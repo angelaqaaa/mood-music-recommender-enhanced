@@ -10,7 +10,11 @@ This file is Copyright (c) 2025 Qian (Angela) Su & Mengxuan (Connie) Guo.
 
 import pandas as pd
 from typing import Dict, List, Optional, Any, Set
-import python_ta
+# Optional import for CSC111 course linting
+try:
+    import python_ta
+except ImportError:
+    python_ta = None
 
 # Import required classes from music_structures
 from .music_structures import GenreTree, SimilaritySongGraph, MusicNode
@@ -497,9 +501,10 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    python_ta.check_all(config={
-        'extra-imports': ['pandas', 'typing', 'music_structures'],
-        'allowed-io': [],
-        'max-line-length': 100,
-        'disable': ['E1136']
-    })
+    if python_ta:
+        python_ta.check_all(config={
+            'extra-imports': ['pandas', 'typing', 'music_structures'],
+            'allowed-io': [],
+            'max-line-length': 100,
+            'disable': ['E1136']
+        })

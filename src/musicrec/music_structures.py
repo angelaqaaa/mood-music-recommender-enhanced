@@ -12,7 +12,11 @@ import networkx as nx
 import numpy as np
 from typing import Dict, List, Tuple, Optional, Any
 from sklearn.metrics.pairwise import cosine_similarity
-import python_ta
+# Optional import for CSC111 course linting
+try:
+    import python_ta
+except ImportError:
+    python_ta = None
 
 
 class MusicNode:
@@ -548,9 +552,10 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    python_ta.check_all(config={
-        'extra-imports': ['networkx', 'numpy', 'sklearn.metrics.pairwise', 'typing'],
-        'allowed-io': [],
-        'max-line-length': 100,
-        'disable': ['E1136']
-    })
+    if python_ta:
+        python_ta.check_all(config={
+            'extra-imports': ['networkx', 'numpy', 'sklearn.metrics.pairwise', 'typing'],
+            'allowed-io': [],
+            'max-line-length': 100,
+            'disable': ['E1136']
+        })

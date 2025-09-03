@@ -15,7 +15,11 @@ import plotly.express as px
 import pandas as pd
 import networkx as nx
 import html as html_lib  # For escaping special characters
-import python_ta
+# Optional import for CSC111 course linting
+try:
+    import python_ta
+except ImportError:
+    python_ta = None
 
 
 class MusicRecommenderDashApp:
@@ -957,12 +961,13 @@ if __name__ == '__main__':
 
     doctest.testmod()
 
-    python_ta.check_all(config={
-        'extra-imports': ['dash', 'dash.dependencies', 'plotly.graph_objects', 'plotly.express',
-                          'pandas', 'networkx', 'html'],
-        'allowed-io': ['update_similarity_graph', 'update_track_dropdown_and_info',
-                       'update_recommendations', 'update_features_bubble_chart',
-                       'track_selection_callback', 'auto_search_on_track_selection'],
-        'max-line-length': 120,
-        'disable': ['E1136']
-    })
+    if python_ta:
+        python_ta.check_all(config={
+            'extra-imports': ['dash', 'dash.dependencies', 'plotly.graph_objects', 'plotly.express',
+                              'pandas', 'networkx', 'html'],
+            'allowed-io': ['update_similarity_graph', 'update_track_dropdown_and_info',
+                           'update_recommendations', 'update_features_bubble_chart',
+                           'track_selection_callback', 'auto_search_on_track_selection'],
+            'max-line-length': 120,
+            'disable': ['E1136']
+        })
