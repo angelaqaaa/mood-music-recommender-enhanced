@@ -17,11 +17,24 @@ import logging
 from pathlib import Path
 import time
 
-from .data_processor import build_dataset, save_processed_data, load_processed_data
-from .recommendation_engine import MusicRecommender
-from .visualization import MusicRecommenderDashApp
-from .logging import setup_logging
-from .config.settings import load_config, get_data_paths, get_retry_config
+# Handle both relative imports (when run as module) and absolute imports (when run directly)
+try:
+    from .data_processor import build_dataset, save_processed_data, load_processed_data
+    from .recommendation_engine import MusicRecommender
+    from .visualization import MusicRecommenderDashApp
+    from .log_setup import setup_logging
+    from .config.settings import load_config, get_data_paths, get_retry_config
+except ImportError:
+    # Fallback to absolute imports when run directly
+    import sys
+    from pathlib import Path
+    # Add parent directory to path so we can import sibling modules
+    sys.path.insert(0, str(Path(__file__).parent))
+    from data_processor import build_dataset, save_processed_data, load_processed_data
+    from recommendation_engine import MusicRecommender
+    from visualization import MusicRecommenderDashApp
+    from log_setup import setup_logging
+    from config.settings import load_config, get_data_paths, get_retry_config
 
 logger = logging.getLogger(__name__)
 

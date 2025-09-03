@@ -3,7 +3,7 @@
 import logging
 import tempfile
 from pathlib import Path
-from src.musicrec.logging import setup_logging
+from src.musicrec.log_setup import setup_logging
 
 
 class TestLogging:
