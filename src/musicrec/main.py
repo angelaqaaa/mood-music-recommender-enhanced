@@ -15,13 +15,73 @@ from typing import Optional
 import html
 import logging
 from pathlib import Path
+import time
 
-from .data_processor import build_dataset, save_processed_data, load_processed_data
-from .recommendation_engine import MusicRecommender
-from .visualization import MusicRecommenderDashApp
-from .logging import setup_logging
+# Handle both relative imports (when run as module) and absolute imports (when run directly)
+try:
+    from .data_processor import build_dataset, save_processed_data, load_processed_data
+    from .recommendation_engine import MusicRecommender
+    from .visualization import MusicRecommenderDashApp
+    from .log_setup import setup_logging
+    from .config.settings import load_config, get_data_paths, get_retry_config
+except ImportError:
+    # Fallback to absolute imports when run directly
+    import sys
+    from pathlib import Path
+    # Add parent directory to path so we can import sibling modules
+    sys.path.insert(0, str(Path(__file__).parent))
+    from data_processor import build_dataset, save_processed_data, load_processed_data
+    from recommendation_engine import MusicRecommender
+    from visualization import MusicRecommenderDashApp
+    from log_setup import setup_logging
+    from config.settings import load_config, get_data_paths, get_retry_config
 
 logger = logging.getLogger(__name__)
+
+
+def _retry_operation(operation, *args, max_attempts: int = 3, 
+                    backoff_seconds: float = 1.0, backoff_multiplier: float = 2.0, 
+                    operation_name: str = "operation", **kwargs):
+    """Retry an operation with exponential backoff.
+    
+    Args:
+        operation: Function to retry
+        *args: Positional arguments to pass to the operation
+        max_attempts: Maximum number of retry attempts
+        backoff_seconds: Initial backoff time in seconds
+        backoff_multiplier: Multiplier for backoff time on each retry
+        operation_name: Name of the operation for logging
+        **kwargs: Keyword arguments to pass to the operation
+        
+    Returns:
+        Result of the successful operation
+        
+    Raises:
+        Exception: The last exception if all retries are exhausted
+    """
+    last_exception = None
+    current_backoff = backoff_seconds
+    
+    for attempt in range(1, max_attempts + 1):
+        try:
+            logger.debug(f"Attempting {operation_name} (attempt {attempt}/{max_attempts})")
+            result = operation(*args, **kwargs)
+            if attempt > 1:
+                logger.info(f"Successfully completed {operation_name} on attempt {attempt}")
+            return result
+        except Exception as e:
+            last_exception = e
+            if attempt < max_attempts:
+                logger.warning(f"Attempt {attempt} failed for {operation_name}: {e}. "
+                             f"Retrying in {current_backoff:.1f} seconds...")
+                time.sleep(current_backoff)
+                current_backoff *= backoff_multiplier
+            else:
+                logger.error(f"All {max_attempts} attempts failed for {operation_name}. "
+                           f"Final error: {e}")
+    
+    # Re-raise the last exception if all retries failed
+    raise last_exception
 
 
 def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.DataFrame:
@@ -299,8 +359,9 @@ def load_data(spotify_path: Optional[str] = None,
               genre_path: Optional[str] = None,
               mood_path: Optional[str] = None,
               metadata_path: Optional[str] = None,
-              use_sample: bool = False) -> pd.DataFrame:
-    """Load and process music data from various sources.
+              use_sample: bool = False,
+              config_path: Optional[str] = None) -> pd.DataFrame:
+    """Load and process music data from various sources with retry logic and config support.
     
     Args:
         spotify_path: Path to Spotify audio features CSV file
@@ -308,16 +369,35 @@ def load_data(spotify_path: Optional[str] = None,
         mood_path: Path to Jamendo mood annotations TSV file
         metadata_path: Path to track metadata TSV file
         use_sample: If True, generate sample data instead of loading files
+        config_path: Optional path to configuration file
         
     Returns:
         Processed DataFrame ready for recommendation engine
         
     Raises:
-        FileNotFoundError: If required files don't exist
+        FileNotFoundError: If required files don't exist after retries
         ValueError: If file paths are invalid
-        PermissionError: If files are not readable
+        PermissionError: If files are not readable after retries
+        RuntimeError: If data loading fails after all retries
     """
-    logger.info("Starting data loading process")
+    logger.info("Starting data loading process with configuration and retry support")
+    
+    # Load configuration
+    config = load_config(config_path)
+    retry_config = get_retry_config(config)
+    data_paths = get_data_paths(config)
+    
+    # Use provided paths or fall back to config defaults
+    final_paths = {
+        'spotify': spotify_path or data_paths.get('spotify_path'),
+        'genre': genre_path or data_paths.get('genre_path'),
+        'mood': mood_path or data_paths.get('mood_path'),
+        'metadata': metadata_path or data_paths.get('metadata_path')
+    }
+    
+    logger.info(f"Using paths: {final_paths}")
+    logger.debug(f"Retry config: max_attempts={retry_config['max_attempts']}, "
+                f"backoff={retry_config['backoff_seconds']}s")
     
     try:
         # Check if we should use sample data
@@ -325,52 +405,81 @@ def load_data(spotify_path: Optional[str] = None,
             logger.info("Using sample dataset for testing")
             return create_sample_data()
 
-        # Validate file paths if provided
+        # Validate and collect available file paths with retry logic
         validated_paths = {}
-        try:
-            if spotify_path:
-                _validate_file_path(spotify_path, ['.csv'], "Spotify file")
-                validated_paths['spotify'] = spotify_path
-            if genre_path:
-                _validate_file_path(genre_path, ['.tsv'], "Genre file")
-                validated_paths['genre'] = genre_path
-            if mood_path:
-                _validate_file_path(mood_path, ['.tsv'], "Mood file")
-                validated_paths['mood'] = mood_path
-            if metadata_path:
-                _validate_file_path(metadata_path, ['.tsv'], "Metadata file")
-                validated_paths['metadata'] = metadata_path
-        except (FileNotFoundError, ValueError, PermissionError) as e:
-            logger.error(f"File validation failed: {e}")
-            raise
+        
+        for data_type, file_path in final_paths.items():
+            if not file_path:
+                logger.debug(f"No path provided for {data_type} data")
+                continue
+                
+            try:
+                def validate_file():
+                    extensions = ['.csv'] if data_type == 'spotify' else ['.tsv']
+                    _validate_file_path(file_path, extensions, f"{data_type.title()} file")
+                    return file_path
+                
+                # Retry file validation to handle transient I/O issues
+                validated_path = _retry_operation(
+                    validate_file,
+                    max_attempts=retry_config['max_attempts'],
+                    backoff_seconds=retry_config['backoff_seconds'],
+                    backoff_multiplier=retry_config['backoff_multiplier'],
+                    operation_name=f"{data_type} file validation"
+                )
+                validated_paths[data_type] = validated_path
+                
+            except Exception as e:
+                logger.warning(f"Could not validate {data_type} file at {file_path}: {e}")
+                # Continue with other files rather than failing completely
 
-        # Check if we have enough valid files
-        required_files = ['spotify']  # Minimum requirement
+        # Check if we have minimum required files
+        required_files = ['spotify']  # Spotify data is minimum requirement
         missing = [key for key in required_files if key not in validated_paths]
+        
         if missing:
             logger.warning(f"Missing required files: {missing}")
+            if 'spotify' in missing:
+                logger.info("No Spotify data available, falling back to sample dataset")
+                return create_sample_data()
             
-        # If no valid data sources, fall back to sample data
+        # If no valid data sources at all, fall back to sample data
         if not validated_paths:
             logger.info("No valid data sources available, using sample dataset")
             return create_sample_data()
 
-        # Build dataset from validated files
-        logger.info(f"Building dataset from {len(validated_paths)} data sources")
-        return build_dataset(
-            validated_paths.get('spotify'),
-            validated_paths.get('genre'),
-            validated_paths.get('mood'),
-            validated_paths.get('metadata')
+        # Build dataset from validated files with retry logic
+        logger.info(f"Building dataset from {len(validated_paths)} data sources: "
+                   f"{list(validated_paths.keys())}")
+        
+        def build_with_retry():
+            return build_dataset(
+                validated_paths.get('spotify'),
+                validated_paths.get('genre'),
+                validated_paths.get('mood'),
+                validated_paths.get('metadata')
+            )
+        
+        # Retry the dataset building process
+        return _retry_operation(
+            build_with_retry,
+            max_attempts=retry_config['max_attempts'],
+            backoff_seconds=retry_config['backoff_seconds'],
+            backoff_multiplier=retry_config['backoff_multiplier'],
+            operation_name="dataset building"
         )
         
     except Exception as e:
-        logger.error(f"Data loading failed: {e}")
-        raise
+        logger.error(f"Data loading failed after retries: {e}")
+        logger.info("Falling back to sample dataset due to loading failure")
         
-    # If no valid data sources, fall back to sample data
-    logger.info("No valid data sources available, using sample dataset")
-    return create_sample_data()
+        # Final fallback to sample data
+        try:
+            return create_sample_data()
+        except Exception as sample_error:
+            logger.error(f"Sample data generation also failed: {sample_error}")
+            raise RuntimeError(f"Both data loading and sample generation failed. "
+                             f"Load error: {e}, Sample error: {sample_error}") from e
 
 
 def run_recommender_app(data: pd.DataFrame, debug: bool = False, port: int = 8040) -> None:
