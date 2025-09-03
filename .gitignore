@@ -1,11 +1,40 @@
+# Python
 __pycache__/
 *.pyc
 *.pyo
-*.DS_Store
-.env
-.venv
+*.pyd
+*.so
 dist/
 build/
+*.egg-info/
+
+# Environment
+.env
+.venv
+venv/
+
+# Testing
 .coverage
 htmlcov/
+.pytest_cache/
+
+# Jupyter
 .ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temp files
+*.tmp
+*.bak
+
+# Logs
+*.log
+musicrec.log
