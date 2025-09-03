@@ -13,11 +13,15 @@ import argparse
 import pandas as pd
 from typing import Optional
 import html
+import logging
+from pathlib import Path
 
 from .data_processor import build_dataset, save_processed_data, load_processed_data
 from .recommendation_engine import MusicRecommender
 from .visualization import MusicRecommenderDashApp
 from .logging import setup_logging
+
+logger = logging.getLogger(__name__)
 
 
 def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.DataFrame:
@@ -210,60 +214,126 @@ def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.Da
     return df
 
 
+def _validate_file_path(file_path: str, expected_extensions: list, description: str) -> None:
+    """Validate a single file path for existence, readability, and extension.
+    
+    Args:
+        file_path: Path to validate
+        expected_extensions: List of allowed file extensions (e.g., ['.csv', '.tsv'])
+        description: Human-readable description of the file for error messages
+        
+    Raises:
+        FileNotFoundError: If file doesn't exist
+        PermissionError: If file isn't readable
+        ValueError: If file has wrong extension
+    """
+    path = Path(file_path)
+    
+    if not path.exists():
+        raise FileNotFoundError(f"{description} not found: {file_path}")
+    
+    if not path.is_file():
+        raise ValueError(f"{description} is not a file: {file_path}")
+        
+    if not os.access(file_path, os.R_OK):
+        raise PermissionError(f"{description} is not readable: {file_path}")
+    
+    if expected_extensions and path.suffix.lower() not in expected_extensions:
+        raise ValueError(
+            f"{description} must have one of these extensions {expected_extensions}, "
+            f"got: {path.suffix}"
+        )
+
+
 def load_data(spotify_path: Optional[str] = None,
               genre_path: Optional[str] = None,
               mood_path: Optional[str] = None,
               metadata_path: Optional[str] = None,
               processed_path: Optional[str] = None,
               use_sample: bool = False) -> pd.DataFrame:
-    """Load and process the music dataset.
+    """Load and process the music dataset with comprehensive input validation.
 
     Args:
-        spotify_path: Path to the Spotify features CSV
-        genre_path: Path to the Jamendo genre TSV
-        mood_path: Path to the Jamendo mood TSV
-        metadata_path: Path to the metadata TSV with track names
-        processed_path: Path to a previously processed dataset
+        spotify_path: Path to the Spotify features CSV file
+        genre_path: Path to the Jamendo genre TSV file
+        mood_path: Path to the Jamendo mood TSV file
+        metadata_path: Path to the metadata TSV file with track names
+        processed_path: Path to a previously processed dataset (pickle)
         use_sample: Whether to use sample data for testing
 
     Returns:
         Processed DataFrame for the recommender system
+        
+    Raises:
+        FileNotFoundError: If required files don't exist
+        PermissionError: If files aren't readable
+        ValueError: If files have wrong extensions or invalid parameters
     """
+    logger.info("Starting data loading process")
+    
     # Check if we should use a previously processed dataset
-    if processed_path and os.path.exists(processed_path):
-        print(f"Loading processed dataset from {processed_path}")
-        return load_processed_data(processed_path)
+    if processed_path:
+        logger.info(f"Attempting to load processed dataset from {processed_path}")
+        try:
+            _validate_file_path(processed_path, ['.pkl', '.pickle'], "Processed dataset")
+            logger.info(f"Loading processed dataset from {processed_path}")
+            return load_processed_data(processed_path)
+        except (FileNotFoundError, PermissionError, ValueError) as e:
+            logger.error(f"Failed to load processed dataset: {e}")
+            raise
 
     # Check if we should use sample data
     if use_sample:
-        print("Using sample dataset for testing")
+        logger.info("Using sample dataset for testing")
         return create_sample_data()
 
-    # Otherwise, build the dataset from source files
-    files_exist = all(
-        os.path.exists(path) for path in [spotify_path, genre_path, mood_path]
-        if path is not None
-    )
+    # Validate file paths if provided
+    validated_paths = {}
+    try:
+        if spotify_path:
+            _validate_file_path(spotify_path, ['.csv'], "Spotify features file")
+            validated_paths['spotify'] = spotify_path
+            logger.debug(f"Validated Spotify file: {spotify_path}")
+            
+        if genre_path:
+            _validate_file_path(genre_path, ['.tsv'], "Genre tags file") 
+            validated_paths['genre'] = genre_path
+            logger.debug(f"Validated genre file: {genre_path}")
+            
+        if mood_path:
+            _validate_file_path(mood_path, ['.tsv'], "Mood tags file")
+            validated_paths['mood'] = mood_path
+            logger.debug(f"Validated mood file: {mood_path}")
+            
+        if metadata_path:
+            _validate_file_path(metadata_path, ['.tsv'], "Metadata file")
+            validated_paths['metadata'] = metadata_path
+            logger.debug(f"Validated metadata file: {metadata_path}")
+            
+    except (FileNotFoundError, PermissionError, ValueError) as e:
+        logger.error(f"File validation failed: {e}")
+        raise
 
-    if files_exist and spotify_path and genre_path and mood_path:
-        print("Building dataset from source files")
-        return build_dataset(spotify_path, genre_path, mood_path, metadata_path)
+    # Check if we have the required files for building dataset
+    required_files = ['spotify', 'genre', 'mood']
+    if all(key in validated_paths for key in required_files):
+        logger.info("Building dataset from validated source files")
+        try:
+            return build_dataset(
+                validated_paths['spotify'],
+                validated_paths['genre'], 
+                validated_paths['mood'],
+                validated_paths.get('metadata')
+            )
+        except Exception as e:
+            logger.error(f"Failed to build dataset from files: {e}")
+            raise
     else:
-        missing = []
-        if spotify_path and not os.path.exists(spotify_path):
-            missing.append(spotify_path)
-        if genre_path and not os.path.exists(genre_path):
-            missing.append(genre_path)
-        if mood_path and not os.path.exists(mood_path):
-            missing.append(mood_path)
-        if metadata_path and not os.path.exists(metadata_path):
-            missing.append(metadata_path)
-
-        if missing:
-            print(f"Warning: The following files were not found: {', '.join(missing)}")
-
-    # If no valid data sources, use sample data
-    print("No valid data sources provided or files not found, using sample dataset")
+        missing = [key for key in required_files if key not in validated_paths]
+        logger.warning(f"Missing required files: {missing}")
+        
+    # If no valid data sources, fall back to sample data
+    logger.info("No valid data sources available, using sample dataset")
     return create_sample_data()
 
 
@@ -423,6 +493,14 @@ def main():
     
     # Setup logging
     setup_logging(level=args.log_level)
+    logger.info("Starting music recommender system")
+    
+    # Validate CLI parameters
+    if args.limit < 1 or args.limit > 1000:
+        raise ValueError(f"--limit must be between 1 and 1000, got: {args.limit}")
+    
+    if args.port < 1024 or args.port > 65535:
+        raise ValueError(f"--port must be between 1024 and 65535, got: {args.port}")
 
     # Set default dataset paths if not provided via command line
     if not args.spotify:

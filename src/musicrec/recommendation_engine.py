@@ -13,7 +13,7 @@ from typing import Dict, List, Optional, Any, Set
 import python_ta
 
 # Import required classes from music_structures
-from music_structures import GenreTree, SimilaritySongGraph, MusicNode
+from .music_structures import GenreTree, SimilaritySongGraph, MusicNode
 
 
 class MusicRecommender:
