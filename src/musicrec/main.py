@@ -17,6 +17,7 @@ import html
 from data_processor import build_dataset, save_processed_data, load_processed_data
 from recommendation_engine import MusicRecommender
 from visualization import MusicRecommenderDashApp
+from logging import setup_logging
 
 
 def create_sample_data() -> pd.DataFrame:
@@ -397,6 +398,8 @@ def parse_args():
     parser.add_argument('--debug', action='store_true', help='Run in debug mode')
     parser.add_argument('--port', type=int, default=8040, help='Port for the web server')
     parser.add_argument('--save', type=str, help='Save processed data to this path')
+    parser.add_argument('--limit', type=int, default=10, help='Limit number of recommendations')
+    parser.add_argument('--log-level', type=str, default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'], help='Logging level')
 
     return parser.parse_args()
 
@@ -405,6 +408,9 @@ def main():
     """Main entry point for the music recommender system."""
     # Parse command line arguments
     args = parse_args()
+    
+    # Setup logging
+    setup_logging(level=args.log_level)
 
     # Set default dataset paths if not provided via command line
     if not args.spotify:
