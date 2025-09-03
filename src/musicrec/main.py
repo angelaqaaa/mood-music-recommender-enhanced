@@ -14,10 +14,10 @@ import pandas as pd
 from typing import Optional
 import html
 
-from data_processor import build_dataset, save_processed_data, load_processed_data
-from recommendation_engine import MusicRecommender
-from visualization import MusicRecommenderDashApp
-from logging import setup_logging
+from .data_processor import build_dataset, save_processed_data, load_processed_data
+from .recommendation_engine import MusicRecommender
+from .visualization import MusicRecommenderDashApp
+from .logging import setup_logging
 
 
 def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.DataFrame:
