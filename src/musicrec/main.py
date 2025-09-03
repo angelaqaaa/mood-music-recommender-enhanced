@@ -20,42 +20,54 @@ from visualization import MusicRecommenderDashApp
 from logging import setup_logging
 
 
-def create_sample_data() -> pd.DataFrame:
+def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.DataFrame:
     """Create a sample dataset for testing when real data files are not available.
+    
+    Args:
+        num_genres: Number of genre categories to generate (default: 4)
+        tracks_per_genre: Number of tracks per genre (default: 10)
 
     Returns:
         Sample DataFrame for testing
+        
+    Raises:
+        ValueError: If num_genres < 1 or tracks_per_genre < 1
     """
+    if num_genres < 1:
+        raise ValueError("num_genres must be at least 1")
+    if tracks_per_genre < 1:
+        raise ValueError("tracks_per_genre must be at least 1")
     # Create sample tracks
     sample_data = []
 
-    # Rock genre tracks
-    for i in range(1, 11):
-        track_id = f"track_100{i}"
-        track_name = f"Rock Song {i}"
-        artist_name = f"Rock Artist {i//3 + 1}"
-        genre = "rock"
-        mood_tags = ["energetic"] if i % 2 == 0 else ["calm"]
+    # Rock genre tracks (only if we're generating at least 1 genre)
+    if num_genres >= 1:
+        for i in range(1, min(tracks_per_genre + 1, 11)):
+            track_id = f"track_100{i}"
+            track_name = f"Rock Song {i}"
+            artist_name = f"Rock Artist {i//3 + 1}"
+            genre = "rock"
+            mood_tags = ["energetic"] if i % 2 == 0 else ["calm"]
 
-        if i % 3 == 0:
-            mood_tags.append("happy")
+            if i % 3 == 0:
+                mood_tags.append("happy")
 
-        energy = 0.7 + (i % 10) / 50
-        valence = 0.6 + (i % 10) / 50
-        tempo = 120 + i
+            energy = 0.7 + (i % 10) / 50
+            valence = 0.6 + (i % 10) / 50
+            tempo = 120 + i
 
-        sample_data.append({
-            "track_id": track_id,
-            "track_name": track_name,
-            "artist_name": artist_name,
-            "genre_tags": [genre],
-            "mood_tags": mood_tags,
-            "duration": 180 + i * 10,
-            "energy": energy,
-            "valence": valence,
-            "tempo": tempo,
-            "genre_hierarchy": ["rock"]
-        })
+            sample_data.append({
+                "track_id": track_id,
+                "track_name": track_name,
+                "artist_name": artist_name,
+                "genre_tags": [genre],
+                "mood_tags": mood_tags,
+                "duration": 180 + i * 10,
+                "energy": energy,
+                "valence": valence,
+                "tempo": tempo,
+                "genre_hierarchy": ["rock"]
+            })
 
     # Metal genre tracks
     for i in range(1, 11):
