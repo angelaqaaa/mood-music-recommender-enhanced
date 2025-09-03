@@ -493,6 +493,14 @@ def main():
     
     # Setup logging
     setup_logging(level=args.log_level)
+    logger.info("Starting music recommender system")
+    
+    # Validate CLI parameters
+    if args.limit < 1 or args.limit > 1000:
+        raise ValueError(f"--limit must be between 1 and 1000, got: {args.limit}")
+    
+    if args.port < 1024 or args.port > 65535:
+        raise ValueError(f"--port must be between 1024 and 65535, got: {args.port}")
 
     # Set default dataset paths if not provided via command line
     if not args.spotify:
