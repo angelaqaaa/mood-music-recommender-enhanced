@@ -82,7 +82,6 @@ class MusicRecommenderDashApp:
             + KEYBOARD_NAVIGATION_JS
             + """
                     </script>
-                    <script src="/assets/js/search.js"></script>
                 </footer>
             </body>
         </html>
