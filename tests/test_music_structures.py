@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.musicrec.music_structures import GenreTree, MusicNode, SimilaritySongGraph
+from src.musicrec.models.structures import GenreTree, MusicNode, SimilaritySongGraph
 
 
 class TestMusicNode:

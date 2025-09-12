@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, Mock, patch
 import pandas as pd
 import pytest
 
-from src.musicrec.music_structures import GenreTree, MusicNode, SimilaritySongGraph
-from src.musicrec.recommendation_engine import MusicRecommender
+from src.musicrec.models.structures import GenreTree, MusicNode, SimilaritySongGraph
+from src.musicrec.models.engine import MusicRecommender
 
 
 @pytest.fixture
@@ -52,7 +52,7 @@ class TestMusicRecommenderInit:
 
         assert recommender.audio_features == custom_features
 
-    @patch("src.musicrec.recommendation_engine.print")
+    @patch("src.musicrec.models.engine.print")
     def test_init_prints_progress(self, mock_print, sample_data):
         """Test that initialization prints progress messages."""
         MusicRecommender(sample_data)

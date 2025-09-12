@@ -11,7 +11,7 @@ import pandas as pd
 import pytest
 
 from src.musicrec.main import create_sample_data, load_data, main
-from src.musicrec.recommendation_engine import MusicRecommender
+from src.musicrec.models.engine import MusicRecommender
 
 
 class TestEndToEndSampleDataFlow:
