@@ -17,6 +17,7 @@ import networkx as nx
 from ..metrics.collector import metrics_collector
 from .explanations import generate_explanation, get_top_features
 from .styles import RESPONSIVE_STYLES, BUTTON_STYLES, CONTAINER_STYLES
+from .keyboard_navigation import KEYBOARD_NAVIGATION_JS
 import time
 
 # Optional import for code analysis
@@ -46,7 +47,7 @@ class MusicRecommenderDashApp:
         self.recommender = recommender
         self.app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
-        # Add custom CSS styles
+        # Add custom CSS styles and JavaScript
         self.app.index_string = (
             """
         <!DOCTYPE html>
@@ -69,6 +70,11 @@ class MusicRecommenderDashApp:
                     {%config%}
                     {%scripts%}
                     {%renderer%}
+                    <script>
+                    """
+            + KEYBOARD_NAVIGATION_JS
+            + """
+                    </script>
                 </footer>
             </body>
         </html>
@@ -688,7 +694,7 @@ class MusicRecommenderDashApp:
                     {"display": "none"},
                     False,
                 )
-            
+
             # Show loading during processing
             # (In production, you might want to handle this differently)
             # Add a small delay to demonstrate loading indicator
@@ -908,8 +914,13 @@ class MusicRecommenderDashApp:
                     ],
                     className="recommendation-item",
                     tabIndex="0",
+                    id=f"recommendation-{i}",
+                    role="option",
                     **{
-                        "aria-label": f"Recommendation {i+1}: {track_display} by {artist_name}"
+                        "aria-label": f"Recommendation {i+1}: {track_display} by {artist_name}",
+                        "aria-selected": "false",
+                        "aria-posinset": str(i + 1),
+                        "aria-setsize": str(len(recommendations)),
                     },
                 )
 
@@ -920,8 +931,14 @@ class MusicRecommenderDashApp:
                 recommendation_cards,
                 className="recommendations-container",
                 id="recommendations-list",
-                **{"aria-label": f"List of {len(recommendations)} recommendations"},
-                role="list",
+                role="listbox",
+                **{
+                    "aria-label": f"List of {len(recommendations)} recommendations",
+                    "aria-multiselectable": "false",
+                    "aria-activedescendant": (
+                        "recommendation-0" if recommendations else ""
+                    ),
+                },
             )
 
             return (
@@ -1005,6 +1022,31 @@ class MusicRecommenderDashApp:
             )
 
             return metrics_content, {"display": "block"}
+
+        # Focus management callback (clientside for performance)
+        self.app.clientside_callback(
+            """
+            function(recommendations_data) {
+                return window.dash_clientside.keyboard.focusFirstRecommendation(recommendations_data);
+            }
+            """,
+            Output("recommendations-list", "data-focus-trigger"),
+            [Input("current-recommendations-store", "data")],
+        )
+
+        # Keyboard navigation initialization callback
+        self.app.clientside_callback(
+            """
+            function(n_clicks, current_recommendations) {
+                return window.dash_clientside.keyboard.handleKeyboardNavigation(n_clicks, current_recommendations);
+            }
+            """,
+            Output("recommendations-list", "data-keyboard-init"),
+            [
+                Input("search-button", "n_clicks"),
+                Input("current-recommendations-store", "data"),
+            ],
+        )
 
         # Update bubble chart visualization
         @self.app.callback(

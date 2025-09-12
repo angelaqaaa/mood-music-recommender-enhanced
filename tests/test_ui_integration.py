@@ -49,7 +49,7 @@ class TestUIIntegration:
         app = MusicRecommenderDashApp(mock_recommender)
 
         # Test that metrics collector is available in the app
-        assert hasattr(app, 'app')
+        assert hasattr(app, "app")
         assert app.app is not None
 
     def test_responsive_card_creation(self):
