@@ -16,10 +16,10 @@ import html
 import logging
 from pathlib import Path
 
-from .data_processor import build_dataset, save_processed_data, load_processed_data
-from .recommendation_engine import MusicRecommender
-from .visualization import MusicRecommenderDashApp
-from .logging import setup_logging
+from .data.processor import build_dataset, save_processed_data, load_processed_data
+from .models.engine import MusicRecommender
+from .ui.dash_app import MusicRecommenderDashApp
+from .utils.logging import setup_logging
 
 logger = logging.getLogger(__name__)
 

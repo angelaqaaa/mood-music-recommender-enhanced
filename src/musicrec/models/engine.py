@@ -12,8 +12,8 @@ import pandas as pd
 from typing import Dict, List, Optional, Any, Set
 import python_ta
 
-# Import required classes from music_structures
-from .music_structures import GenreTree, SimilaritySongGraph, MusicNode
+# Import required classes from structures
+from .structures import GenreTree, SimilaritySongGraph, MusicNode
 
 
 class MusicRecommender:
