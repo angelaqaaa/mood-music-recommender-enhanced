@@ -1,7 +1,8 @@
 """CSC111 Winter 2025: A Mood-Driven Music Recommender with Genre Hierarchies
 
 Module for defining the core data structures of the music recommender system.
-This module contains the implementation of the Genre Tree and Song Similarity Graph.
+This module contains the implementation of the Genre Tree and Song Similarity
+Graph.
 
 Copyright and Usage Information
 ===============================
@@ -12,6 +13,7 @@ import networkx as nx
 import numpy as np
 from typing import Dict, List, Tuple, Optional, Any
 from sklearn.metrics.pairwise import cosine_similarity
+
 # Optional import for code analysis
 try:
     import python_ta
@@ -39,11 +41,16 @@ class MusicNode:
 
     name: str
     node_type: str
-    parent: Optional['MusicNode']
-    children: List['MusicNode']
+    parent: Optional["MusicNode"]
+    children: List["MusicNode"]
     data: Dict[str, Any]
 
-    def __init__(self, name: str, node_type: str = 'genre', parent: Optional['MusicNode'] = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        node_type: str = "genre",
+        parent: Optional["MusicNode"] = None,
+    ) -> None:
         """Initialize a music node.
 
         Args:
@@ -58,9 +65,9 @@ class MusicNode:
         self.node_type = node_type
         self.parent = parent
         self.children = []
-        self.data = {}  # For storing track attributes like mood, valence, etc.
+        self.data = {}  # For storing track attributes
 
-    def add_child(self, child: 'MusicNode') -> None:
+    def add_child(self, child: "MusicNode") -> None:
         """Add a child node to this node.
 
         Args:
@@ -87,14 +94,15 @@ class GenreTree:
 
     def __init__(self) -> None:
         """Initialize the genre tree with a root 'music' node."""
-        self.root = MusicNode('music', 'genre')
+        self.root = MusicNode("music", "genre")
         self.tracks = {}  # Maps track_id to its node for quick access
 
     def add_genre(self, genre_path: List[str]) -> MusicNode:
         """Add a genre hierarchy path to the tree.
 
         Args:
-            genre_path: List of genres in hierarchical order (e.g., ['rock', 'alternative'])
+            genre_path: List of genres in hierarchical order
+                (e.g., ['rock', 'alternative'])
 
         Returns:
             The leaf genre node
@@ -115,20 +123,22 @@ class GenreTree:
             # Check if this genre already exists as a child
             found = False
             for child in current.children:
-                if child.name == genre and child.node_type == 'genre':
+                if child.name == genre and child.node_type == "genre":
                     current = child
                     found = True
                     break
 
             # If not found, create a new genre node
             if not found:
-                new_node = MusicNode(genre, 'genre', current)
+                new_node = MusicNode(genre, "genre", current)
                 current.add_child(new_node)
                 current = new_node
 
         return current
 
-    def add_track(self, track_id: str, genre_path: List[str], track_data: Dict[str, Any]) -> MusicNode:
+    def add_track(
+        self, track_id: str, genre_path: List[str], track_data: Dict[str, Any]
+    ) -> MusicNode:
         """Add a track to the tree under the specified genre path.
 
         Args:
@@ -140,7 +150,9 @@ class GenreTree:
             The track node
 
         >>> tree = GenreTree()
-        >>> track_node = tree.add_track('track_001', ['rock', 'alternative'], {'mood_tags': ['energetic']})
+        >>> track_node = tree.add_track(
+        ...     'track_001', ['rock', 'alternative'], {'mood_tags': ['energetic']}
+        ... )
         >>> track_node.name
         'track_001'
         >>> track_node.node_type
@@ -154,7 +166,7 @@ class GenreTree:
         genre_node = self.add_genre(genre_path)
 
         # Create the track node
-        new_track_node = MusicNode(track_id, 'track', genre_node)
+        new_track_node = MusicNode(track_id, "track", genre_node)
         new_track_node.data = track_data
 
         # Add the track as a child of the genre
@@ -190,7 +202,7 @@ class GenreTree:
 
         # Traverse up to the root, collecting genre names
         while current and current.parent:
-            if current.node_type == 'genre':
+            if current.node_type == "genre":
                 path.append(current.name)
             current = current.parent
 
@@ -211,7 +223,7 @@ class GenreTree:
 
         def dfs(node: MusicNode) -> None:
             """Depth-first search helper to find genre nodes."""
-            if node.node_type == 'genre' and node.name == genre:
+            if node.node_type == "genre" and node.name == genre:
                 # Found the genre, collect all track descendants
                 collect_tracks(node, results)
             else:
@@ -221,7 +233,7 @@ class GenreTree:
 
         def collect_tracks(node: MusicNode, track_list: List[MusicNode]) -> None:
             """Helper function to collect all track nodes beneath a given node."""
-            if node.node_type == 'track':
+            if node.node_type == "track":
                 track_list.append(node)
             else:
                 for child in node.children:
@@ -243,7 +255,7 @@ class GenreTree:
 
         for _, node in self.tracks.items():
             # Check if the mood is in the track's mood tags
-            if 'mood_tags' in node.data and mood in node.data['mood_tags']:
+            if "mood_tags" in node.data and mood in node.data["mood_tags"]:
                 results.append(node)
 
         return results
@@ -261,10 +273,15 @@ class GenreTree:
         genre_results = self.search_by_genre(genre)
 
         # Filter by mood
-        return [node for node in genre_results
-                if 'mood_tags' in node.data and mood in node.data['mood_tags']]
+        return [
+            node
+            for node in genre_results
+            if "mood_tags" in node.data and mood in node.data["mood_tags"]
+        ]
 
-    def bfs_search(self, start_genre: str, mood: Optional[str] = None, max_depth: int = 2) -> List[MusicNode]:
+    def bfs_search(
+        self, start_genre: str, mood: Optional[str] = None, max_depth: int = 2
+    ) -> List[MusicNode]:
         """Perform breadth-first search from a genre node, optionally filtering by mood.
 
         Args:
@@ -275,10 +292,11 @@ class GenreTree:
         Returns:
             List of track nodes in BFS order
         """
+
         # Find the start genre node
         def find_genre(curr_node: MusicNode, target: str) -> Optional[MusicNode]:
             """Find a genre node by name using recursive DFS."""
-            if curr_node.node_type == 'genre' and curr_node.name == target:
+            if curr_node.node_type == "genre" and curr_node.name == target:
                 return curr_node
 
             for curr_child in curr_node.children:
@@ -306,8 +324,10 @@ class GenreTree:
             visited.add(curr)
 
             # If it's a track and matches the mood filter (if provided)
-            if curr.node_type == 'track':
-                if mood is None or ('mood_tags' in curr.data and mood in curr.data['mood_tags']):
+            if curr.node_type == "track":
+                if mood is None or (
+                    "mood_tags" in curr.data and mood in curr.data["mood_tags"]
+                ):
                     results.append(curr)
 
             # Add children to the queue
@@ -316,7 +336,9 @@ class GenreTree:
 
         return results
 
-    def dfs_search(self, start_genre: str, mood: Optional[str] = None, max_breadth: int = 5) -> List[MusicNode]:
+    def dfs_search(
+        self, start_genre: str, mood: Optional[str] = None, max_breadth: int = 5
+    ) -> List[MusicNode]:
         """Perform depth-first search from a genre node, optionally filtering by mood.
 
         Args:
@@ -327,10 +349,11 @@ class GenreTree:
         Returns:
             List of track nodes in DFS order
         """
+
         # Find the start genre node
         def find_genre(curr_node: MusicNode, target: str) -> Optional[MusicNode]:
             """Find a genre node by name using recursive DFS."""
-            if curr_node.node_type == 'genre' and curr_node.name == target:
+            if curr_node.node_type == "genre" and curr_node.name == target:
                 return curr_node
 
             for curr_child in curr_node.children:
@@ -358,8 +381,10 @@ class GenreTree:
             visited.add(curr)
 
             # If it's a track and matches the mood filter (if provided)
-            if curr.node_type == 'track':
-                if mood is None or ('mood_tags' in curr.data and mood in curr.data['mood_tags']):
+            if curr.node_type == "track":
+                if mood is None or (
+                    "mood_tags" in curr.data and mood in curr.data["mood_tags"]
+                ):
                     results.append(curr)
 
             # Limit breadth by taking only up to max_breadth children
@@ -403,8 +428,13 @@ class SimilaritySongGraph:
         """
         self.graph.add_edge(track_id1, track_id2, weight=similarity)
 
-    def calculate_similarities(self, feature_keys: List[str], mood_weight: float = 0.6,
-                               feature_weight: float = 0.4, similarity_threshold: float = 0.5) -> None:
+    def calculate_similarities(
+        self,
+        feature_keys: List[str],
+        mood_weight: float = 0.6,
+        feature_weight: float = 0.4,
+        similarity_threshold: float = 0.5,
+    ) -> None:
         """Calculate and add similarity edges between all pairs of tracks.
 
         Args:
@@ -423,7 +453,10 @@ class SimilaritySongGraph:
         total_nodes = len(nodes)
 
         if total_nodes > 500:
-            print(f"Warning: Calculating similarities for {total_nodes} tracks. This might take a while.")
+            print(
+                f"Warning: Calculating similarities for {total_nodes} tracks. "
+                "This might take a while."
+            )
             print("Limiting to 500 tracks for faster processing.")
             nodes = nodes[:500]
             total_nodes = 500
@@ -437,14 +470,14 @@ class SimilaritySongGraph:
         for i in range(len(nodes)):
             track_id1, attrs1 = nodes[i]
 
-            for j in range(i+1, len(nodes)):
+            for j in range(i + 1, len(nodes)):
                 track_id2, attrs2 = nodes[j]
 
                 # Calculate mood similarity (Jaccard similarity of mood tags)
                 mood_sim = 0.0
-                if 'mood_tags' in attrs1 and 'mood_tags' in attrs2:
-                    mood_tags1 = set(attrs1['mood_tags'])
-                    mood_tags2 = set(attrs2['mood_tags'])
+                if "mood_tags" in attrs1 and "mood_tags" in attrs2:
+                    mood_tags1 = set(attrs1["mood_tags"])
+                    mood_tags2 = set(attrs2["mood_tags"])
 
                     if mood_tags1 and mood_tags2:  # Ensure non-empty sets
                         intersection = mood_tags1.intersection(mood_tags2)
@@ -483,13 +516,21 @@ class SimilaritySongGraph:
                 current_percentage = int((comparison_count / total_comparisons) * 100)
 
                 # Print progress every 10%
-                if current_percentage % 10 == 0 and current_percentage != last_percentage:
-                    print(f"  Similarity calculation: {current_percentage}% complete, {edge_count} connections found")
+                if (
+                    current_percentage % 10 == 0
+                    and current_percentage != last_percentage
+                ):
+                    print(
+                        f"  Similarity calculation: {current_percentage}% complete, "
+                        f"{edge_count} connections found"
+                    )
                     last_percentage = current_percentage
 
         print(f"✓ Similarity graph created with {edge_count} connections")
 
-    def recommend_similar_tracks(self, track_id: str, n: int = 5) -> List[Tuple[str, float]]:
+    def recommend_similar_tracks(
+        self, track_id: str, n: int = 5
+    ) -> List[Tuple[str, float]]:
         """Return up to n most similar tracks to track_id.
 
         Args:
@@ -502,15 +543,15 @@ class SimilaritySongGraph:
         if track_id not in self.graph:
             return []
 
-        # We'll store (neighbor_id_as_str, float_weight)
+        # Store (neighbor_id_as_str, float_weight)
         neighbors: List[Tuple[str, float]] = []
 
         for neighbor_id, edge_attrs in self.graph[track_id].items():
-            # Cast neighbor_id to string if you are sure it is a string or can be converted
+            # Cast neighbor_id to string
             neighbor_str = str(neighbor_id)
 
             # Extract the weight as a float
-            weight_val = float(edge_attrs.get('weight', 0.0))
+            weight_val = float(edge_attrs.get("weight", 0.0))
 
             neighbors.append((neighbor_str, weight_val))
 
@@ -533,8 +574,11 @@ class SimilaritySongGraph:
             - n >= 1
         """
         # Filter nodes by mood
-        mood_nodes = [node for node, attrs in self.graph.nodes(data=True)
-                      if 'mood_tags' in attrs and mood in attrs['mood_tags']]
+        mood_nodes = [
+            node
+            for node, attrs in self.graph.nodes(data=True)
+            if "mood_tags" in attrs and mood in attrs["mood_tags"]
+        ]
 
         if not mood_nodes:
             return []
@@ -543,18 +587,28 @@ class SimilaritySongGraph:
         centrality = nx.degree_centrality(self.graph)
 
         # Sort mood nodes by centrality
-        mood_nodes_ranked = sorted(mood_nodes, key=lambda x: centrality.get(x, 0), reverse=True)
+        mood_nodes_ranked = sorted(
+            mood_nodes, key=lambda x: centrality.get(x, 0), reverse=True
+        )
 
         return mood_nodes_ranked[:n]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
+
     doctest.testmod()
 
-    python_ta.check_all(config={
-        'extra-imports': ['networkx', 'numpy', 'sklearn.metrics.pairwise', 'typing'],
-        'allowed-io': [],
-        'max-line-length': 100,
-        'disable': ['E1136']
-    })
+    python_ta.check_all(
+        config={
+            "extra-imports": [
+                "networkx",
+                "numpy",
+                "sklearn.metrics.pairwise",
+                "typing",
+            ],
+            "allowed-io": [],
+            "max-line-length": 100,
+            "disable": ["E1136"],
+        }
+    )
