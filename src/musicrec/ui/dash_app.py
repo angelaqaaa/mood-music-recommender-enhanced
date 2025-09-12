@@ -344,7 +344,7 @@ class MusicRecommenderDashApp:
                                                                 html.Div(
                                                                     id="track-search-suggestions",
                                                                     style={
-                                                                        "display": "none"
+                                                                        "position": "relative"
                                                                     },
                                                                 ),
                                                             ],
