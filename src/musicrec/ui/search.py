@@ -8,10 +8,9 @@ Copyright and Usage Information
 This file is Copyright (c) 2025 Qian (Angela) Su.
 """
 
-from typing import List, Dict, Any, Set, Tuple
 import difflib
 from functools import lru_cache
-
+from typing import Any, Dict, List, Set, Tuple
 
 # Performance optimization constants
 FUZZY_PREFILTER_TOP_N = 30

@@ -8,16 +8,18 @@ Copyright and Usage Information
 This file is Copyright (c) 2025 Qian (Angela) Su.
 """
 
+from typing import Any, Dict, List, Optional, Set
+
 import pandas as pd
-from typing import Dict, List, Optional, Any, Set
+
 # Optional import for CSC111 course linting
 try:
     import python_ta
 except ImportError:
     python_ta = None
 
-# Import required classes from music_structures
-from .music_structures import GenreTree, SimilaritySongGraph, MusicNode
+# Import required classes from structures
+from .structures import GenreTree, MusicNode, SimilaritySongGraph
 
 
 class MusicRecommender:
@@ -38,7 +40,9 @@ class MusicRecommender:
     data: pd.DataFrame
     audio_features: List[str]
 
-    def __init__(self, data: pd.DataFrame, audio_features: Optional[List[str]] = None) -> None:
+    def __init__(
+        self, data: pd.DataFrame, audio_features: Optional[List[str]] = None
+    ) -> None:
         """Initialize the music recommender with a processed dataset.
 
         Args:
@@ -50,7 +54,7 @@ class MusicRecommender:
 
         if audio_features is None:
             # Default audio features to use for similarity
-            self.audio_features = ['energy', 'valence', 'tempo']
+            self.audio_features = ["energy", "valence", "tempo"]
         else:
             self.audio_features = audio_features
 
@@ -75,15 +79,17 @@ class MusicRecommender:
         for i, (_, row) in enumerate(self.data.iterrows()):
             # Create a dictionary of track attributes
             track_data = {
-                'mood_tags': row['mood_tags'] if isinstance(row['mood_tags'], list) else [],
-                'duration': row['duration'] if 'duration' in row else 0
+                "mood_tags": (
+                    row["mood_tags"] if isinstance(row["mood_tags"], list) else []
+                ),
+                "duration": row["duration"] if "duration" in row else 0,
             }
 
             # Add track name and artist if available
-            if 'track_name' in row:
-                track_data['track_name'] = row['track_name']
-            if 'artist_name' in row:
-                track_data['artist_name'] = row['artist_name']
+            if "track_name" in row:
+                track_data["track_name"] = row["track_name"]
+            if "artist_name" in row:
+                track_data["artist_name"] = row["artist_name"]
 
             # Add audio features
             for feature in self.audio_features:
@@ -91,20 +97,26 @@ class MusicRecommender:
                     track_data[feature] = row[feature]
 
             # Get the genre hierarchy
-            genre_path = row['genre_hierarchy'] if isinstance(row['genre_hierarchy'], list) else []
+            genre_path = (
+                row["genre_hierarchy"]
+                if isinstance(row["genre_hierarchy"], list)
+                else []
+            )
 
             # Add track to the tree
-            self.genre_tree.add_track(row['track_id'], genre_path, track_data)
+            self.genre_tree.add_track(row["track_id"], genre_path, track_data)
 
             # Add track to the similarity graph
-            self.similarity_graph.add_node(row['track_id'], track_data)
+            self.similarity_graph.add_node(row["track_id"], track_data)
 
             track_count += 1
 
             # Print progress
             if track_count % print_interval == 0 or track_count == total_tracks:
-                print(f"  Progress: {track_count}/{total_tracks} "
-                      f"tracks processed ({int(track_count/total_tracks*100)}%)")
+                print(
+                    f"  Progress: {track_count}/{total_tracks} "
+                    f"tracks processed ({int(track_count/total_tracks*100)}%)"
+                )
 
         print("Building similarity graph...")
         # Calculate similarities between tracks
@@ -112,7 +124,7 @@ class MusicRecommender:
             feature_keys=self.audio_features,
             mood_weight=0.6,
             feature_weight=0.4,
-            similarity_threshold=0.3
+            similarity_threshold=0.3,
         )
 
         print("✓ Data structures built successfully")
@@ -120,7 +132,9 @@ class MusicRecommender:
         # Print some summary statistics
         genre_count = len(self.get_available_genres())
         mood_count = len(self.get_available_moods())
-        print(f"Summary: {track_count} tracks, {genre_count} genres, {mood_count} moods")
+        print(
+            f"Summary: {track_count} tracks, {genre_count} genres, {mood_count} moods"
+        )
 
     def recommend_by_genre(self, genre: str, limit: int = 10) -> List[Dict[str, Any]]:
         """Recommend tracks by genre.
@@ -139,16 +153,16 @@ class MusicRecommender:
         recommendations = []
         for node in track_nodes[:limit]:
             track_info = {
-                'track_id': node.name,
-                'genre_path': self.genre_tree.get_genre_path(node),
-                'mood_tags': node.data.get('mood_tags', [])
+                "track_id": node.name,
+                "genre_path": self.genre_tree.get_genre_path(node),
+                "mood_tags": node.data.get("mood_tags", []),
             }
 
             # Add track name and artist if available
-            if 'track_name' in node.data:
-                track_info['track_name'] = node.data['track_name']
-            if 'artist_name' in node.data:
-                track_info['artist_name'] = node.data['artist_name']
+            if "track_name" in node.data:
+                track_info["track_name"] = node.data["track_name"]
+            if "artist_name" in node.data:
+                track_info["artist_name"] = node.data["artist_name"]
 
             # Add audio features
             for feature in self.audio_features:
@@ -176,16 +190,16 @@ class MusicRecommender:
         recommendations = []
         for node in track_nodes[:limit]:
             track_info = {
-                'track_id': node.name,
-                'genre_path': self.genre_tree.get_genre_path(node),
-                'mood_tags': node.data.get('mood_tags', [])
+                "track_id": node.name,
+                "genre_path": self.genre_tree.get_genre_path(node),
+                "mood_tags": node.data.get("mood_tags", []),
             }
 
             # Add track name and artist if available
-            if 'track_name' in node.data:
-                track_info['track_name'] = node.data['track_name']
-            if 'artist_name' in node.data:
-                track_info['artist_name'] = node.data['artist_name']
+            if "track_name" in node.data:
+                track_info["track_name"] = node.data["track_name"]
+            if "artist_name" in node.data:
+                track_info["artist_name"] = node.data["artist_name"]
 
             # Add audio features
             for feature in self.audio_features:
@@ -196,7 +210,9 @@ class MusicRecommender:
 
         return recommendations
 
-    def recommend_by_genre_and_mood(self, genre: str, mood: str, limit: int = 10) -> List[Dict[str, Any]]:
+    def recommend_by_genre_and_mood(
+        self, genre: str, mood: str, limit: int = 10
+    ) -> List[Dict[str, Any]]:
         """Recommend tracks by both genre and mood.
 
         Args:
@@ -214,16 +230,16 @@ class MusicRecommender:
         recommendations = []
         for node in track_nodes[:limit]:
             track_info = {
-                'track_id': node.name,
-                'genre_path': self.genre_tree.get_genre_path(node),
-                'mood_tags': node.data.get('mood_tags', [])
+                "track_id": node.name,
+                "genre_path": self.genre_tree.get_genre_path(node),
+                "mood_tags": node.data.get("mood_tags", []),
             }
 
             # Add track name and artist if available
-            if 'track_name' in node.data:
-                track_info['track_name'] = node.data['track_name']
-            if 'artist_name' in node.data:
-                track_info['artist_name'] = node.data['artist_name']
+            if "track_name" in node.data:
+                track_info["track_name"] = node.data["track_name"]
+            if "artist_name" in node.data:
+                track_info["artist_name"] = node.data["artist_name"]
 
             # Add audio features
             for feature in self.audio_features:
@@ -234,7 +250,9 @@ class MusicRecommender:
 
         return recommendations
 
-    def recommend_similar_to_track(self, track_id: str, limit: int = 5) -> List[Dict[str, Any]]:
+    def recommend_similar_to_track(
+        self, track_id: str, limit: int = 5
+    ) -> List[Dict[str, Any]]:
         """Recommend tracks similar to a given track.
 
         Args:
@@ -253,17 +271,17 @@ class MusicRecommender:
             node = self.genre_tree.get_track_node(similar_id)
             if node:
                 track_info = {
-                    'track_id': node.name,
-                    'similarity': similarity,
-                    'genre_path': self.genre_tree.get_genre_path(node),
-                    'mood_tags': node.data.get('mood_tags', [])
+                    "track_id": node.name,
+                    "similarity": similarity,
+                    "genre_path": self.genre_tree.get_genre_path(node),
+                    "mood_tags": node.data.get("mood_tags", []),
                 }
 
                 # Add track name and artist if available
-                if 'track_name' in node.data:
-                    track_info['track_name'] = node.data['track_name']
-                if 'artist_name' in node.data:
-                    track_info['artist_name'] = node.data['artist_name']
+                if "track_name" in node.data:
+                    track_info["track_name"] = node.data["track_name"]
+                if "artist_name" in node.data:
+                    track_info["artist_name"] = node.data["artist_name"]
 
                 # Add audio features
                 for feature in self.audio_features:
@@ -274,8 +292,13 @@ class MusicRecommender:
 
         return recommendations
 
-    def bfs_recommend(self, genre: str, mood: Optional[str] = None,
-                      max_depth: int = 2, limit: int = 10) -> List[Dict[str, Any]]:
+    def bfs_recommend(
+        self,
+        genre: str,
+        mood: Optional[str] = None,
+        max_depth: int = 2,
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
         """Recommend tracks using breadth-first search from a genre node.
 
         Args:
@@ -302,16 +325,16 @@ class MusicRecommender:
             seen_tracks.add(node.name)
 
             track_info = {
-                'track_id': node.name,
-                'genre_path': self.genre_tree.get_genre_path(node),
-                'mood_tags': node.data.get('mood_tags', [])
+                "track_id": node.name,
+                "genre_path": self.genre_tree.get_genre_path(node),
+                "mood_tags": node.data.get("mood_tags", []),
             }
 
             # Add track name and artist if available
-            if 'track_name' in node.data:
-                track_info['track_name'] = node.data['track_name']
-            if 'artist_name' in node.data:
-                track_info['artist_name'] = node.data['artist_name']
+            if "track_name" in node.data:
+                track_info["track_name"] = node.data["track_name"]
+            if "artist_name" in node.data:
+                track_info["artist_name"] = node.data["artist_name"]
 
             # Add audio features
             for feature in self.audio_features:
@@ -326,8 +349,13 @@ class MusicRecommender:
 
         return recommendations
 
-    def dfs_recommend(self, genre: str, mood: Optional[str] = None,
-                      max_breadth: int = 5, limit: int = 10) -> List[Dict[str, Any]]:
+    def dfs_recommend(
+        self,
+        genre: str,
+        mood: Optional[str] = None,
+        max_breadth: int = 5,
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
         """Recommend tracks using depth-first search from a genre node.
 
         Args:
@@ -354,16 +382,16 @@ class MusicRecommender:
             seen_tracks.add(node.name)
 
             track_info = {
-                'track_id': node.name,
-                'genre_path': self.genre_tree.get_genre_path(node),
-                'mood_tags': node.data.get('mood_tags', [])
+                "track_id": node.name,
+                "genre_path": self.genre_tree.get_genre_path(node),
+                "mood_tags": node.data.get("mood_tags", []),
             }
 
             # Add track name and artist if available
-            if 'track_name' in node.data:
-                track_info['track_name'] = node.data['track_name']
-            if 'artist_name' in node.data:
-                track_info['artist_name'] = node.data['artist_name']
+            if "track_name" in node.data:
+                track_info["track_name"] = node.data["track_name"]
+            if "artist_name" in node.data:
+                track_info["artist_name"] = node.data["artist_name"]
 
             # Add audio features
             for feature in self.audio_features:
@@ -388,7 +416,7 @@ class MusicRecommender:
 
         def collect_genres(node: MusicNode) -> None:
             """Recursively collect genre names from the tree."""
-            if node.node_type == 'genre' and node.name != 'music':
+            if node.node_type == "genre" and node.name != "music":
                 genres.add(node.name)
 
             for child in node.children:
@@ -409,8 +437,8 @@ class MusicRecommender:
 
         # Collect mood tags from all tracks
         for track_id, node in self.genre_tree.tracks.items():
-            if 'mood_tags' in node.data:
-                moods.update(node.data['mood_tags'])
+            if "mood_tags" in node.data:
+                moods.update(node.data["mood_tags"])
 
         return sorted(list(moods))
 
@@ -428,16 +456,16 @@ class MusicRecommender:
             return None
 
         track_info = {
-            'track_id': node.name,
-            'genre_path': self.genre_tree.get_genre_path(node),
-            'mood_tags': node.data.get('mood_tags', [])
+            "track_id": node.name,
+            "genre_path": self.genre_tree.get_genre_path(node),
+            "mood_tags": node.data.get("mood_tags", []),
         }
 
         # Add track name and artist if available
-        if 'track_name' in node.data:
-            track_info['track_name'] = node.data['track_name']
-        if 'artist_name' in node.data:
-            track_info['artist_name'] = node.data['artist_name']
+        if "track_name" in node.data:
+            track_info["track_name"] = node.data["track_name"]
+        if "artist_name" in node.data:
+            track_info["artist_name"] = node.data["artist_name"]
 
         # Add audio features
         for feature in self.audio_features:
@@ -445,12 +473,14 @@ class MusicRecommender:
                 track_info[feature] = node.data[feature]
 
         # Add duration if available
-        if 'duration' in node.data:
-            track_info['duration'] = node.data['duration']
+        if "duration" in node.data:
+            track_info["duration"] = node.data["duration"]
 
         return track_info
 
-    def search_tracks_by_name(self, search_term: str, limit: int = 10) -> List[Dict[str, Any]]:
+    def search_tracks_by_name(
+        self, search_term: str, limit: int = 10
+    ) -> List[Dict[str, Any]]:
         """Search for tracks by name or artist.
 
         Args:
@@ -463,24 +493,26 @@ class MusicRecommender:
         results = []
 
         for track_id, node in self.genre_tree.tracks.items():
-            track_name = node.data.get('track_name', '')
-            artist_name = node.data.get('artist_name', '')
+            track_name = node.data.get("track_name", "")
+            artist_name = node.data.get("artist_name", "")
 
             # Skip if track or artist name is missing
             if not track_name and not artist_name:
                 continue
 
             # Check if search term is in track name or artist name
-            if (search_term.lower() in track_name.lower() or
-                    search_term.lower() in artist_name.lower()):
+            if (
+                search_term.lower() in track_name.lower()
+                or search_term.lower() in artist_name.lower()
+            ):
 
                 # Create track info dictionary
                 track_info = {
-                    'track_id': track_id,
-                    'track_name': track_name,
-                    'artist_name': artist_name,
-                    'genre_path': self.genre_tree.get_genre_path(node),
-                    'mood_tags': node.data.get('mood_tags', [])
+                    "track_id": track_id,
+                    "track_name": track_name,
+                    "artist_name": artist_name,
+                    "genre_path": self.genre_tree.get_genre_path(node),
+                    "mood_tags": node.data.get("mood_tags", []),
                 }
 
                 # Add audio features
@@ -497,14 +529,17 @@ class MusicRecommender:
         return results
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
+
     doctest.testmod()
 
     if python_ta:
-        python_ta.check_all(config={
-            'extra-imports': ['pandas', 'typing', 'music_structures'],
-            'allowed-io': [],
-            'max-line-length': 100,
-            'disable': ['E1136']
-        })
+        python_ta.check_all(
+            config={
+                "extra-imports": ["pandas", "typing", "music_structures"],
+                "allowed-io": [],
+                "max-line-length": 100,
+                "disable": ["E1136"],
+            }
+        )

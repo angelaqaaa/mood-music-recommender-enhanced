@@ -8,18 +8,20 @@ Copyright and Usage Information
 This file is Copyright (c) 2025 Qian (Angela) Su.
 """
 
+import time
+
 import dash
-from dash import dcc, html, Input, Output, State, callback_context
-import plotly.graph_objects as go
-import plotly.express as px
-import pandas as pd
 import networkx as nx
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from dash import Input, Output, State, callback_context, dcc, html
+
 from ..metrics.collector import metrics_collector
 from .explanations import generate_explanation, get_top_features
-from .styles import RESPONSIVE_STYLES, BUTTON_STYLES, CONTAINER_STYLES
 from .keyboard_navigation import KEYBOARD_NAVIGATION_JS
 from .search import SearchEngine, generate_search_styles
-import time
+from .styles import BUTTON_STYLES, CONTAINER_STYLES, RESPONSIVE_STYLES
 
 # Optional import for code analysis
 try:
@@ -1668,6 +1670,7 @@ class MusicRecommenderDashApp:
         def get_metrics():
             """Return current metrics as JSON."""
             import json
+
             from flask import Response
 
             metrics = metrics_collector.get_metrics()

@@ -4,10 +4,10 @@ This module provides lightweight metrics tracking for recommendation requests,
 including counters for successes, failures, and basic latency tracking.
 """
 
-import time
 import threading
-from typing import Dict, Any
+import time
 from dataclasses import dataclass, field
+from typing import Any, Dict
 
 
 @dataclass
