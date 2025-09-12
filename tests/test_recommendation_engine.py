@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, Mock, patch
 import pandas as pd
 import pytest
 
-from src.musicrec.models.structures import GenreTree, MusicNode, SimilaritySongGraph
 from src.musicrec.models.engine import MusicRecommender
+from src.musicrec.models.structures import GenreTree, MusicNode, SimilaritySongGraph
 
 
 @pytest.fixture
