@@ -1,6 +1,5 @@
 """Unit tests for UI features including explanations and metrics collection."""
 
-import pytest
 from src.musicrec.ui.explanations import generate_explanation, get_top_features
 from src.musicrec.metrics.collector import MetricsCollector
 

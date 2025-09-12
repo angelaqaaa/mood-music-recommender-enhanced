@@ -14,7 +14,6 @@ import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
 import networkx as nx
-import logging
 from ..metrics.collector import metrics_collector
 
 # Optional import for code analysis
