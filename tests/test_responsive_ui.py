@@ -1,6 +1,5 @@
 """Tests for responsive UI features including accessibility and explanations."""
 
-import pytest
 from unittest.mock import Mock, patch
 from src.musicrec.ui.dash_app import MusicRecommenderDashApp
 from src.musicrec.ui.styles import RESPONSIVE_STYLES, CONTAINER_STYLES
@@ -55,6 +54,9 @@ class TestResponsiveLayout:
 
         app = MusicRecommenderDashApp(mock_recommender)
 
+        # Verify app was created successfully
+        assert app is not None
+        
         # Check that html.Div was called with className="main-container"
         mock_html.Div.assert_called()
         calls = mock_html.Div.call_args_list
@@ -89,6 +91,9 @@ class TestLoadingIndicator:
 
         app = MusicRecommenderDashApp(mock_recommender)
 
+        # Verify app was created successfully  
+        assert app is not None
+        
         # Check loading indicator was created
         loading_calls = [
             call
@@ -191,6 +196,9 @@ class TestAccessibilityFeatures:
 
         app = MusicRecommenderDashApp(mock_recommender)
 
+        # Verify app was created successfully
+        assert app is not None
+        
         # Check skip link was created
         skip_links = [
             call
@@ -213,6 +221,9 @@ class TestAccessibilityFeatures:
 
         app = MusicRecommenderDashApp(mock_recommender)
 
+        # Verify app was created successfully
+        assert app is not None
+        
         # Check that ARIA attributes were used in calls
         all_calls = (
             mock_html.Header.call_args_list
@@ -244,6 +255,9 @@ class TestAccessibilityFeatures:
 
         app = MusicRecommenderDashApp(mock_recommender)
 
+        # Verify app was created successfully
+        assert app is not None
+        
         # Check semantic elements were used
         mock_html.Header.assert_called()
         mock_html.Main.assert_called()
