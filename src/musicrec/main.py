@@ -5,51 +5,106 @@ This module connects all components and runs the complete application.
 
 Copyright and Usage Information
 ===============================
-This file is Copyright (c) 2025 Qian (Angela) Su & Mengxuan (Connie) Guo.
+This file is Copyright (c) 2025 Qian (Angela) Su.
 """
 
 import os
 import argparse
 import pandas as pd
 from typing import Optional
+import html
 import logging
 from pathlib import Path
+import time
 
-from .data.processor import build_dataset, save_processed_data
-from .models.engine import MusicRecommender
-from .ui.dash_app import MusicRecommenderDashApp
-from .utils.logging import setup_logging
+# Handle both relative imports (when run as module) and absolute imports (when run directly)
+try:
+    from .data.processor import build_dataset, save_processed_data, load_processed_data
+    from .models.engine import MusicRecommender
+    from .ui.dash_app import MusicRecommenderDashApp
+    from .log_setup import setup_logging
+    from .config.settings import load_config, get_data_paths, get_retry_config
+except ImportError:
+    # Fallback to absolute imports when run directly
+    import sys
+    from pathlib import Path
+    # Add parent directory to path so we can import sibling modules
+    sys.path.insert(0, str(Path(__file__).parent))
+    from data.processor import build_dataset, save_processed_data, load_processed_data
+    from models.engine import MusicRecommender
+    from ui.dash_app import MusicRecommenderDashApp
+    from log_setup import setup_logging
+    from config.settings import load_config, get_data_paths, get_retry_config
 
 logger = logging.getLogger(__name__)
 
 
+def _retry_operation(operation, *args, max_attempts: int = 3, 
+                    backoff_seconds: float = 1.0, backoff_multiplier: float = 2.0, 
+                    operation_name: str = "operation", **kwargs):
+    """Retry an operation with exponential backoff.
+    
+    Args:
+        operation: Function to retry
+        *args: Positional arguments to pass to the operation
+        max_attempts: Maximum number of retry attempts
+        backoff_seconds: Initial backoff time in seconds
+        backoff_multiplier: Multiplier for backoff time on each retry
+        operation_name: Name of the operation for logging
+        **kwargs: Keyword arguments to pass to the operation
+        
+    Returns:
+        Result of the successful operation
+        
+    Raises:
+        Exception: The last exception if all retries are exhausted
+    """
+    last_exception = None
+    current_backoff = backoff_seconds
+    
+    for attempt in range(1, max_attempts + 1):
+        try:
+            logger.debug(f"Attempting {operation_name} (attempt {attempt}/{max_attempts})")
+            result = operation(*args, **kwargs)
+            if attempt > 1:
+                logger.info(f"Successfully completed {operation_name} on attempt {attempt}")
+            return result
+        except Exception as e:
+            last_exception = e
+            if attempt < max_attempts:
+                logger.warning(f"Attempt {attempt} failed for {operation_name}: {e}. "
+                             f"Retrying in {current_backoff:.1f} seconds...")
+                time.sleep(current_backoff)
+                current_backoff *= backoff_multiplier
+            else:
+                logger.error(f"All {max_attempts} attempts failed for {operation_name}. "
+                           f"Final error: {e}")
+    
+    # Re-raise the last exception if all retries failed
+    raise last_exception
+
+
 def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.DataFrame:
     """Create a sample dataset for testing when real data files are not available.
-
+    
     Args:
         num_genres: Number of genre categories to generate (default: 4)
         tracks_per_genre: Number of tracks per genre (default: 10)
 
     Returns:
         Sample DataFrame for testing
-
+        
     Raises:
         ValueError: If parameters are invalid or data generation fails
         RuntimeError: If sample data generation produces invalid results
     """
-    logger.info(
-        f"Creating sample dataset with {num_genres} genres, {tracks_per_genre} tracks per genre"
-    )
-
+    logger.info(f"Creating sample dataset with {num_genres} genres, {tracks_per_genre} tracks per genre")
+    
     # Enhanced parameter validation
     if not isinstance(num_genres, int):
-        raise ValueError(
-            f"num_genres must be an integer, got {type(num_genres).__name__}"
-        )
+        raise ValueError(f"num_genres must be an integer, got {type(num_genres).__name__}")
     if not isinstance(tracks_per_genre, int):
-        raise ValueError(
-            f"tracks_per_genre must be an integer, got {type(tracks_per_genre).__name__}"
-        )
+        raise ValueError(f"tracks_per_genre must be an integer, got {type(tracks_per_genre).__name__}")
     if num_genres < 1:
         raise ValueError(f"num_genres must be at least 1, got {num_genres}")
     if num_genres > 100:
@@ -58,11 +113,11 @@ def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.Da
         raise ValueError(f"tracks_per_genre must be at least 1, got {tracks_per_genre}")
     if tracks_per_genre > 1000:
         raise ValueError(f"tracks_per_genre cannot exceed 1000, got {tracks_per_genre}")
-
+    
     # Calculate total expected tracks
     expected_total = num_genres * tracks_per_genre + 10  # +10 for subgenre tracks
     logger.info(f"Expected to generate approximately {expected_total} total tracks")
-
+    
     try:
         # Create sample tracks
         sample_data = []
@@ -83,20 +138,18 @@ def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.Da
                 valence = 0.6 + (i % 10) / 50
                 tempo = 120 + i
 
-                sample_data.append(
-                    {
-                        "track_id": track_id,
-                        "track_name": track_name,
-                        "artist_name": artist_name,
-                        "genre_tags": [genre],
-                        "mood_tags": mood_tags,
-                        "duration": 180 + i * 10,
-                        "energy": energy,
-                        "valence": valence,
-                        "tempo": tempo,
-                        "genre_hierarchy": ["rock"],
-                    }
-                )
+                sample_data.append({
+                    "track_id": track_id,
+                    "track_name": track_name,
+                    "artist_name": artist_name,
+                    "genre_tags": [genre],
+                    "mood_tags": mood_tags,
+                    "duration": 180 + i * 10,
+                    "energy": energy,
+                    "valence": valence,
+                    "tempo": tempo,
+                    "genre_hierarchy": ["rock"]
+                })
 
         # Metal genre tracks
         if num_genres >= 2:
@@ -114,20 +167,18 @@ def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.Da
                 valence = 0.4 + (i % 10) / 50
                 tempo = 140 + i
 
-                sample_data.append(
-                    {
-                        "track_id": track_id,
-                        "track_name": track_name,
-                        "artist_name": artist_name,
-                        "genre_tags": [genre],
-                        "mood_tags": mood_tags,
-                        "duration": 210 + i * 10,
-                        "energy": energy,
-                        "valence": valence,
-                        "tempo": tempo,
-                        "genre_hierarchy": ["metal"],
-                    }
-                )
+                sample_data.append({
+                    "track_id": track_id,
+                    "track_name": track_name,
+                    "artist_name": artist_name,
+                    "genre_tags": [genre],
+                    "mood_tags": mood_tags,
+                    "duration": 210 + i * 10,
+                    "energy": energy,
+                    "valence": valence,
+                    "tempo": tempo,
+                    "genre_hierarchy": ["metal"]
+                })
 
         # Electronic genre tracks
         if num_genres >= 3:
@@ -145,20 +196,18 @@ def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.Da
                 valence = 0.7 + (i % 10) / 50
                 tempo = 130 + i
 
-                sample_data.append(
-                    {
-                        "track_id": track_id,
-                        "track_name": track_name,
-                        "artist_name": artist_name,
-                        "genre_tags": [genre],
-                        "mood_tags": mood_tags,
-                        "duration": 200 + i * 10,
-                        "energy": energy,
-                        "valence": valence,
-                        "tempo": tempo,
-                        "genre_hierarchy": ["electronic"],
-                    }
-                )
+                sample_data.append({
+                    "track_id": track_id,
+                    "track_name": track_name,
+                    "artist_name": artist_name,
+                    "genre_tags": [genre],
+                    "mood_tags": mood_tags,
+                    "duration": 200 + i * 10,
+                    "energy": energy,
+                    "valence": valence,
+                    "tempo": tempo,
+                    "genre_hierarchy": ["electronic"]
+                })
 
         # Acoustic genre tracks
         if num_genres >= 4:
@@ -176,20 +225,18 @@ def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.Da
                 valence = 0.5 + (i % 10) / 50
                 tempo = 90 + i
 
-                sample_data.append(
-                    {
-                        "track_id": track_id,
-                        "track_name": track_name,
-                        "artist_name": artist_name,
-                        "genre_tags": [genre],
-                        "mood_tags": mood_tags,
-                        "duration": 190 + i * 10,
-                        "energy": energy,
-                        "valence": valence,
-                        "tempo": tempo,
-                        "genre_hierarchy": ["acoustic"],
-                    }
-                )
+                sample_data.append({
+                    "track_id": track_id,
+                    "track_name": track_name,
+                    "artist_name": artist_name,
+                    "genre_tags": [genre],
+                    "mood_tags": mood_tags,
+                    "duration": 190 + i * 10,
+                    "energy": energy,
+                    "valence": valence,
+                    "tempo": tempo,
+                    "genre_hierarchy": ["acoustic"]
+                })
 
         # Add some subgenres
         # Punkrock (subgenre of rock)
@@ -204,20 +251,18 @@ def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.Da
             valence = 0.5 + (i % 5) / 50
             tempo = 150 + i
 
-            sample_data.append(
-                {
-                    "track_id": track_id,
-                    "track_name": track_name,
-                    "artist_name": artist_name,
-                    "genre_tags": [genre],
-                    "mood_tags": mood_tags,
-                    "duration": 150 + i * 10,
-                    "energy": energy,
-                    "valence": valence,
-                    "tempo": tempo,
-                    "genre_hierarchy": ["rock", "punkrock"],
-                }
-            )
+            sample_data.append({
+                "track_id": track_id,
+                "track_name": track_name,
+                "artist_name": artist_name,
+                "genre_tags": [genre],
+                "mood_tags": mood_tags,
+                "duration": 150 + i * 10,
+                "energy": energy,
+                "valence": valence,
+                "tempo": tempo,
+                "genre_hierarchy": ["rock", "punkrock"]
+            })
 
         # Death metal (subgenre of metal)
         for i in range(1, 6):
@@ -231,96 +276,78 @@ def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.Da
             valence = 0.2 + (i % 5) / 50
             tempo = 160 + i
 
-            sample_data.append(
-                {
-                    "track_id": track_id,
-                    "track_name": track_name,
-                    "artist_name": artist_name,
-                    "genre_tags": [genre],
-                    "mood_tags": mood_tags,
-                    "duration": 170 + i * 10,
-                    "energy": energy,
-                    "valence": valence,
-                    "tempo": tempo,
-                    "genre_hierarchy": ["metal", "deathmetal"],
-                }
-            )
+            sample_data.append({
+                "track_id": track_id,
+                "track_name": track_name,
+                "artist_name": artist_name,
+                "genre_tags": [genre],
+                "mood_tags": mood_tags,
+                "duration": 170 + i * 10,
+                "energy": energy,
+                "valence": valence,
+                "tempo": tempo,
+                "genre_hierarchy": ["metal", "deathmetal"]
+            })
 
         # Create a DataFrame
         df = pd.DataFrame(sample_data)
-
+        
         # Validate the generated data
         if df.empty:
             raise RuntimeError("Sample data generation resulted in empty DataFrame")
-
-        required_columns = [
-            "track_id",
-            "track_name",
-            "artist_name",
-            "genre_tags",
-            "mood_tags",
-            "duration",
-            "energy",
-            "valence",
-            "tempo",
-            "genre_hierarchy",
-        ]
+        
+        required_columns = ['track_id', 'track_name', 'artist_name', 'genre_tags', 
+                           'mood_tags', 'duration', 'energy', 'valence', 'tempo', 'genre_hierarchy']
         missing_columns = [col for col in required_columns if col not in df.columns]
         if missing_columns:
-            raise RuntimeError(
-                f"Generated data missing required columns: {missing_columns}"
-            )
-
+            raise RuntimeError(f"Generated data missing required columns: {missing_columns}")
+        
         # Validate data ranges
-        if df["energy"].min() < 0 or df["energy"].max() > 1:
+        if df['energy'].min() < 0 or df['energy'].max() > 1:
             raise RuntimeError("Energy values must be between 0 and 1")
-        if df["valence"].min() < 0 or df["valence"].max() > 1:
+        if df['valence'].min() < 0 or df['valence'].max() > 1:
             raise RuntimeError("Valence values must be between 0 and 1")
-        if df["tempo"].min() <= 0:
+        if df['tempo'].min() <= 0:
             raise RuntimeError("Tempo values must be positive")
-        if df["duration"].min() <= 0:
+        if df['duration'].min() <= 0:
             raise RuntimeError("Duration values must be positive")
-
+        
         # Check for duplicate track IDs
-        if df["track_id"].duplicated().any():
+        if df['track_id'].duplicated().any():
             raise RuntimeError("Generated data contains duplicate track IDs")
-
-        logger.info(
-            f"Successfully generated {len(df)} sample tracks with {df['genre_hierarchy'].apply(lambda x: x[0]).nunique()} unique genres"
-        )
+        
+        logger.info(f"Successfully generated {len(df)} sample tracks with {df['genre_hierarchy'].apply(lambda x: x[0]).nunique()} unique genres")
         return df
-
+        
     except Exception as e:
         logger.error(f"Failed to generate sample data: {e}")
         raise
 
 
-def _validate_file_path(
-    file_path: str, expected_extensions: list, description: str
-) -> None:
+def _validate_file_path(file_path: str, expected_extensions: list, description: str) -> None:
     """Validate that a file path exists, is readable, and has the correct extension.
-
+    
     Args:
         file_path: Path to the file to validate
         expected_extensions: List of allowed file extensions (e.g., ['.csv', '.tsv'])
         description: Human-readable description of the file for error messages
-
+        
     Raises:
         FileNotFoundError: If the file doesn't exist
         ValueError: If the path is not a file or has wrong extension
         PermissionError: If the file is not readable
     """
     path = Path(file_path)
-
+    
     if not path.exists():
         raise FileNotFoundError(f"{description} not found: {file_path}")
-
+    
     if not path.is_file():
         raise ValueError(f"{description} is not a file: {file_path}")
-
+        
     if not os.access(file_path, os.R_OK):
         raise PermissionError(f"{description} is not readable: {file_path}")
-
+    
     if expected_extensions and path.suffix.lower() not in expected_extensions:
         raise ValueError(
             f"{description} must have one of these extensions {expected_extensions}, "
@@ -328,89 +355,134 @@ def _validate_file_path(
         )
 
 
-def load_data(
-    spotify_path: Optional[str] = None,
-    genre_path: Optional[str] = None,
-    mood_path: Optional[str] = None,
-    metadata_path: Optional[str] = None,
-    use_sample: bool = False,
-) -> pd.DataFrame:
-    """Load and process music data from various sources.
-
+def load_data(spotify_path: Optional[str] = None,
+              genre_path: Optional[str] = None,
+              mood_path: Optional[str] = None,
+              metadata_path: Optional[str] = None,
+              use_sample: bool = False,
+              config_path: Optional[str] = None) -> pd.DataFrame:
+    """Load and process music data from various sources with retry logic and config support.
+    
     Args:
         spotify_path: Path to Spotify audio features CSV file
         genre_path: Path to Jamendo genre annotations TSV file
         mood_path: Path to Jamendo mood annotations TSV file
         metadata_path: Path to track metadata TSV file
         use_sample: If True, generate sample data instead of loading files
-
+        config_path: Optional path to configuration file
+        
     Returns:
         Processed DataFrame ready for recommendation engine
-
+        
     Raises:
-        FileNotFoundError: If required files don't exist
+        FileNotFoundError: If required files don't exist after retries
         ValueError: If file paths are invalid
-        PermissionError: If files are not readable
+        PermissionError: If files are not readable after retries
+        RuntimeError: If data loading fails after all retries
     """
-    logger.info("Starting data loading process")
-
+    logger.info("Starting data loading process with configuration and retry support")
+    
+    # Load configuration
+    config = load_config(config_path)
+    retry_config = get_retry_config(config)
+    data_paths = get_data_paths(config)
+    
+    # Use provided paths or fall back to config defaults
+    final_paths = {
+        'spotify': spotify_path or data_paths.get('spotify_path'),
+        'genre': genre_path or data_paths.get('genre_path'),
+        'mood': mood_path or data_paths.get('mood_path'),
+        'metadata': metadata_path or data_paths.get('metadata_path')
+    }
+    
+    logger.info(f"Using paths: {final_paths}")
+    logger.debug(f"Retry config: max_attempts={retry_config['max_attempts']}, "
+                f"backoff={retry_config['backoff_seconds']}s")
+    
     try:
         # Check if we should use sample data
         if use_sample:
             logger.info("Using sample dataset for testing")
             return create_sample_data()
 
-        # Validate file paths if provided
+        # Validate and collect available file paths with retry logic
         validated_paths = {}
-        try:
-            if spotify_path:
-                _validate_file_path(spotify_path, [".csv"], "Spotify file")
-                validated_paths["spotify"] = spotify_path
-            if genre_path:
-                _validate_file_path(genre_path, [".tsv"], "Genre file")
-                validated_paths["genre"] = genre_path
-            if mood_path:
-                _validate_file_path(mood_path, [".tsv"], "Mood file")
-                validated_paths["mood"] = mood_path
-            if metadata_path:
-                _validate_file_path(metadata_path, [".tsv"], "Metadata file")
-                validated_paths["metadata"] = metadata_path
-        except (FileNotFoundError, ValueError, PermissionError) as e:
-            logger.error(f"File validation failed: {e}")
-            raise
+        
+        for data_type, file_path in final_paths.items():
+            if not file_path:
+                logger.debug(f"No path provided for {data_type} data")
+                continue
+                
+            try:
+                def validate_file():
+                    extensions = ['.csv'] if data_type == 'spotify' else ['.tsv']
+                    _validate_file_path(file_path, extensions, f"{data_type.title()} file")
+                    return file_path
+                
+                # Retry file validation to handle transient I/O issues
+                validated_path = _retry_operation(
+                    validate_file,
+                    max_attempts=retry_config['max_attempts'],
+                    backoff_seconds=retry_config['backoff_seconds'],
+                    backoff_multiplier=retry_config['backoff_multiplier'],
+                    operation_name=f"{data_type} file validation"
+                )
+                validated_paths[data_type] = validated_path
+                
+            except Exception as e:
+                logger.warning(f"Could not validate {data_type} file at {file_path}: {e}")
+                # Continue with other files rather than failing completely
 
-        # Check if we have enough valid files
-        required_files = ["spotify"]  # Minimum requirement
+        # Check if we have minimum required files
+        required_files = ['spotify']  # Spotify data is minimum requirement
         missing = [key for key in required_files if key not in validated_paths]
+        
         if missing:
             logger.warning(f"Missing required files: {missing}")
-
-        # If no valid data sources, fall back to sample data
+            if 'spotify' in missing:
+                logger.info("No Spotify data available, falling back to sample dataset")
+                return create_sample_data()
+            
+        # If no valid data sources at all, fall back to sample data
         if not validated_paths:
             logger.info("No valid data sources available, using sample dataset")
             return create_sample_data()
 
-        # Build dataset from validated files
-        logger.info(f"Building dataset from {len(validated_paths)} data sources")
-        return build_dataset(
-            validated_paths.get("spotify"),
-            validated_paths.get("genre"),
-            validated_paths.get("mood"),
-            validated_paths.get("metadata"),
+        # Build dataset from validated files with retry logic
+        logger.info(f"Building dataset from {len(validated_paths)} data sources: "
+                   f"{list(validated_paths.keys())}")
+        
+        def build_with_retry():
+            return build_dataset(
+                validated_paths.get('spotify'),
+                validated_paths.get('genre'),
+                validated_paths.get('mood'),
+                validated_paths.get('metadata')
+            )
+        
+        # Retry the dataset building process
+        return _retry_operation(
+            build_with_retry,
+            max_attempts=retry_config['max_attempts'],
+            backoff_seconds=retry_config['backoff_seconds'],
+            backoff_multiplier=retry_config['backoff_multiplier'],
+            operation_name="dataset building"
         )
-
+        
     except Exception as e:
-        logger.error(f"Data loading failed: {e}")
-        raise
+        logger.error(f"Data loading failed after retries: {e}")
+        logger.info("Falling back to sample dataset due to loading failure")
+        
+        # Final fallback to sample data
+        try:
+            return create_sample_data()
+        except Exception as sample_error:
+            logger.error(f"Sample data generation also failed: {sample_error}")
+            raise RuntimeError(f"Both data loading and sample generation failed. "
+                             f"Load error: {e}, Sample error: {sample_error}") from e
 
-    # If no valid data sources, fall back to sample data
-    logger.info("No valid data sources available, using sample dataset")
-    return create_sample_data()
 
-
-def run_recommender_app(
-    data: pd.DataFrame, debug: bool = False, port: int = 8040
-) -> None:
+def run_recommender_app(data: pd.DataFrame, debug: bool = False, port: int = 8040) -> None:
     """Run the music recommender Dash application.
 
     Args:
@@ -424,7 +496,7 @@ def run_recommender_app(
 
         print("Starting web application...")
         app = MusicRecommenderDashApp(recommender)
-        app.run_server(debug=debug, port=port, host="0.0.0.0")
+        app.run_server(debug=debug, port=port, host='0.0.0.0')
 
     except Exception as e:
         print(f"Error running application: {e}")
@@ -442,9 +514,9 @@ def run_demo_cli(data: pd.DataFrame, limit: int = 5) -> None:
         print("\nBuilding recommendation engine...")
         recommender = MusicRecommender(data)
 
-        print("\n" + "=" * 50)
+        print("\n" + "="*50)
         print("🎵 MUSIC RECOMMENDER DEMO")
-        print("=" * 50)
+        print("="*50)
 
         # Show available genres and moods
         genres = recommender.get_available_genres()
@@ -465,9 +537,9 @@ def run_demo_cli(data: pd.DataFrame, limit: int = 5) -> None:
             genre_recs = recommender.recommend_by_genre(sample_genre, limit)
 
             for i, track in enumerate(genre_recs, 1):
-                track_name = track.get("track_name", "Unknown")
-                artist_name = track.get("artist_name", "Unknown")
-                moods = ", ".join(track.get("mood_tags", []))
+                track_name = track.get('track_name', 'Unknown')
+                artist_name = track.get('artist_name', 'Unknown')
+                moods = ', '.join(track.get('mood_tags', []))
                 print(f"{i}. {track_name} by {artist_name}")
                 print(f"   Moods: {moods}")
 
@@ -478,15 +550,15 @@ def run_demo_cli(data: pd.DataFrame, limit: int = 5) -> None:
             mood_recs = recommender.recommend_by_mood(sample_mood, limit)
 
             for i, track in enumerate(mood_recs, 1):
-                track_name = track.get("track_name", "Unknown")
-                artist_name = track.get("artist_name", "Unknown")
-                genre_path = " > ".join(track.get("genre_path", []))
+                track_name = track.get('track_name', 'Unknown')
+                artist_name = track.get('artist_name', 'Unknown')
+                genre_path = ' > '.join(track.get('genre_path', []))
                 print(f"{i}. {track_name} by {artist_name}")
                 print(f"   Genre: {genre_path}")
 
-        print("\n" + "=" * 50)
+        print("\n" + "="*50)
         print("Demo completed! Use --no-demo to start the web interface.")
-        print("=" * 50)
+        print("="*50)
 
     except Exception as e:
         print(f"Error running demo: {e}")
@@ -495,41 +567,21 @@ def run_demo_cli(data: pd.DataFrame, limit: int = 5) -> None:
 
 def main() -> None:
     """Main function to run the music recommender system."""
-    parser = argparse.ArgumentParser(description="CSC111 Music Recommender System")
-    parser.add_argument("--spotify", type=str, help="Path to Spotify songs CSV file")
-    parser.add_argument("--genre", type=str, help="Path to genre annotations TSV file")
-    parser.add_argument("--mood", type=str, help="Path to mood annotations TSV file")
-    parser.add_argument("--metadata", type=str, help="Path to metadata TSV file")
-    parser.add_argument(
-        "--sample", action="store_true", help="Use sample data for testing"
-    )
-    parser.add_argument(
-        "--save", type=str, help="Save processed data to file (CSV or pickle)"
-    )
-    parser.add_argument(
-        "--demo", action="store_true", help="Run CLI demo instead of web app"
-    )
-    parser.add_argument("--debug", action="store_true", help="Run in debug mode")
-    parser.add_argument(
-        "--port",
-        type=int,
-        default=8040,
-        help="Port for web application (default: 8040)",
-    )
-    parser.add_argument(
-        "--limit",
-        type=int,
-        default=10,
-        help="Number of recommendations to show in demo (1-1000)",
-    )
-    parser.add_argument(
-        "--log-level",
-        type=str,
-        default="INFO",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
-        help="Logging level (default: INFO)",
-    )
-    parser.add_argument("--log-file", type=str, help="Path to log file (optional)")
+    parser = argparse.ArgumentParser(description='CSC111 Music Recommender System')
+    parser.add_argument('--spotify', type=str, help='Path to Spotify songs CSV file')
+    parser.add_argument('--genre', type=str, help='Path to genre annotations TSV file')
+    parser.add_argument('--mood', type=str, help='Path to mood annotations TSV file')
+    parser.add_argument('--metadata', type=str, help='Path to metadata TSV file')
+    parser.add_argument('--sample', action='store_true', help='Use sample data for testing')
+    parser.add_argument('--save', type=str, help='Save processed data to file (CSV or pickle)')
+    parser.add_argument('--demo', action='store_true', help='Run CLI demo instead of web app')
+    parser.add_argument('--debug', action='store_true', help='Run in debug mode')
+    parser.add_argument('--port', type=int, default=8040, help='Port for web application (default: 8040)')
+    parser.add_argument('--limit', type=int, default=10, help='Number of recommendations to show in demo (1-1000)')
+    parser.add_argument('--log-level', type=str, default='INFO', 
+                       choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'], 
+                       help='Logging level (default: INFO)')
+    parser.add_argument('--log-file', type=str, help='Path to log file (optional)')
 
     args = parser.parse_args()
 
@@ -550,7 +602,7 @@ def main() -> None:
             genre_path=args.genre,
             mood_path=args.mood,
             metadata_path=args.metadata,
-            use_sample=args.sample,
+            use_sample=args.sample
         )
 
         logger.info(f"Loaded dataset with {len(data)} tracks")
