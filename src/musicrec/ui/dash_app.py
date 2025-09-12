@@ -1501,15 +1501,16 @@ class MusicRecommenderDashApp:
                 headers={"Access-Control-Allow-Origin": "*"},
             )
 
-    def run_server(self, debug=False, port=8040):
+    def run_server(self, debug=False, port=8040, host="127.0.0.1"):
         """Run the Dash server.
 
         Args:
             debug: Whether to run in debug mode
             port: The port to run on
+            host: The host to run on
         """
         # Use the newer app.run() method instead of app.run_server()
-        self.app.run(debug=debug, port=port)
+        self.app.run(debug=debug, port=port, host=host)
 
 
 if __name__ == "__main__":
