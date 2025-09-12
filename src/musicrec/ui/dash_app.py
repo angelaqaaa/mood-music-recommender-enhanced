@@ -946,7 +946,7 @@ class MusicRecommenderDashApp:
                     id=f"recommendation-{i}",
                     role="option",
                     **{
-                        "aria-label": f"Recommendation {i+1}: {track_display} by {artist_name}",
+                        "aria-label": f"Recommendation {i + 1}: {track_display} by {artist_name}",
                         "aria-selected": "false",
                         "aria-posinset": str(i + 1),
                         "aria-setsize": str(len(recommendations)),

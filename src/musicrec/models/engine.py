@@ -115,7 +115,7 @@ class MusicRecommender:
             if track_count % print_interval == 0 or track_count == total_tracks:
                 print(
                     f"  Progress: {track_count}/{total_tracks} "
-                    f"tracks processed ({int(track_count/total_tracks*100)}%)"
+                    f"tracks processed ({int(track_count / total_tracks * 100)}%)"
                 )
 
         print("Building similarity graph...")
