@@ -15,6 +15,9 @@ import plotly.express as px
 import pandas as pd
 import networkx as nx
 from ..metrics.collector import metrics_collector
+from .explanations import generate_explanation, get_top_features
+from .styles import RESPONSIVE_STYLES, BUTTON_STYLES, CONTAINER_STYLES
+import time
 
 # Optional import for code analysis
 try:
@@ -42,6 +45,35 @@ class MusicRecommenderDashApp:
         """
         self.recommender = recommender
         self.app = dash.Dash(__name__, suppress_callback_exceptions=True)
+
+        # Add custom CSS styles
+        self.app.index_string = (
+            """
+        <!DOCTYPE html>
+        <html>
+            <head>
+                {%metas%}
+                <title>{%title%}</title>
+                {%favicon%}
+                {%css%}
+                <style>
+                """
+            + RESPONSIVE_STYLES
+            + """
+                </style>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body>
+                {%app_entry%}
+                <footer>
+                    {%config%}
+                    {%scripts%}
+                    {%renderer%}
+                </footer>
+            </body>
+        </html>
+        """
+        )
 
         # Set the app layout
         self.app.layout = self._create_layout()
@@ -80,246 +112,336 @@ class MusicRecommenderDashApp:
         # Create the layout
         layout = html.Div(
             [
-                html.H1(
-                    "Mood-Driven Music Recommender with Genre Hierarchies",
-                    style={"textAlign": "center", "marginBottom": "30px"},
+                html.Header(
+                    [
+                        html.H1(
+                            "Mood-Driven Music Recommender with Genre Hierarchies",
+                            style={"textAlign": "center", "marginBottom": "30px"},
+                            id="main-title",
+                        )
+                    ],
+                    role="banner",
                 ),
-                # Controls section
+                # Skip link for accessibility
+                html.A(
+                    "Skip to main content",
+                    href="#main-content",
+                    className="sr-only",
+                    style={
+                        "position": "absolute",
+                        "left": "-10000px",
+                        "top": "auto",
+                        "width": "1px",
+                        "height": "1px",
+                        "overflow": "hidden",
+                    },
+                    tabIndex="1",
+                ),
+                # Metrics panel
                 html.Div(
+                    id="metrics-panel",
+                    className="metrics-panel",
+                    style={"display": "none"},
+                ),
+                # Main content area with responsive layout
+                html.Main(
                     [
                         html.Div(
-                            [
-                                html.H3("Search Options"),
-                                # Search Type tabs
-                                dcc.Tabs(
-                                    id="search-type-tabs",
-                                    value="genre-mood",
-                                    children=[
-                                        dcc.Tab(
-                                            label="Search by Genre/Mood",
+                            className="main-layout",
+                            children=[
+                                # Controls section
+                                html.Section(
+                                    [
+                                        html.H3(
+                                            "Search Options",
+                                            id="search-options-heading",
+                                        ),
+                                        # Loading indicator
+                                        html.Div(
+                                            [
+                                                html.Div(className="loading-spinner"),
+                                                html.Span(
+                                                    "Finding recommendations...",
+                                                    **{"aria-live": "polite"},
+                                                ),
+                                            ],
+                                            id="loading-indicator",
+                                            className="loading-indicator",
+                                            style={"display": "none"},
+                                            role="status",
+                                        ),
+                                        # Search Type tabs
+                                        dcc.Tabs(
+                                            id="search-type-tabs",
                                             value="genre-mood",
                                             children=[
-                                                # Genre selection
-                                                html.Label("Select Genre:"),
-                                                dcc.Dropdown(
-                                                    id="genre-dropdown",
-                                                    options=[
-                                                        {"label": genre, "value": genre}
-                                                        for genre in genres
-                                                    ],
-                                                    value=genres[0] if genres else None,
-                                                    clearable=False,
-                                                ),
-                                                # Mood selection
-                                                html.Label("Select Mood (Optional):"),
-                                                dcc.Dropdown(
-                                                    id="mood-dropdown",
-                                                    options=[
-                                                        {"label": mood, "value": mood}
-                                                        for mood in moods
-                                                    ],
-                                                    value=None,
-                                                    clearable=True,
-                                                ),
-                                                # Search method
-                                                html.Label("Search Method:"),
-                                                dcc.RadioItems(
-                                                    id="search-method",
-                                                    options=[
-                                                        {
-                                                            "label": "Breadth-First Search (BFS)",
-                                                            "value": "bfs",
-                                                        },
-                                                        {
-                                                            "label": "Depth-First Search (DFS)",
-                                                            "value": "dfs",
-                                                        },
-                                                        {
-                                                            "label": "Direct Search",
-                                                            "value": "direct",
-                                                        },
-                                                    ],
-                                                    value="direct",
-                                                    labelStyle={"display": "block"},
-                                                ),
-                                                # Number of results to show - set default to 50
-                                                html.Label("Number of Results:"),
-                                                dcc.Slider(
-                                                    id="results-count-slider",
-                                                    min=5,
-                                                    max=100,
-                                                    step=5,
-                                                    value=50,  # Changed to 50
-                                                    marks={
-                                                        i: str(i)
-                                                        for i in range(5, 101, 10)
-                                                    },
-                                                ),
-                                                # Search options for BFS/DFS
-                                                html.Div(
-                                                    [
-                                                        html.Label("Max Depth (BFS):"),
-                                                        dcc.Slider(
-                                                            id="max-depth-slider",
-                                                            min=1,
-                                                            max=5,
-                                                            step=1,
-                                                            value=2,
-                                                            marks={
-                                                                i: str(i)
-                                                                for i in range(1, 6)
-                                                            },
+                                                dcc.Tab(
+                                                    label="Search by Genre/Mood",
+                                                    value="genre-mood",
+                                                    children=[
+                                                        # Genre selection
+                                                        html.Label("Select Genre:"),
+                                                        dcc.Dropdown(
+                                                            id="genre-dropdown",
+                                                            options=[
+                                                                {
+                                                                    "label": genre,
+                                                                    "value": genre,
+                                                                }
+                                                                for genre in genres
+                                                            ],
+                                                            value=(
+                                                                genres[0]
+                                                                if genres
+                                                                else None
+                                                            ),
+                                                            clearable=False,
                                                         ),
+                                                        # Mood selection
                                                         html.Label(
-                                                            "Max Breadth (DFS):"
+                                                            "Select Mood (Optional):"
                                                         ),
-                                                        dcc.Slider(
-                                                            id="max-breadth-slider",
-                                                            min=1,
-                                                            max=10,
-                                                            step=1,
-                                                            value=5,
-                                                            marks={
-                                                                i: str(i)
-                                                                for i in range(1, 11, 2)
+                                                        dcc.Dropdown(
+                                                            id="mood-dropdown",
+                                                            options=[
+                                                                {
+                                                                    "label": mood,
+                                                                    "value": mood,
+                                                                }
+                                                                for mood in moods
+                                                            ],
+                                                            value=None,
+                                                            clearable=True,
+                                                        ),
+                                                        # Search method
+                                                        html.Label("Search Method:"),
+                                                        dcc.RadioItems(
+                                                            id="search-method",
+                                                            options=[
+                                                                {
+                                                                    "label": "Breadth-First Search (BFS)",
+                                                                    "value": "bfs",
+                                                                },
+                                                                {
+                                                                    "label": "Depth-First Search (DFS)",
+                                                                    "value": "dfs",
+                                                                },
+                                                                {
+                                                                    "label": "Direct Search",
+                                                                    "value": "direct",
+                                                                },
+                                                            ],
+                                                            value="direct",
+                                                            labelStyle={
+                                                                "display": "block"
                                                             },
                                                         ),
+                                                        # Number of results to show - set default to 50
+                                                        html.Label(
+                                                            "Number of Results:"
+                                                        ),
+                                                        dcc.Slider(
+                                                            id="results-count-slider",
+                                                            min=5,
+                                                            max=100,
+                                                            step=5,
+                                                            value=50,  # Changed to 50
+                                                            marks={
+                                                                i: str(i)
+                                                                for i in range(
+                                                                    5, 101, 10
+                                                                )
+                                                            },
+                                                        ),
+                                                        # Search options for BFS/DFS
+                                                        html.Div(
+                                                            [
+                                                                html.Label(
+                                                                    "Max Depth (BFS):"
+                                                                ),
+                                                                dcc.Slider(
+                                                                    id="max-depth-slider",
+                                                                    min=1,
+                                                                    max=5,
+                                                                    step=1,
+                                                                    value=2,
+                                                                    marks={
+                                                                        i: str(i)
+                                                                        for i in range(
+                                                                            1, 6
+                                                                        )
+                                                                    },
+                                                                ),
+                                                                html.Label(
+                                                                    "Max Breadth (DFS):"
+                                                                ),
+                                                                dcc.Slider(
+                                                                    id="max-breadth-slider",
+                                                                    min=1,
+                                                                    max=10,
+                                                                    step=1,
+                                                                    value=5,
+                                                                    marks={
+                                                                        i: str(i)
+                                                                        for i in range(
+                                                                            1, 11, 2
+                                                                        )
+                                                                    },
+                                                                ),
+                                                            ],
+                                                            id="search-options",
+                                                            style={"marginTop": "15px"},
+                                                        ),
                                                     ],
-                                                    id="search-options",
-                                                    style={"marginTop": "15px"},
+                                                ),
+                                                dcc.Tab(
+                                                    label="Search by Track",
+                                                    value="track",
+                                                    children=[
+                                                        # Track selection dropdown with help text
+                                                        html.Label("Select a Track:"),
+                                                        html.Div(
+                                                            [
+                                                                html.P(
+                                                                    "Type at least 3 characters to search for tracks by name or artist.",
+                                                                    style={
+                                                                        "fontSize": "0.9em",
+                                                                        "color": "#666",
+                                                                        "marginBottom": "5px",
+                                                                    },
+                                                                )
+                                                            ]
+                                                        ),
+                                                        dcc.Dropdown(
+                                                            id="track-selection-dropdown",
+                                                            options=all_tracks,  # Show all tracks initially
+                                                            value=None,
+                                                            placeholder="Type to search for a track...",
+                                                            clearable=True,
+                                                            searchable=True,
+                                                        ),
+                                                        # Track info display
+                                                        html.Div(
+                                                            id="selected-track-info",
+                                                            style={
+                                                                "marginTop": "10px",
+                                                                "fontSize": "0.9em",
+                                                            },
+                                                        ),
+                                                        # Number of recommendations - set default to 50
+                                                        html.Label(
+                                                            "Number of Recommendations:"
+                                                        ),
+                                                        dcc.Slider(
+                                                            id="num-recommendations-slider",
+                                                            min=5,
+                                                            max=100,
+                                                            step=5,
+                                                            value=50,  # Changed to 50
+                                                            marks={
+                                                                i: str(i)
+                                                                for i in range(
+                                                                    5, 101, 10
+                                                                )
+                                                            },
+                                                        ),
+                                                        html.Div(
+                                                            [
+                                                                html.P(
+                                                                    "This tab helps you find tracks similar to a specific song.",
+                                                                    style={
+                                                                        "marginTop": "20px",
+                                                                        "fontSize": "0.9em",
+                                                                        "color": "#666",
+                                                                    },
+                                                                ),
+                                                                html.P(
+                                                                    "1. Select a track from the dropdown (or use the 'Similar' button on recommendations)",
+                                                                    style={
+                                                                        "fontSize": "0.9em",
+                                                                        "color": "#666",
+                                                                    },
+                                                                ),
+                                                                html.P(
+                                                                    "2. Click 'Search' to find similar tracks",
+                                                                    style={
+                                                                        "fontSize": "0.9em",
+                                                                        "color": "#666",
+                                                                    },
+                                                                ),
+                                                                html.P(
+                                                                    "Note: If no recommendations appear, this track may not have enough similar songs in the database.",
+                                                                    style={
+                                                                        "fontSize": "0.9em",
+                                                                        "color": "#bb0000",
+                                                                        "fontWeight": "bold",
+                                                                    },
+                                                                ),
+                                                            ]
+                                                        ),
+                                                    ],
                                                 ),
                                             ],
                                         ),
-                                        dcc.Tab(
-                                            label="Search by Track",
-                                            value="track",
-                                            children=[
-                                                # Track selection dropdown with help text
-                                                html.Label("Select a Track:"),
-                                                html.Div(
-                                                    [
-                                                        html.P(
-                                                            "Type at least 3 characters to search for tracks by name or artist.",
-                                                            style={
-                                                                "fontSize": "0.9em",
-                                                                "color": "#666",
-                                                                "marginBottom": "5px",
-                                                            },
-                                                        )
-                                                    ]
-                                                ),
-                                                dcc.Dropdown(
-                                                    id="track-selection-dropdown",
-                                                    options=all_tracks,  # Show all tracks initially
-                                                    value=None,
-                                                    placeholder="Type to search for a track...",
-                                                    clearable=True,
-                                                    searchable=True,
-                                                ),
-                                                # Track info display
-                                                html.Div(
-                                                    id="selected-track-info",
-                                                    style={
-                                                        "marginTop": "10px",
-                                                        "fontSize": "0.9em",
-                                                    },
-                                                ),
-                                                # Number of recommendations - set default to 50
-                                                html.Label(
-                                                    "Number of Recommendations:"
-                                                ),
-                                                dcc.Slider(
-                                                    id="num-recommendations-slider",
-                                                    min=5,
-                                                    max=100,
-                                                    step=5,
-                                                    value=50,  # Changed to 50
-                                                    marks={
-                                                        i: str(i)
-                                                        for i in range(5, 101, 10)
-                                                    },
-                                                ),
-                                                html.Div(
-                                                    [
-                                                        html.P(
-                                                            "This tab helps you find tracks similar to a specific song.",
-                                                            style={
-                                                                "marginTop": "20px",
-                                                                "fontSize": "0.9em",
-                                                                "color": "#666",
-                                                            },
-                                                        ),
-                                                        html.P(
-                                                            "1. Select a track from the dropdown (or use the 'Similar' button on recommendations)",
-                                                            style={
-                                                                "fontSize": "0.9em",
-                                                                "color": "#666",
-                                                            },
-                                                        ),
-                                                        html.P(
-                                                            "2. Click 'Search' to find similar tracks",
-                                                            style={
-                                                                "fontSize": "0.9em",
-                                                                "color": "#666",
-                                                            },
-                                                        ),
-                                                        html.P(
-                                                            "Note: If no recommendations appear, this track may not have enough similar songs in the database.",
-                                                            style={
-                                                                "fontSize": "0.9em",
-                                                                "color": "#bb0000",
-                                                                "fontWeight": "bold",
-                                                            },
-                                                        ),
-                                                    ]
-                                                ),
-                                            ],
+                                        # Search button
+                                        html.Button(
+                                            "Search",
+                                            id="search-button",
+                                            className="primary-button",
+                                            **{"aria-describedby": "search-status"},
+                                            style={
+                                                "marginTop": "20px",
+                                                "width": "100%",
+                                                "padding": "10px",
+                                                "backgroundColor": "#4CAF50",
+                                                "color": "white",
+                                                "border": "none",
+                                                "borderRadius": "4px",
+                                                "cursor": "pointer",
+                                                "fontSize": "16px",
+                                                "fontWeight": "bold",
+                                            },
                                         ),
                                     ],
+                                    className="controls-container",
+                                    **{"aria-labelledby": "search-options-heading"},
+                                    role="form",
                                 ),
-                                # Search button
-                                html.Button(
-                                    "Search",
-                                    id="search-button",
-                                    style={
-                                        "marginTop": "20px",
-                                        "width": "100%",
-                                        "padding": "10px",
-                                        "backgroundColor": "#4CAF50",
-                                        "color": "white",
-                                        "border": "none",
-                                        "borderRadius": "4px",
-                                        "cursor": "pointer",
-                                        "fontSize": "16px",
-                                        "fontWeight": "bold",
-                                    },
-                                ),
-                            ],
-                            style={"width": "30%", "float": "left", "padding": "20px"},
-                        ),
-                        # Results section with maximum height and scrolling
-                        html.Div(
-                            [
-                                html.H3("Recommendations"),
-                                # Status indicator
-                                html.Div(
-                                    id="search-status",
-                                    style={"marginBottom": "10px", "color": "#666"},
-                                ),
-                                # Recommendation results table with scrolling
-                                html.Div(
-                                    id="recommendations-table",
-                                    style={
-                                        "overflowX": "auto",
-                                        "overflowY": "auto",
-                                        "maxHeight": "500px",
-                                    },
+                                # Results section with maximum height and scrolling
+                                html.Section(
+                                    [
+                                        html.H3(
+                                            "Recommendations",
+                                            id="recommendations-heading",
+                                        ),
+                                        # Status indicator
+                                        html.Div(
+                                            id="search-status",
+                                            style={
+                                                "marginBottom": "10px",
+                                                "color": "#666",
+                                            },
+                                        ),
+                                        # Recommendation results table with scrolling
+                                        html.Div(
+                                            id="recommendations-table",
+                                            style={
+                                                "overflowX": "auto",
+                                                "overflowY": "auto",
+                                                "maxHeight": "500px",
+                                            },
+                                        ),
+                                    ],
+                                    className="results-container",
+                                    **{"aria-labelledby": "recommendations-heading"},
+                                    role="region",
+                                    **{"aria-live": "polite"},
                                 ),
                             ],
-                            style={"width": "65%", "float": "right", "padding": "20px"},
-                        ),
+                        )
                     ],
-                    style={"display": "flex", "flexWrap": "wrap"},
+                    id="main-content",
+                    role="main",
                 ),
                 # Visualization section
                 html.Div(
@@ -384,7 +506,8 @@ class MusicRecommenderDashApp:
                 dcc.Store(id="current-recommendations-store"),
                 # Hidden div for page load trigger
                 html.Div(id="page-load-trigger", style={"display": "none"}),
-            ]
+            ],
+            className="main-container",
         )
 
         return layout
@@ -514,6 +637,8 @@ class MusicRecommenderDashApp:
                 Output("recommendations-table", "children"),
                 Output("search-status", "children"),
                 Output("current-recommendations-store", "data"),
+                Output("loading-indicator", "style"),
+                Output("search-button", "disabled"),
             ],
             [
                 Input("search-button", "n_clicks"),
@@ -556,7 +681,18 @@ class MusicRecommenderDashApp:
 
             # Only process if search button was clicked or tab changed after a search
             if n_clicks is None:
-                return html.Div(), "Select search criteria and click 'Search'", []
+                return (
+                    html.Div(),
+                    "Select search criteria and click 'Search'",
+                    [],
+                    {"display": "none"},
+                    False,
+                )
+            
+            # Show loading during processing
+            # (In production, you might want to handle this differently)
+            # Add a small delay to demonstrate loading indicator
+            time.sleep(0.5)
 
             # Determine which tab is active and generate recommendations accordingly
             if active_tab == "track":  # Track selection tab
@@ -568,6 +704,8 @@ class MusicRecommenderDashApp:
                         html.Div("Please select a track first."),
                         "No track selected",
                         [],
+                        {"display": "none"},
+                        False,
                     )
 
                 # Get track info for the status message
@@ -594,7 +732,13 @@ class MusicRecommenderDashApp:
 
             else:  # Genre/Mood tab
                 if not genre:
-                    return html.Div("Please select a genre."), "No genre selected", []
+                    return (
+                        html.Div("Please select a genre."),
+                        "No genre selected",
+                        [],
+                        {"display": "none"},
+                        False,
+                    )
 
                 # Get the number of results to show
                 limit = results_count or 50  # Default to 50
@@ -645,27 +789,17 @@ class MusicRecommenderDashApp:
                 else:
                     no_results_message += " Try different search criteria."
 
-                return html.Div(no_results_message), status_message, []
-
-            # Create the recommendation table
-            table_header = [
-                html.Thead(
-                    html.Tr(
-                        [
-                            html.Th("Track Name"),
-                            html.Th("Artist"),
-                            html.Th("Genre Path"),
-                            html.Th("Moods"),
-                            html.Th("Energy"),
-                            html.Th("Valence"),
-                            html.Th("Actions"),
-                        ]
-                    )
+                return (
+                    html.Div(no_results_message),
+                    status_message,
+                    [],
+                    {"display": "none"},
+                    False,
                 )
-            ]
 
-            table_rows = []
-            for rec in recommendations:
+            # Create responsive recommendation cards
+            recommendation_cards = []
+            for i, rec in enumerate(recommendations):
                 # Get properly decoded text fields
                 track_display = rec.get("track_name", rec["track_id"])
                 artist_name = rec.get("artist_name", "Unknown")
@@ -678,64 +812,199 @@ class MusicRecommenderDashApp:
                 encoded_query = search_query.replace(" ", "+")
                 streaming_url = f"https://music.youtube.com/search?q={encoded_query}"
 
-                # Create clickable track name with link to streaming service
-                track_link = html.A(
-                    track_display,
-                    href=streaming_url,
-                    target="_blank",
-                    title=f"Listen to {track_display} on YouTube Music",
-                    style={"color": "#0066cc", "textDecoration": "none"},
+                # Generate explanation for this recommendation
+                explanation = generate_explanation(
+                    rec,
+                    "similarity" if active_tab == "track" else "genre_mood",
+                    similarity_score=rec.get("similarity_score"),
+                    source_track=rec.get("source_track"),
                 )
 
-                row = html.Tr(
+                # Create responsive recommendation card
+                card = html.Div(
                     [
-                        html.Td(track_link),  # Clickable link instead of plain text
-                        html.Td(artist_name),
-                        html.Td(genre_path),
-                        html.Td(mood_tags),
-                        html.Td(
-                            f"{rec.get('energy', 'N/A'):.2f}"
-                            if "energy" in rec
-                            else "N/A"
+                        # Track title and artist
+                        html.Div(
+                            [
+                                html.A(
+                                    track_display,
+                                    href=streaming_url,
+                                    target="_blank",
+                                    className="recommendation-title",
+                                    style={
+                                        "color": "#1DB954",
+                                        "textDecoration": "none",
+                                    },
+                                    title=f"Listen to {track_display} on YouTube Music",
+                                    tabIndex="0",
+                                ),
+                                html.Div(
+                                    f"by {artist_name}",
+                                    className="recommendation-details",
+                                ),
+                            ],
+                            style={"marginBottom": "10px"},
                         ),
-                        html.Td(
-                            f"{rec.get('valence', 'N/A'):.2f}"
-                            if "valence" in rec
-                            else "N/A"
+                        # Audio features and genre info
+                        html.Div(
+                            [
+                                html.Span(
+                                    f"Genre: {genre_path}",
+                                    style={"marginRight": "15px"},
+                                ),
+                                html.Span(
+                                    f"Moods: {mood_tags}" if mood_tags else "",
+                                    style={"marginRight": "15px"},
+                                ),
+                                html.Span(
+                                    f"Energy: {rec.get('energy', 'N/A'):.2f}"
+                                    if "energy" in rec
+                                    else ""
+                                ),
+                                html.Span(
+                                    f" | Valence: {rec.get('valence', 'N/A'):.2f}"
+                                    if "valence" in rec
+                                    else ""
+                                ),
+                            ],
+                            className="recommendation-details",
+                            style={"marginBottom": "10px"},
                         ),
-                        html.Td(
-                            html.Button(
-                                "Similar",
-                                id={"type": "track-button", "index": rec["track_id"]},
-                                title="Find tracks similar to this one",
-                                style={
-                                    "backgroundColor": "#2196F3",
-                                    "color": "white",
-                                    "border": "none",
-                                    "padding": "5px 10px",
-                                    "borderRadius": "4px",
-                                    "cursor": "pointer",
-                                },
-                            )
+                        # Explanation text
+                        html.Div(
+                            explanation,
+                            className="recommendation-explanation",
+                            **{
+                                "aria-label": f"Why this track was recommended: {explanation}"
+                            },
                         ),
-                    ]
+                        # Action button
+                        html.Div(
+                            [
+                                html.Button(
+                                    "Find Similar",
+                                    id={
+                                        "type": "track-button",
+                                        "index": rec["track_id"],
+                                    },
+                                    className="secondary-button",
+                                    title="Find tracks similar to this one",
+                                    **{
+                                        "aria-label": f"Find tracks similar to {track_display}"
+                                    },
+                                    style={
+                                        "backgroundColor": "#2196F3",
+                                        "color": "white",
+                                        "border": "none",
+                                        "padding": "8px 16px",
+                                        "borderRadius": "4px",
+                                        "cursor": "pointer",
+                                        "fontSize": "14px",
+                                    },
+                                )
+                            ],
+                            style={"textAlign": "right", "marginTop": "10px"},
+                        ),
+                    ],
+                    className="recommendation-item",
+                    tabIndex="0",
+                    **{
+                        "aria-label": f"Recommendation {i+1}: {track_display} by {artist_name}"
+                    },
                 )
-                table_rows.append(row)
 
-            table_body = [html.Tbody(table_rows)]
+                recommendation_cards.append(card)
 
-            # Apply styling to the table
-            table = html.Table(
-                table_header + table_body,
-                style={
-                    "width": "100%",
-                    "borderCollapse": "collapse",
-                    "border": "1px solid #ddd",
-                },
-                className="recommendation-table",
+            # Create container for recommendation cards
+            recommendations_container = html.Div(
+                recommendation_cards,
+                className="recommendations-container",
+                id="recommendations-list",
+                **{"aria-label": f"List of {len(recommendations)} recommendations"},
+                role="list",
             )
 
-            return table, status_message, recommendations
+            return (
+                recommendations_container,
+                status_message,
+                recommendations,
+                {"display": "none"},
+                False,
+            )
+
+        # Metrics panel callback
+        @self.app.callback(
+            [
+                Output("metrics-panel", "children"),
+                Output("metrics-panel", "style"),
+            ],
+            [Input("current-recommendations-store", "data")],
+        )
+        def update_metrics_panel(recommendations):
+            """Update the metrics panel with current metrics."""
+            metrics = metrics_collector.get_metrics()
+
+            if not metrics["total_requests"]:
+                return html.Div(), {"display": "none"}
+
+            metrics_content = html.Div(
+                [
+                    html.H4("Usage Metrics"),
+                    html.Div(
+                        [
+                            html.Div(
+                                [
+                                    html.Div(
+                                        str(metrics["total_requests"]),
+                                        className="metric-value",
+                                    ),
+                                    html.Div(
+                                        "Total Requests", className="metric-label"
+                                    ),
+                                ],
+                                className="metric-item",
+                            ),
+                            html.Div(
+                                [
+                                    html.Div(
+                                        f"{metrics['success_rate_percent']:.1f}%",
+                                        className="metric-value",
+                                    ),
+                                    html.Div("Success Rate", className="metric-label"),
+                                ],
+                                className="metric-item",
+                            ),
+                            html.Div(
+                                [
+                                    html.Div(
+                                        f"{metrics['average_latency_ms']:.1f}ms",
+                                        className="metric-value",
+                                    ),
+                                    html.Div("Avg Latency", className="metric-label"),
+                                ],
+                                className="metric-item",
+                            ),
+                            html.Div(
+                                [
+                                    html.Div(
+                                        str(
+                                            len(recommendations)
+                                            if recommendations
+                                            else 0
+                                        ),
+                                        className="metric-value",
+                                    ),
+                                    html.Div("Results Found", className="metric-label"),
+                                ],
+                                className="metric-item",
+                            ),
+                        ],
+                        className="metrics-grid",
+                    ),
+                ]
+            )
+
+            return metrics_content, {"display": "block"}
 
         # Update bubble chart visualization
         @self.app.callback(
