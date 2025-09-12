@@ -11,7 +11,11 @@ This file is Copyright (c) 2025 Qian (Angela) Su & Mengxuan (Connie) Guo.
 import pandas as pd
 import numpy as np
 from typing import List
-import python_ta
+# Optional import for code analysis
+try:
+    import python_ta
+except ImportError:
+    python_ta = None
 import html
 
 

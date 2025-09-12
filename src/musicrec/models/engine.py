@@ -10,7 +10,11 @@ This file is Copyright (c) 2025 Qian (Angela) Su & Mengxuan (Connie) Guo.
 
 import pandas as pd
 from typing import Dict, List, Optional, Any, Set
-import python_ta
+# Optional import for code analysis
+try:
+    import python_ta
+except ImportError:
+    python_ta = None
 
 # Import required classes from structures
 from .structures import GenreTree, SimilaritySongGraph, MusicNode

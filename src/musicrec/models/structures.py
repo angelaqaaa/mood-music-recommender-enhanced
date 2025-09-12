@@ -12,7 +12,11 @@ import networkx as nx
 import numpy as np
 from typing import Dict, List, Tuple, Optional, Any
 from sklearn.metrics.pairwise import cosine_similarity
-import python_ta
+# Optional import for code analysis
+try:
+    import python_ta
+except ImportError:
+    python_ta = None
 
 
 class MusicNode:

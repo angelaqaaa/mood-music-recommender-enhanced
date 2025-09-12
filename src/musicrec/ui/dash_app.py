@@ -15,7 +15,11 @@ import plotly.express as px
 import pandas as pd
 import networkx as nx
 import html as html_lib  # For escaping special characters
-import python_ta
+# Optional import for code analysis
+try:
+    import python_ta
+except ImportError:
+    python_ta = None
 
 
 class MusicRecommenderDashApp:
