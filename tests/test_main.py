@@ -1,7 +1,7 @@
 """Tests for main module functionality."""
 
-import pytest
 import pandas as pd
+import pytest
 
 
 def test_sample_data_validation():

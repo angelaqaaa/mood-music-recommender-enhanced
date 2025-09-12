@@ -8,9 +8,11 @@ Copyright and Usage Information
 This file is Copyright (c) 2025 Qian (Angela) Su.
 """
 
-import pytest
 import time
 from unittest.mock import Mock
+
+import pytest
+
 from src.musicrec.ui.search import SearchEngine
 
 
