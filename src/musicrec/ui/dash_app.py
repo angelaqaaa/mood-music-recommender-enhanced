@@ -14,6 +14,8 @@ import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
 import networkx as nx
+import logging
+from ..metrics.collector import metrics_collector
 
 # Optional import for code analysis
 try:
@@ -47,6 +49,9 @@ class MusicRecommenderDashApp:
 
         # Register callbacks
         self._register_callbacks()
+
+        # Add metrics endpoint
+        self._add_metrics_endpoint()
 
     def _create_layout(self):
         """Create the layout for the Dash application.
@@ -1169,6 +1174,22 @@ class MusicRecommenderDashApp:
                 return 1  # Trigger one click
 
             return dash.no_update
+
+    def _add_metrics_endpoint(self):
+        """Add metrics endpoint to the Flask server."""
+
+        @self.app.server.route("/metrics")
+        def get_metrics():
+            """Return current metrics as JSON."""
+            import json
+            from flask import Response
+
+            metrics = metrics_collector.get_metrics()
+            return Response(
+                json.dumps(metrics, indent=2),
+                mimetype="application/json",
+                headers={"Access-Control-Allow-Origin": "*"},
+            )
 
     def run_server(self, debug=False, port=8040):
         """Run the Dash server.

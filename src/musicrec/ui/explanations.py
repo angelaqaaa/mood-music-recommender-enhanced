@@ -24,10 +24,10 @@ def generate_explanation(
     Returns:
         Human-readable explanation string
     """
-    track_name = track_info.get("track_name", "Unknown Track")
-    artist_name = track_info.get("artist_name", "Unknown Artist")
-    genre_path = track_info.get("genre_path", [])
-    mood_tags = track_info.get("mood_tags", [])
+    track_name = track_info.get("track_name") or "Unknown Track"
+    artist_name = track_info.get("artist_name") or "Unknown Artist"
+    genre_path = track_info.get("genre_path") or []
+    mood_tags = track_info.get("mood_tags") or []
 
     # Base track identifier
     base_text = f'"{track_name}" by {artist_name}'
