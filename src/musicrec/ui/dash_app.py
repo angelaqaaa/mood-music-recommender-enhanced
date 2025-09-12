@@ -343,13 +343,12 @@ class MusicRecommenderDashApp:
                                                                 ),
                                                                 html.Div(
                                                                     id="track-search-suggestions",
-                                                                    style={
-                                                                        "position": "relative"
-                                                                    },
+                                                                    # No inline style - let CSS handle positioning
                                                                 ),
                                                             ],
                                                             id="track-search-container",
                                                             className="search-container",
+                                                            style={"position": "relative"},
                                                         ),
                                                         # Hidden store for selected track from search
                                                         dcc.Store(
@@ -1616,37 +1615,37 @@ class MusicRecommenderDashApp:
                 **{"aria-label": f"{len(suggestions)} search results"},
             )
 
-        # Client-side callback to initialize search functionality
-        self.app.clientside_callback(
-            """
-            function(n_clicks) {
-                // Initialize debounced search when component loads
-                if (typeof window.DebouncedSearch !== 'undefined' && !window.trackSearch) {
-                    window.trackSearch = new window.DebouncedSearch(
-                        'track-search-input',
-                        'track-search-container',
-                        {
-                            debounceDelay: 300,
-                            minQueryLength: 3,
-                            maxResults: 20,
-                            onSearch: async function(query) {
-                                // This will be handled by the Dash callback
-                                return [];
-                            },
-                            onSelect: function(suggestion) {
-                                // Store selected track for recommendations
-                                window.dash_clientside.set_props('search-selected-track', {data: suggestion.track_id});
-                                window.dash_clientside.set_props('search-type-tabs', {value: 'track'});
-                            }
-                        }
-                    );
-                }
-                return window.dash_clientside.no_update;
-            }
-            """,
-            Output("track-search-container", "data-initialized"),
-            [Input("page-load-trigger", "children")],
-        )
+        # Client-side callback disabled temporarily to debug search issue
+        # self.app.clientside_callback(
+        #     """
+        #     function(n_clicks) {
+        #         // Initialize debounced search when component loads
+        #         if (typeof window.DebouncedSearch !== 'undefined' && !window.trackSearch) {
+        #             window.trackSearch = new window.DebouncedSearch(
+        #                 'track-search-input',
+        #                 'track-search-container',
+        #                 {
+        #                     debounceDelay: 300,
+        #                     minQueryLength: 3,
+        #                     maxResults: 20,
+        #                     onSearch: async function(query) {
+        #                         // This will be handled by the Dash callback
+        #                         return [];
+        #                     },
+        #                     onSelect: function(suggestion) {
+        #                         // Store selected track for recommendations
+        #                         window.dash_clientside.set_props('search-selected-track', {data: suggestion.track_id});
+        #                         window.dash_clientside.set_props('search-type-tabs', {value: 'track'});
+        #                     }
+        #                 }
+        #             );
+        #         }
+        #         return window.dash_clientside.no_update;
+        #     }
+        #     """,
+        #     Output("track-search-container", "data-initialized"),
+        #     [Input("page-load-trigger", "children")],
+        # )
 
         # Handle track selection from search
         @self.app.callback(
