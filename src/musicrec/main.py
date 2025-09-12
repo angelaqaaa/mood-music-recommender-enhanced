@@ -9,7 +9,6 @@ This file is Copyright (c) 2025 Qian (Angela) Su.
 """
 
 import argparse
-import html
 import logging
 import os
 import time
@@ -21,21 +20,18 @@ import pandas as pd
 # Handle both relative imports (when run as module) and absolute imports (when run directly)
 try:
     from .config.settings import get_data_paths, get_retry_config, load_config
-    from .data.processor import (build_dataset, load_processed_data,
-                                 save_processed_data)
+    from .data.processor import build_dataset, load_processed_data, save_processed_data
     from .log_setup import setup_logging
     from .models.engine import MusicRecommender
     from .ui.dash_app import MusicRecommenderDashApp
 except ImportError:
     # Fallback to absolute imports when run directly
     import sys
-    from pathlib import Path
 
     # Add parent directory to path so we can import sibling modules
     sys.path.insert(0, str(Path(__file__).parent))
     from config.settings import get_data_paths, get_retry_config, load_config
-    from data.processor import (build_dataset, load_processed_data,
-                                save_processed_data)
+    from data.processor import build_dataset, load_processed_data, save_processed_data
     from log_setup import setup_logging
     from models.engine import MusicRecommender
     from ui.dash_app import MusicRecommenderDashApp
@@ -151,7 +147,7 @@ def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.Da
             for i in range(1, min(tracks_per_genre + 1, 11)):
                 track_id = f"track_100{i}"
                 track_name = f"Rock Song {i}"
-                artist_name = f"Rock Artist {i//3 + 1}"
+                artist_name = f"Rock Artist {i // 3 + 1}"
                 genre = "rock"
                 mood_tags = ["energetic"] if i % 2 == 0 else ["calm"]
 
@@ -182,7 +178,7 @@ def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.Da
             for i in range(1, min(tracks_per_genre + 1, 11)):
                 track_id = f"track_200{i}"
                 track_name = f"Metal Song {i}"
-                artist_name = f"Metal Artist {i//3 + 1}"
+                artist_name = f"Metal Artist {i // 3 + 1}"
                 genre = "metal"
                 mood_tags = ["intense"] if i % 2 == 0 else ["melodic"]
 
@@ -213,7 +209,7 @@ def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.Da
             for i in range(1, min(tracks_per_genre + 1, 11)):
                 track_id = f"track_300{i}"
                 track_name = f"Electronic Song {i}"
-                artist_name = f"DJ Artist {i//3 + 1}"
+                artist_name = f"DJ Artist {i // 3 + 1}"
                 genre = "electronic"
                 mood_tags = ["upbeat"] if i % 2 == 0 else ["chill"]
 
@@ -244,7 +240,7 @@ def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.Da
             for i in range(1, min(tracks_per_genre + 1, 11)):
                 track_id = f"track_400{i}"
                 track_name = f"Acoustic Song {i}"
-                artist_name = f"Folk Artist {i//3 + 1}"
+                artist_name = f"Folk Artist {i // 3 + 1}"
                 genre = "acoustic"
                 mood_tags = ["calm"] if i % 2 == 0 else ["melancholic"]
 
@@ -275,7 +271,7 @@ def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.Da
         for i in range(1, 6):
             track_id = f"track_500{i}"
             track_name = f"Punk Song {i}"
-            artist_name = f"Punk Artist {i//2 + 1}"
+            artist_name = f"Punk Artist {i // 2 + 1}"
             genre = "punkrock"
             mood_tags = ["energetic", "intense"]
 
@@ -302,7 +298,7 @@ def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.Da
         for i in range(1, 6):
             track_id = f"track_600{i}"
             track_name = f"Death Metal Song {i}"
-            artist_name = f"Death Metal Artist {i//2 + 1}"
+            artist_name = f"Death Metal Artist {i // 2 + 1}"
             genre = "deathmetal"
             mood_tags = ["intense", "angry"]
 
