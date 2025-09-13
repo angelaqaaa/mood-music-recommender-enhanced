@@ -18,6 +18,7 @@ from ..metrics.collector import metrics_collector
 from .explanations import generate_explanation, get_top_features
 from .styles import RESPONSIVE_STYLES, BUTTON_STYLES, CONTAINER_STYLES
 from .keyboard_navigation import KEYBOARD_NAVIGATION_JS
+from .search import SearchEngine
 import time
 
 # Optional import for code analysis
@@ -45,6 +46,9 @@ class MusicRecommenderDashApp:
             recommender: The music recommender engine
         """
         self.recommender = recommender
+        self.search_engine = SearchEngine(
+            recommender, enable_fuzzy=True, fuzzy_threshold=0.6
+        )
         self.app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
         # Add custom CSS styles and JavaScript
@@ -548,29 +552,17 @@ class MusicRecommenderDashApp:
                     # Show a message if search term is too short
                     return dash.no_update, "Type at least 3 characters to search"
 
-                # Search for matching tracks
+                # Use SearchEngine with fuzzy search for better results
+                search_results = self.search_engine.search_tracks(search_value)
+
+                # Convert search results to dropdown format
                 matched_tracks = []
-                for track_id, node in self.recommender.genre_tree.tracks.items():
-                    track_name = node.data.get("track_name", "")
-                    artist_name = node.data.get("artist_name", "")
-
-                    # Convert to lowercase for case-insensitive search
-                    if (
-                        search_value.lower() in track_name.lower()
-                        or search_value.lower() in artist_name.lower()
-                    ):
-                        # Create properly decoded display name
-                        display_name = f"{track_name} - {artist_name}"
-                        matched_tracks.append(
-                            {"label": display_name, "value": track_id}
-                        )
-
-                        # Limit to 100 matches for performance
-                        if len(matched_tracks) >= 100:
-                            break
-
-                # Sort matches alphabetically
-                matched_tracks.sort(key=lambda x: x["label"].lower())
+                for result in search_results:
+                    display_name = result["display_name"]
+                    track_id = result["track_id"]
+                    matched_tracks.append(
+                        {"label": display_name, "value": track_id}
+                    )
 
                 # Show default message if no track selected yet
                 return matched_tracks, "Select a track and click 'Search'"
