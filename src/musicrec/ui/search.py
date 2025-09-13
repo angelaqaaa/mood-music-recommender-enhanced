@@ -72,8 +72,8 @@ class SearchEngine:
         index = defaultdict(list)
 
         for track_id, node in self.recommender.genre_tree.tracks.items():
-            track_name = node.data.get("track_name", "")
-            artist_name = node.data.get("artist_name", "")
+            track_name = node.data.get("track_name", "") or ""
+            artist_name = node.data.get("artist_name", "") or ""
 
             # Index normalized versions for case-insensitive search
             track_normalized = track_name.lower().strip()
