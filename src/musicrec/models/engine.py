@@ -5,20 +5,21 @@ This module builds the data structures and implements recommendation algorithms.
 
 Copyright and Usage Information
 ===============================
-This file is Copyright (c) 2025 Qian (Angela) Su & Mengxuan (Connie) Guo.
+This file is Copyright (c) 2025 Qian (Angela) Su.
 """
 
-import pandas as pd
-from typing import Dict, List, Optional, Any, Set
+from typing import Any, Dict, List, Optional, Set
 
-# Optional import for code analysis
+import pandas as pd
+
+# Optional import for CSC111 course linting
 try:
     import python_ta
 except ImportError:
     python_ta = None
 
 # Import required classes from structures
-from .structures import GenreTree, SimilaritySongGraph, MusicNode
+from .structures import GenreTree, MusicNode, SimilaritySongGraph
 
 
 class MusicRecommender:
@@ -534,11 +535,12 @@ if __name__ == "__main__":
 
     doctest.testmod()
 
-    python_ta.check_all(
-        config={
-            "extra-imports": ["pandas", "typing", "music_structures"],
-            "allowed-io": [],
-            "max-line-length": 100,
-            "disable": ["E1136"],
-        }
-    )
+    if python_ta:
+        python_ta.check_all(
+            config={
+                "extra-imports": ["pandas", "typing", "structures"],
+                "allowed-io": [],
+                "max-line-length": 100,
+                "disable": ["E1136"],
+            }
+        )

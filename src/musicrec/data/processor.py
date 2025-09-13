@@ -5,14 +5,15 @@ This module handles loading and parsing the Spotify and Jamendo datasets.
 
 Copyright and Usage Information
 ===============================
-This file is Copyright (c) 2025 Qian (Angela) Su & Mengxuan (Connie) Guo.
+This file is Copyright (c) 2025 Qian (Angela) Su.
 """
 
-import pandas as pd
-import numpy as np
 from typing import List
 
-# Optional import for code analysis
+import numpy as np
+import pandas as pd
+
+# Optional import for CSC111 course linting
 try:
     import python_ta
 except ImportError:
@@ -744,21 +745,22 @@ if __name__ == "__main__":
 
     doctest.testmod()
 
-    python_ta.check_all(
-        config={
-            "extra-imports": ["pandas", "numpy", "typing", "html"],
-            "allowed-io": [
-                "save_processed_data",
-                "build_dataset",
-                "load_processed_data",
-                "load_jamendo_genre_data",
-                "load_jamendo_mood_data",
-                "load_metadata",
-                "merge_datasets",
-                "preprocess_merged_data",
-                "load_spotify_data",
-            ],
-            "max-line-length": 100,
-            "disable": ["E1136"],
-        }
-    )
+    if python_ta:
+        python_ta.check_all(
+            config={
+                "extra-imports": ["pandas", "numpy", "typing", "html"],
+                "allowed-io": [
+                    "save_processed_data",
+                    "build_dataset",
+                    "load_processed_data",
+                    "load_jamendo_genre_data",
+                    "load_jamendo_mood_data",
+                    "load_metadata",
+                    "merge_datasets",
+                    "preprocess_merged_data",
+                    "load_spotify_data",
+                ],
+                "max-line-length": 100,
+                "disable": ["E1136"],
+            }
+        )
