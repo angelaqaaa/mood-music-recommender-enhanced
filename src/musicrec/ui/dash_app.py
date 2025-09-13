@@ -560,9 +560,7 @@ class MusicRecommenderDashApp:
                 for result in search_results:
                     display_name = result["display_name"]
                     track_id = result["track_id"]
-                    matched_tracks.append(
-                        {"label": display_name, "value": track_id}
-                    )
+                    matched_tracks.append({"label": display_name, "value": track_id})
 
                 # Show default message if no track selected yet
                 return matched_tracks, "Select a track and click 'Search'"

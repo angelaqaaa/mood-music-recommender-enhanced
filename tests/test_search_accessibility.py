@@ -11,7 +11,7 @@ import sys
 import os
 
 # Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from musicrec.ui.search import SearchEngine
 
@@ -23,10 +23,14 @@ class TestSearchAccessibility(unittest.TestCase):
         """Set up test fixtures."""
         self.mock_recommender = Mock()
         self.mock_recommender.genre_tree.tracks = {
-            'track1': Mock(data={'track_name': 'Test Song', 'artist_name': 'Test Artist'}),
-            'track2': Mock(data={'track_name': 'Another Song', 'artist_name': 'Another Artist'}),
-            'track3': Mock(data={'track_name': '', 'artist_name': ''}),  # Empty names
-            'track4': Mock(data={}),  # Missing data
+            "track1": Mock(
+                data={"track_name": "Test Song", "artist_name": "Test Artist"}
+            ),
+            "track2": Mock(
+                data={"track_name": "Another Song", "artist_name": "Another Artist"}
+            ),
+            "track3": Mock(data={"track_name": "", "artist_name": ""}),  # Empty names
+            "track4": Mock(data={}),  # Missing data
         }
 
     def test_empty_track_data_handling(self):
@@ -34,22 +38,22 @@ class TestSearchAccessibility(unittest.TestCase):
         search_engine = SearchEngine(self.mock_recommender)
 
         # Should not crash with empty/missing data
-        results = search_engine.search_tracks('test')
+        results = search_engine.search_tracks("test")
         self.assertIsInstance(results, list)
 
         # Should handle tracks with empty names gracefully
-        results = search_engine.search_tracks('')
+        results = search_engine.search_tracks("")
         self.assertEqual(len(results), 0)
 
     def test_missing_track_data_handling(self):
         """Test handling of tracks with missing data fields."""
         # Add track with None values
-        self.mock_recommender.genre_tree.tracks['track5'] = Mock(
-            data={'track_name': None, 'artist_name': None}
+        self.mock_recommender.genre_tree.tracks["track5"] = Mock(
+            data={"track_name": None, "artist_name": None}
         )
 
         search_engine = SearchEngine(self.mock_recommender)
-        results = search_engine.search_tracks('test')
+        results = search_engine.search_tracks("test")
 
         # Should not crash and return valid results
         self.assertIsInstance(results, list)
@@ -57,35 +61,45 @@ class TestSearchAccessibility(unittest.TestCase):
     def test_unicode_and_special_characters(self):
         """Test handling of Unicode and special characters."""
         # Add tracks with special characters
-        self.mock_recommender.genre_tree.tracks.update({
-            'unicode1': Mock(data={'track_name': 'Café Müller', 'artist_name': 'François'}),
-            'unicode2': Mock(data={'track_name': '東京', 'artist_name': 'アーティスト'}),
-            'special1': Mock(data={'track_name': 'Song & Title', 'artist_name': 'Artist!'}),
-            'special2': Mock(data={'track_name': 'Track (2023)', 'artist_name': 'Band #1'}),
-        })
+        self.mock_recommender.genre_tree.tracks.update(
+            {
+                "unicode1": Mock(
+                    data={"track_name": "Café Müller", "artist_name": "François"}
+                ),
+                "unicode2": Mock(
+                    data={"track_name": "東京", "artist_name": "アーティスト"}
+                ),
+                "special1": Mock(
+                    data={"track_name": "Song & Title", "artist_name": "Artist!"}
+                ),
+                "special2": Mock(
+                    data={"track_name": "Track (2023)", "artist_name": "Band #1"}
+                ),
+            }
+        )
 
         search_engine = SearchEngine(self.mock_recommender, enable_fuzzy=True)
 
         # Test Unicode search
-        unicode_results = search_engine.search_tracks('Café')
+        unicode_results = search_engine.search_tracks("Café")
         self.assertGreater(len(unicode_results), 0)
 
         # Test special character search
-        special_results = search_engine.search_tracks('Song &')
+        special_results = search_engine.search_tracks("Song &")
         self.assertGreater(len(special_results), 0)
 
     def test_extremely_long_strings(self):
         """Test handling of extremely long search queries and track names."""
         # Add track with very long name
-        long_name = 'A' * 1000  # 1000 character name
-        self.mock_recommender.genre_tree.tracks['long_track'] = Mock(
-            data={'track_name': long_name, 'artist_name': 'Artist'}
+        long_name = "A" * 1000  # 1000 character name
+        self.mock_recommender.genre_tree.tracks["long_track"] = Mock(
+            data={"track_name": long_name, "artist_name": "Artist"}
         )
 
         search_engine = SearchEngine(self.mock_recommender)
 
         # Test very long query
-        long_query = 'A' * 500
+        long_query = "A" * 500
         results = search_engine.search_tracks(long_query)
 
         # Should not crash
@@ -94,14 +108,12 @@ class TestSearchAccessibility(unittest.TestCase):
     def test_cache_key_consistency(self):
         """Test that cache keys are consistent for similar queries."""
         search_engine = SearchEngine(
-            self.mock_recommender,
-            enable_fuzzy=True,
-            cache_size=10
+            self.mock_recommender, enable_fuzzy=True, cache_size=10
         )
 
         # These should use the same cache entry
-        query1 = 'test'
-        query2 = 'test'  # Identical
+        query1 = "test"
+        query2 = "test"  # Identical
 
         # Call both to populate cache
         results1 = search_engine.search_tracks(query1)
@@ -114,24 +126,22 @@ class TestSearchAccessibility(unittest.TestCase):
         """Test that configuration parameters are handled correctly."""
         # Test with various parameter combinations
         configs = [
-            {'min_query_length': 1, 'max_results': 5},
-            {'fuzzy_threshold': 0.1},
-            {'fuzzy_threshold': 0.9},
-            {'prefilter_top_n': 1},
-            {'prefilter_top_n': 1000},
-            {'cache_size': 1},
-            {'cache_size': 1000},
+            {"min_query_length": 1, "max_results": 5},
+            {"fuzzy_threshold": 0.1},
+            {"fuzzy_threshold": 0.9},
+            {"prefilter_top_n": 1},
+            {"prefilter_top_n": 1000},
+            {"cache_size": 1},
+            {"cache_size": 1000},
         ]
 
         for config in configs:
             with self.subTest(config=config):
                 try:
                     engine = SearchEngine(
-                        self.mock_recommender,
-                        enable_fuzzy=True,
-                        **config
+                        self.mock_recommender, enable_fuzzy=True, **config
                     )
-                    results = engine.search_tracks('test')
+                    results = engine.search_tracks("test")
                     self.assertIsInstance(results, list)
                 except Exception as e:
                     self.fail(f"Configuration {config} should not raise exception: {e}")
@@ -141,17 +151,14 @@ class TestSearchAccessibility(unittest.TestCase):
         import threading
         import queue
 
-        search_engine = SearchEngine(
-            self.mock_recommender,
-            enable_fuzzy=True
-        )
+        search_engine = SearchEngine(self.mock_recommender, enable_fuzzy=True)
 
         results_queue = queue.Queue()
         exceptions_queue = queue.Queue()
 
         def search_worker(query, worker_id):
             try:
-                results = search_engine.search_tracks(f'test{worker_id}')
+                results = search_engine.search_tracks(f"test{worker_id}")
                 results_queue.put((worker_id, results))
             except Exception as e:
                 exceptions_queue.put((worker_id, e))
@@ -159,7 +166,7 @@ class TestSearchAccessibility(unittest.TestCase):
         # Start multiple threads
         threads = []
         for i in range(5):
-            thread = threading.Thread(target=search_worker, args=('test', i))
+            thread = threading.Thread(target=search_worker, args=("test", i))
             threads.append(thread)
             thread.start()
 
@@ -181,9 +188,7 @@ class TestSearchAccessibility(unittest.TestCase):
         import weakref
 
         search_engine = SearchEngine(
-            self.mock_recommender,
-            enable_fuzzy=True,
-            cache_size=100
+            self.mock_recommender, enable_fuzzy=True, cache_size=100
         )
 
         # Create weak reference to test cleanup
@@ -191,7 +196,7 @@ class TestSearchAccessibility(unittest.TestCase):
 
         # Perform searches to populate internal structures
         for i in range(10):
-            search_engine.search_tracks(f'test{i}')
+            search_engine.search_tracks(f"test{i}")
 
         # Delete engine and force garbage collection
         del search_engine
@@ -205,7 +210,7 @@ class TestSearchAccessibility(unittest.TestCase):
         # Mock recommender that raises exceptions
         error_recommender = Mock()
         error_recommender.genre_tree.tracks = {
-            'track1': Mock(data={'track_name': 'Test', 'artist_name': 'Artist'})
+            "track1": Mock(data={"track_name": "Test", "artist_name": "Artist"})
         }
 
         search_engine = SearchEngine(error_recommender)
@@ -213,7 +218,7 @@ class TestSearchAccessibility(unittest.TestCase):
         # Test with recommender that has issues
         error_recommender.genre_tree.tracks = None
         try:
-            results = search_engine.search_tracks('test')
+            results = search_engine.search_tracks("test")
             # Should handle gracefully, not crash
         except Exception:
             pass  # Some exceptions are acceptable for malformed data
@@ -221,28 +226,26 @@ class TestSearchAccessibility(unittest.TestCase):
     def test_boundary_values(self):
         """Test boundary values for all parameters."""
         boundary_tests = [
-            {'min_query_length': 0},  # Minimum
-            {'min_query_length': 100},  # Large value
-            {'max_results': 0},  # Edge case
-            {'max_results': 1},  # Minimum useful
-            {'fuzzy_threshold': 0.0},  # Minimum
-            {'fuzzy_threshold': 1.0},  # Maximum
-            {'prefilter_top_n': 0},  # Edge case
-            {'prefilter_top_n': 1},  # Minimum useful
-            {'cache_size': 0},  # No cache
+            {"min_query_length": 0},  # Minimum
+            {"min_query_length": 100},  # Large value
+            {"max_results": 0},  # Edge case
+            {"max_results": 1},  # Minimum useful
+            {"fuzzy_threshold": 0.0},  # Minimum
+            {"fuzzy_threshold": 1.0},  # Maximum
+            {"prefilter_top_n": 0},  # Edge case
+            {"prefilter_top_n": 1},  # Minimum useful
+            {"cache_size": 0},  # No cache
         ]
 
         for params in boundary_tests:
             with self.subTest(params=params):
                 try:
                     engine = SearchEngine(
-                        self.mock_recommender,
-                        enable_fuzzy=True,
-                        **params
+                        self.mock_recommender, enable_fuzzy=True, **params
                     )
 
                     # Test basic functionality
-                    results = engine.search_tracks('test')
+                    results = engine.search_tracks("test")
                     self.assertIsInstance(results, list)
 
                 except Exception as e:
@@ -258,10 +261,12 @@ class TestSearchResultIntegrity(unittest.TestCase):
         """Set up test fixtures."""
         self.mock_recommender = Mock()
         self.mock_recommender.genre_tree.tracks = {
-            f'track{i}': Mock(data={
-                'track_name': f'Song {i}',
-                'artist_name': f'Artist {i % 3}'  # Reuse some artists
-            })
+            f"track{i}": Mock(
+                data={
+                    "track_name": f"Song {i}",
+                    "artist_name": f"Artist {i % 3}",  # Reuse some artists
+                }
+            )
             for i in range(20)
         }
 
@@ -269,7 +274,7 @@ class TestSearchResultIntegrity(unittest.TestCase):
         """Test that identical queries return identical results."""
         search_engine = SearchEngine(self.mock_recommender, enable_fuzzy=True)
 
-        query = 'Song 1'
+        query = "Song 1"
         results1 = search_engine.search_tracks(query)
         results2 = search_engine.search_tracks(query)
 
@@ -277,17 +282,17 @@ class TestSearchResultIntegrity(unittest.TestCase):
         self.assertEqual(len(results1), len(results2))
 
         for r1, r2 in zip(results1, results2):
-            self.assertEqual(r1['track_id'], r2['track_id'])
-            self.assertEqual(r1['score'], r2['score'])
+            self.assertEqual(r1["track_id"], r2["track_id"])
+            self.assertEqual(r1["score"], r2["score"])
 
     def test_score_validity(self):
         """Test that all scores are valid numbers in correct range."""
         search_engine = SearchEngine(self.mock_recommender, enable_fuzzy=True)
 
-        results = search_engine.search_tracks('Song')
+        results = search_engine.search_tracks("Song")
 
         for result in results:
-            score = result['score']
+            score = result["score"]
             self.assertIsInstance(score, (int, float))
             self.assertGreaterEqual(score, 0.0)
             self.assertLessEqual(score, 1.0)
@@ -297,19 +302,19 @@ class TestSearchResultIntegrity(unittest.TestCase):
         """Test that match types are consistent with scores."""
         search_engine = SearchEngine(self.mock_recommender, enable_fuzzy=True)
 
-        results = search_engine.search_tracks('Song')
+        results = search_engine.search_tracks("Song")
 
         for result in results:
-            match_type = result['match_type']
-            score = result['score']
+            match_type = result["match_type"]
+            score = result["score"]
 
             # Exact matches should generally have higher scores
-            if match_type == 'exact':
+            if match_type == "exact":
                 self.assertGreaterEqual(score, 0.8)  # Usually high score
 
             # Match type should be valid
-            self.assertIn(match_type, ['exact', 'fuzzy'])
+            self.assertIn(match_type, ["exact", "fuzzy"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

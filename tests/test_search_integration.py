@@ -13,7 +13,7 @@ import sys
 import os
 
 # Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from musicrec.ui.search import SearchEngine
 
@@ -52,28 +52,24 @@ class TestSearchIntegration(unittest.TestCase):
         """Set up test fixtures."""
         self.mock_recommender = Mock()
         self.mock_recommender.genre_tree.tracks = {
-            f'track{i:03d}': Mock(data={
-                'track_name': f'Track {i:03d}',
-                'artist_name': f'Artist {i % 5}'
-            })
+            f"track{i:03d}": Mock(
+                data={"track_name": f"Track {i:03d}", "artist_name": f"Artist {i % 5}"}
+            )
             for i in range(50)
         }
 
         self.search_engine = SearchEngine(
-            self.mock_recommender,
-            enable_fuzzy=True,
-            fuzzy_threshold=0.6
+            self.mock_recommender, enable_fuzzy=True, fuzzy_threshold=0.6
         )
 
     def test_debounced_search_behavior(self):
         """Test simulated debounced search behavior."""
         debouncer = MockDebouncer(
-            self.search_engine.search_tracks,
-            debounce_delay=0.1  # Shorter for testing
+            self.search_engine.search_tracks, debounce_delay=0.1  # Shorter for testing
         )
 
         # Simulate rapid typing
-        queries = ['t', 'tr', 'tra', 'trac', 'track']
+        queries = ["t", "tr", "tra", "trac", "track"]
 
         for query in queries:
             debouncer.handle_input(query)
@@ -84,43 +80,40 @@ class TestSearchIntegration(unittest.TestCase):
 
     def test_minimum_query_length_validation(self):
         """Test that minimum query length is enforced."""
-        debouncer = MockDebouncer(
-            self.search_engine.search_tracks,
-            min_query_length=3
-        )
+        debouncer = MockDebouncer(self.search_engine.search_tracks, min_query_length=3)
 
         # Test queries below minimum
-        short_queries = ['a', 'ab']
+        short_queries = ["a", "ab"]
         for query in short_queries:
             result = debouncer.handle_input(query)
             self.assertIsNone(result)
 
         # Test query at minimum
-        valid_result = debouncer.handle_input('abc')
+        valid_result = debouncer.handle_input("abc")
         self.assertIsNotNone(valid_result)
 
     def test_search_result_formatting_for_frontend(self):
         """Test that search results are properly formatted for frontend consumption."""
-        results = self.search_engine.search_tracks('Track')
+        results = self.search_engine.search_tracks("Track")
 
         for result in results:
             # Check required fields for frontend
-            self.assertIn('track_id', result)
-            self.assertIn('display_name', result)
-            self.assertIn('score', result)
-            self.assertIn('match_type', result)
+            self.assertIn("track_id", result)
+            self.assertIn("display_name", result)
+            self.assertIn("score", result)
+            self.assertIn("match_type", result)
 
             # Check display name format
-            self.assertIsInstance(result['display_name'], str)
-            self.assertIn(' - ', result['display_name'])
+            self.assertIsInstance(result["display_name"], str)
+            self.assertIn(" - ", result["display_name"])
 
     def test_search_performance_for_realtime_ui(self):
         """Test that search performance is suitable for real-time UI."""
         queries = [
-            'Track 001',
-            'Artist 1',
-            'Tra',  # Partial match
-            'xyz',  # No match
+            "Track 001",
+            "Artist 1",
+            "Tra",  # Partial match
+            "xyz",  # No match
         ]
 
         for query in queries:
@@ -130,50 +123,60 @@ class TestSearchIntegration(unittest.TestCase):
 
             # Should be fast enough for real-time UI
             self.assertLess(
-                search_time, 0.1,  # 100ms for real-time feel
-                f"Search for '{query}' took {search_time:.3f}s, too slow for real-time UI"
+                search_time,
+                0.1,  # 100ms for real-time feel
+                f"Search for '{query}' took {search_time:.3f}s, too slow for real-time UI",
             )
 
     def test_search_result_limit_for_ui(self):
         """Test that search results are limited appropriately for UI display."""
         # Search for something that matches many tracks
-        results = self.search_engine.search_tracks('Track')
+        results = self.search_engine.search_tracks("Track")
 
         # Should limit results for UI performance
         self.assertLessEqual(
-            len(results), self.search_engine.max_results,
-            "Results should be limited for UI performance"
+            len(results),
+            self.search_engine.max_results,
+            "Results should be limited for UI performance",
         )
 
     def test_empty_and_error_state_handling(self):
         """Test handling of empty results and error states."""
         # Test empty results
-        empty_results = self.search_engine.search_tracks('xyznonexistent')
+        empty_results = self.search_engine.search_tracks("xyznonexistent")
         self.assertEqual(len(empty_results), 0)
         self.assertIsInstance(empty_results, list)
 
         # Test very short query
-        short_results = self.search_engine.search_tracks('ab')
+        short_results = self.search_engine.search_tracks("ab")
         self.assertEqual(len(short_results), 0)
 
     def test_special_character_handling_for_ui(self):
         """Test handling of special characters that might come from UI."""
         # Add tracks with special characters
-        self.mock_recommender.genre_tree.tracks.update({
-            'special1': Mock(data={'track_name': 'Track & Title', 'artist_name': 'Artist'}),
-            'special2': Mock(data={'track_name': 'Track (2023)', 'artist_name': 'Artist'}),
-            'special3': Mock(data={'track_name': 'Track "Quote"', 'artist_name': 'Artist'}),
-        })
+        self.mock_recommender.genre_tree.tracks.update(
+            {
+                "special1": Mock(
+                    data={"track_name": "Track & Title", "artist_name": "Artist"}
+                ),
+                "special2": Mock(
+                    data={"track_name": "Track (2023)", "artist_name": "Artist"}
+                ),
+                "special3": Mock(
+                    data={"track_name": 'Track "Quote"', "artist_name": "Artist"}
+                ),
+            }
+        )
 
         # Recreate engine with updated data
         search_engine = SearchEngine(self.mock_recommender, enable_fuzzy=True)
 
         special_queries = [
-            'Track &',
-            'Track (',
+            "Track &",
+            "Track (",
             'Track "',
-            '&',
-            '(',
+            "&",
+            "(",
             '"',
         ]
 
@@ -207,16 +210,15 @@ class TestSearchIntegration(unittest.TestCase):
 
         # Simulate multiple users searching simultaneously
         user_queries = [
-            ['Track 001', 'Artist 1', 'Track'],
-            ['Track 002', 'Artist 2', 'Artist'],
-            ['Track 003', 'Artist 3', 'Tra'],
+            ["Track 001", "Artist 1", "Track"],
+            ["Track 002", "Artist 2", "Artist"],
+            ["Track 003", "Artist 3", "Tra"],
         ]
 
         threads = []
         for i, queries in enumerate(user_queries):
             thread = threading.Thread(
-                target=simulate_user_search,
-                args=(f'user_{i}', queries)
+                target=simulate_user_search, args=(f"user_{i}", queries)
             )
             threads.append(thread)
             thread.start()
@@ -245,19 +247,21 @@ class TestSearchIntegration(unittest.TestCase):
         search_states = []
 
         def track_search_state(query, results):
-            search_states.append({
-                'query': query,
-                'result_count': len(results),
-                'has_results': len(results) > 0,
-                'timestamp': time.time()
-            })
+            search_states.append(
+                {
+                    "query": query,
+                    "result_count": len(results),
+                    "has_results": len(results) > 0,
+                    "timestamp": time.time(),
+                }
+            )
 
         queries = [
-            '',          # Empty (should not search)
-            'ab',        # Too short (should not search)
-            'Track',     # Valid search
-            'Nonexist',  # Valid search, no results
-            'Artist',    # Valid search with results
+            "",  # Empty (should not search)
+            "ab",  # Too short (should not search)
+            "Track",  # Valid search
+            "Nonexist",  # Valid search, no results
+            "Artist",  # Valid search with results
         ]
 
         for query in queries:
@@ -266,14 +270,15 @@ class TestSearchIntegration(unittest.TestCase):
                 track_search_state(query, results)
 
         # Should have tracked appropriate searches
-        valid_queries = [q for q in queries if len(q) >= self.search_engine.min_query_length]
+        valid_queries = [
+            q for q in queries if len(q) >= self.search_engine.min_query_length
+        ]
         self.assertEqual(len(search_states), len(valid_queries))
 
         # States should be in chronological order
         for i in range(1, len(search_states)):
             self.assertGreaterEqual(
-                search_states[i]['timestamp'],
-                search_states[i-1]['timestamp']
+                search_states[i]["timestamp"], search_states[i - 1]["timestamp"]
             )
 
 
@@ -284,15 +289,19 @@ class TestJavaScriptBehaviorSimulation(unittest.TestCase):
         """Set up test fixtures."""
         self.mock_recommender = Mock()
         self.mock_recommender.genre_tree.tracks = {
-            'track1': Mock(data={'track_name': 'Sample Track', 'artist_name': 'Sample Artist'}),
-            'track2': Mock(data={'track_name': 'Another Track', 'artist_name': 'Another Artist'}),
+            "track1": Mock(
+                data={"track_name": "Sample Track", "artist_name": "Sample Artist"}
+            ),
+            "track2": Mock(
+                data={"track_name": "Another Track", "artist_name": "Another Artist"}
+            ),
         }
 
         self.search_engine = SearchEngine(self.mock_recommender, enable_fuzzy=True)
 
     def test_keyboard_navigation_simulation(self):
         """Test simulation of keyboard navigation through search results."""
-        results = self.search_engine.search_tracks('Track')
+        results = self.search_engine.search_tracks("Track")
 
         # Simulate keyboard navigation
         selected_index = -1  # No selection initially
@@ -313,60 +322,61 @@ class TestJavaScriptBehaviorSimulation(unittest.TestCase):
         # Simulate Enter (selection)
         if selected_index >= 0 and selected_index < len(results):
             selected_result = results[selected_index]
-            self.assertIn('track_id', selected_result)
+            self.assertIn("track_id", selected_result)
 
     def test_loading_state_simulation(self):
         """Test simulation of loading states during search."""
+
         class LoadingStateTracker:
             def __init__(self):
                 self.states = []
 
             def set_loading(self, loading):
-                self.states.append(('loading', loading, time.time()))
+                self.states.append(("loading", loading, time.time()))
 
             def set_results(self, results):
-                self.states.append(('results', len(results), time.time()))
+                self.states.append(("results", len(results), time.time()))
 
         tracker = LoadingStateTracker()
 
         # Simulate search with loading states
         tracker.set_loading(True)
-        results = self.search_engine.search_tracks('Track')
+        results = self.search_engine.search_tracks("Track")
         tracker.set_loading(False)
         tracker.set_results(results)
 
         # Should have tracked loading states
         self.assertEqual(len(tracker.states), 3)
-        self.assertEqual(tracker.states[0][0], 'loading')
+        self.assertEqual(tracker.states[0][0], "loading")
         self.assertEqual(tracker.states[0][1], True)
-        self.assertEqual(tracker.states[1][0], 'loading')
+        self.assertEqual(tracker.states[1][0], "loading")
         self.assertEqual(tracker.states[1][1], False)
-        self.assertEqual(tracker.states[2][0], 'results')
+        self.assertEqual(tracker.states[2][0], "results")
 
     def test_accessibility_attributes_simulation(self):
         """Test simulation of ARIA accessibility attributes."""
-        results = self.search_engine.search_tracks('Track')
+        results = self.search_engine.search_tracks("Track")
 
         # Simulate ARIA attributes that would be set by JavaScript
         aria_attributes = {
-            'role': 'combobox',
-            'aria-autocomplete': 'list',
-            'aria-expanded': 'true' if len(results) > 0 else 'false',
-            'aria-controls': 'search-suggestions',
+            "role": "combobox",
+            "aria-autocomplete": "list",
+            "aria-expanded": "true" if len(results) > 0 else "false",
+            "aria-controls": "search-suggestions",
         }
 
         if len(results) > 0:
-            aria_attributes['aria-activedescendant'] = 'option-0'  # First option
+            aria_attributes["aria-activedescendant"] = "option-0"  # First option
 
         # Verify attributes are appropriate
-        self.assertEqual(aria_attributes['role'], 'combobox')
-        self.assertEqual(aria_attributes['aria-autocomplete'], 'list')
+        self.assertEqual(aria_attributes["role"], "combobox")
+        self.assertEqual(aria_attributes["aria-autocomplete"], "list")
 
         if len(results) > 0:
-            self.assertEqual(aria_attributes['aria-expanded'], 'true')
-            self.assertIn('aria-activedescendant', aria_attributes)
+            self.assertEqual(aria_attributes["aria-expanded"], "true")
+            self.assertIn("aria-activedescendant", aria_attributes)
         else:
-            self.assertEqual(aria_attributes['aria-expanded'], 'false')
+            self.assertEqual(aria_attributes["aria-expanded"], "false")
 
     def test_reduced_motion_preference_simulation(self):
         """Test simulation of reduced motion preferences."""
@@ -374,7 +384,7 @@ class TestJavaScriptBehaviorSimulation(unittest.TestCase):
         prefer_reduced_motion = True
 
         # Search behavior should not change
-        results = self.search_engine.search_tracks('Track')
+        results = self.search_engine.search_tracks("Track")
         self.assertIsInstance(results, list)
 
         # But UI animations would be disabled (simulated)
@@ -382,5 +392,5 @@ class TestJavaScriptBehaviorSimulation(unittest.TestCase):
         self.assertEqual(animation_duration, 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -12,7 +12,7 @@ import sys
 import os
 
 # Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from musicrec.ui.search import SearchEngine
 
@@ -27,33 +27,30 @@ class TestSearchPerformance(unittest.TestCase):
 
         # Generate test tracks (simulating 1000+ tracks)
         tracks = {}
-        artists = ['Artist A', 'Artist B', 'Artist C', 'Artist D', 'Artist E']
-        genres = ['Pop', 'Rock', 'Hip Hop', 'Electronic', 'Jazz']
+        artists = ["Artist A", "Artist B", "Artist C", "Artist D", "Artist E"]
+        genres = ["Pop", "Rock", "Hip Hop", "Electronic", "Jazz"]
 
         for i in range(1000):
-            track_id = f'track{i:04d}'
+            track_id = f"track{i:04d}"
             artist = artists[i % len(artists)]
             genre = genres[i % len(genres)]
-            track_name = f'{genre} Song {i:04d}'
+            track_name = f"{genre} Song {i:04d}"
 
-            tracks[track_id] = Mock(data={
-                'track_name': track_name,
-                'artist_name': artist
-            })
+            tracks[track_id] = Mock(
+                data={"track_name": track_name, "artist_name": artist}
+            )
 
         self.mock_recommender.genre_tree.tracks = tracks
 
     def test_large_dataset_search_performance(self):
         """Test search performance on large dataset."""
         search_engine = SearchEngine(
-            self.mock_recommender,
-            enable_fuzzy=True,
-            fuzzy_threshold=0.6
+            self.mock_recommender, enable_fuzzy=True, fuzzy_threshold=0.6
         )
 
         # Test exact search performance
         start_time = time.time()
-        results = search_engine.search_tracks('Pop Song')
+        results = search_engine.search_tracks("Pop Song")
         exact_time = time.time() - start_time
 
         self.assertLess(exact_time, 0.2, "Exact search should complete in <200ms")
@@ -65,12 +62,12 @@ class TestSearchPerformance(unittest.TestCase):
             self.mock_recommender,
             enable_fuzzy=True,
             fuzzy_threshold=0.6,
-            prefilter_top_n=100  # Limit candidates for performance
+            prefilter_top_n=100,  # Limit candidates for performance
         )
 
         # Test fuzzy search with trigram method
         start_time = time.time()
-        results = search_engine.search_tracks('Pap Song')  # Typo in 'Pop'
+        results = search_engine.search_tracks("Pap Song")  # Typo in 'Pop'
         fuzzy_time = time.time() - start_time
 
         self.assertLess(fuzzy_time, 0.2, "Fuzzy search should complete in <200ms")
@@ -82,7 +79,7 @@ class TestSearchPerformance(unittest.TestCase):
             self.mock_recommender,
             enable_fuzzy=True,
             fuzzy_threshold=0.6,
-            prefilter_top_n=50
+            prefilter_top_n=50,
         )
 
         # Engine without prefiltering (high limit)
@@ -90,10 +87,10 @@ class TestSearchPerformance(unittest.TestCase):
             self.mock_recommender,
             enable_fuzzy=True,
             fuzzy_threshold=0.6,
-            prefilter_top_n=1000  # No effective limit
+            prefilter_top_n=1000,  # No effective limit
         )
 
-        query = 'Rock Song'
+        query = "Rock Song"
 
         # Time both approaches
         start_time = time.time()
@@ -109,18 +106,16 @@ class TestSearchPerformance(unittest.TestCase):
         self.assertLessEqual(
             filtered_time,
             unfiltered_time * 1.5,  # Allow 50% tolerance
-            "Prefiltering should not significantly slow down search"
+            "Prefiltering should not significantly slow down search",
         )
 
     def test_cache_performance_benefit(self):
         """Test that LRU cache improves repeated search performance."""
         search_engine = SearchEngine(
-            self.mock_recommender,
-            enable_fuzzy=True,
-            cache_size=128
+            self.mock_recommender, enable_fuzzy=True, cache_size=128
         )
 
-        query = 'Electronic Song'
+        query = "Electronic Song"
 
         # First search (cold cache)
         start_time = time.time()
@@ -141,22 +136,19 @@ class TestSearchPerformance(unittest.TestCase):
         self.assertLessEqual(
             second_time,
             first_time * 2,  # Allow significant tolerance
-            "Cached search should not be slower than initial search"
+            "Cached search should not be slower than initial search",
         )
 
     def test_multiple_concurrent_searches(self):
         """Test performance with multiple search operations."""
-        search_engine = SearchEngine(
-            self.mock_recommender,
-            enable_fuzzy=True
-        )
+        search_engine = SearchEngine(self.mock_recommender, enable_fuzzy=True)
 
         queries = [
-            'Pop Song',
-            'Rock Song',
-            'Hip Hop Song',
-            'Electronic Song',
-            'Jazz Song'
+            "Pop Song",
+            "Rock Song",
+            "Hip Hop Song",
+            "Electronic Song",
+            "Jazz Song",
         ]
 
         start_time = time.time()
@@ -172,8 +164,7 @@ class TestSearchPerformance(unittest.TestCase):
         # All searches should return results
         for i, result in enumerate(results):
             self.assertGreater(
-                len(result), 0,
-                f"Query '{queries[i]}' should return results"
+                len(result), 0, f"Query '{queries[i]}' should return results"
             )
 
     def test_memory_usage_stability(self):
@@ -181,11 +172,11 @@ class TestSearchPerformance(unittest.TestCase):
         search_engine = SearchEngine(
             self.mock_recommender,
             enable_fuzzy=True,
-            cache_size=50  # Small cache to test eviction
+            cache_size=50,  # Small cache to test eviction
         )
 
         # Perform many searches to test cache eviction and stability
-        queries = [f'Song {i:04d}' for i in range(100)]
+        queries = [f"Song {i:04d}" for i in range(100)]
 
         start_time = time.time()
         for query in queries:
@@ -197,7 +188,7 @@ class TestSearchPerformance(unittest.TestCase):
         self.assertLess(
             end_time - start_time,
             5.0,  # 5 seconds for 100 searches
-            "Many searches with cache eviction should complete reasonably"
+            "Many searches with cache eviction should complete reasonably",
         )
 
     def test_worst_case_performance(self):
@@ -205,21 +196,21 @@ class TestSearchPerformance(unittest.TestCase):
         search_engine = SearchEngine(
             self.mock_recommender,
             enable_fuzzy=True,
-            fuzzy_threshold=0.1  # Very low threshold (more matches)
+            fuzzy_threshold=0.1,  # Very low threshold (more matches)
         )
 
         # Single character query (matches many tracks)
         start_time = time.time()
-        results = search_engine.search_tracks('a')
+        results = search_engine.search_tracks("a")
         worst_case_time = time.time() - start_time
 
         # Even worst case should be reasonable
         self.assertLess(
             worst_case_time,
             0.5,  # 500ms tolerance for worst case
-            "Worst-case search should complete in reasonable time"
+            "Worst-case search should complete in reasonable time",
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -31,7 +31,7 @@ class SearchEngine:
         fuzzy_threshold: float = 0.6,
         fuzzy_method: str = "trigram",
         prefilter_top_n: int = 100,
-        cache_size: int = 128
+        cache_size: int = 128,
     ):
         """Initialize the search engine.
 
@@ -128,7 +128,7 @@ class SearchEngine:
         trigrams = set()
 
         for i in range(len(padded) - 2):
-            trigrams.add(padded[i:i+3])
+            trigrams.add(padded[i : i + 3])
 
         return trigrams
 
@@ -217,7 +217,7 @@ class SearchEngine:
                 if result:
                     results.append(result)
 
-        return results[:self.max_results]
+        return results[: self.max_results]
 
     def _find_exact_matches(self, query: str) -> List[Tuple[str, float]]:
         """Find exact string matches.
@@ -239,9 +239,9 @@ class SearchEngine:
                 elif indexed_string.startswith(query):
                     score = 0.95  # Prefix match
                 elif indexed_string.endswith(query):
-                    score = 0.9   # Suffix match
+                    score = 0.9  # Suffix match
                 else:
-                    score = 0.8   # Substring match
+                    score = 0.8  # Substring match
 
                 for track_id in track_ids:
                     matches.append((track_id, score))
@@ -250,7 +250,9 @@ class SearchEngine:
         matches.sort(key=lambda x: x[1], reverse=True)
         return matches
 
-    def _find_fuzzy_matches(self, query: str, exclude_tracks: Set[str]) -> List[Tuple[str, float]]:
+    def _find_fuzzy_matches(
+        self, query: str, exclude_tracks: Set[str]
+    ) -> List[Tuple[str, float]]:
         """Find fuzzy string matches with prefiltering optimization.
 
         Uses trigram prefiltering to reduce complexity from O(n*m) to O(k*m)
@@ -271,13 +273,14 @@ class SearchEngine:
         else:
             # For difflib, use all tracks (no prefiltering available)
             candidates = [
-                track_id for track_id in self.recommender.genre_tree.tracks.keys()
+                track_id
+                for track_id in self.recommender.genre_tree.tracks.keys()
                 if track_id not in exclude_tracks
             ]
 
         # Apply prefiltering limit for performance
         if len(candidates) > self.prefilter_top_n:
-            candidates = candidates[:self.prefilter_top_n]
+            candidates = candidates[: self.prefilter_top_n]
 
         # Calculate similarity scores for candidates
         for track_id in candidates:
@@ -302,7 +305,9 @@ class SearchEngine:
         matches.sort(key=lambda x: x[1], reverse=True)
         return matches
 
-    def _get_trigram_candidates(self, query: str, exclude_tracks: Set[str]) -> List[str]:
+    def _get_trigram_candidates(
+        self, query: str, exclude_tracks: Set[str]
+    ) -> List[str]:
         """Get candidate tracks using trigram intersection for prefiltering.
 
         Args:
@@ -324,14 +329,14 @@ class SearchEngine:
 
         # Sort candidates by trigram overlap count (descending)
         sorted_candidates = sorted(
-            candidate_scores.items(),
-            key=lambda x: x[1],
-            reverse=True
+            candidate_scores.items(), key=lambda x: x[1], reverse=True
         )
 
         return [track_id for track_id, _ in sorted_candidates]
 
-    def _create_result(self, track_id: str, score: float, match_type: str) -> Optional[Dict[str, Any]]:
+    def _create_result(
+        self, track_id: str, score: float, match_type: str
+    ) -> Optional[Dict[str, Any]]:
         """Create a search result dictionary for a track.
 
         Args:
@@ -355,7 +360,7 @@ class SearchEngine:
             "artist_name": artist_name,
             "display_name": f"{track_name} - {artist_name}",
             "score": score,
-            "match_type": match_type
+            "match_type": match_type,
         }
 
 

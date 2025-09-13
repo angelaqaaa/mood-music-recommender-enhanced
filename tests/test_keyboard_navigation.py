@@ -141,15 +141,11 @@ class TestAccessibilityCompliance:
     def test_aria_attributes_completeness(self):
         """Test that all necessary ARIA attributes are included."""
         # Test core ARIA attributes that should be in the JavaScript
-        core_aria_attrs = [
-            "aria-selected",
-            "aria-live",
-            "aria-atomic"
-        ]
+        core_aria_attrs = ["aria-selected", "aria-live", "aria-atomic"]
 
         for attr in core_aria_attrs:
             assert attr in KEYBOARD_NAVIGATION_JS
-            
+
         # Test that ARIA management functions exist
         assert "setAttribute" in KEYBOARD_NAVIGATION_JS
 
