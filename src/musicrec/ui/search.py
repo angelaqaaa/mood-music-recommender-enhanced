@@ -5,8 +5,10 @@ including fuzzy string matching, trigram indexing, and performance optimizations
 """
 
 import re
+import difflib
 from collections import defaultdict
-from typing import Dict, List, Set, Tuple, Optional, Any
+from functools import lru_cache
+from typing import Dict, List, Set, Tuple, Optional, Any, Union
 import time
 
 
@@ -26,7 +28,10 @@ class SearchEngine:
         min_query_length: int = 3,
         max_results: int = 20,
         enable_fuzzy: bool = False,
-        fuzzy_threshold: float = 0.6
+        fuzzy_threshold: float = 0.6,
+        fuzzy_method: str = "trigram",
+        prefilter_top_n: int = 100,
+        cache_size: int = 128
     ):
         """Initialize the search engine.
 
@@ -36,16 +41,27 @@ class SearchEngine:
             max_results: Maximum number of results to return
             enable_fuzzy: Whether to enable fuzzy string matching
             fuzzy_threshold: Minimum similarity score for fuzzy matches (0.0-1.0)
+            fuzzy_method: Method for fuzzy matching ("trigram" or "difflib")
+            prefilter_top_n: Number of candidates to consider for fuzzy matching
+            cache_size: LRU cache size for similarity computations
         """
         self.recommender = recommender
         self.min_query_length = min_query_length
         self.max_results = max_results
         self.enable_fuzzy = enable_fuzzy
         self.fuzzy_threshold = fuzzy_threshold
+        self.fuzzy_method = fuzzy_method
+        self.prefilter_top_n = prefilter_top_n
+        self.cache_size = cache_size
 
         # Build search indexes for performance
         self._exact_index = self._build_exact_index()
         self._trigram_index = self._build_trigram_index() if enable_fuzzy else {}
+
+        # Configure LRU cache for similarity computations
+        self._calculate_similarity_cached = lru_cache(maxsize=cache_size)(
+            self._calculate_similarity_uncached
+        )
 
     def _build_exact_index(self) -> Dict[str, List[str]]:
         """Build an exact string matching index for fast lookups.
@@ -116,10 +132,23 @@ class SearchEngine:
 
         return trigrams
 
-    def _calculate_similarity(self, query: str, target: str) -> float:
-        """Calculate similarity between query and target strings.
+    def _calculate_similarity_uncached(self, query: str, target: str) -> float:
+        """Calculate similarity between query and target strings (uncached version).
 
-        Uses Jaccard similarity based on trigrams.
+        Args:
+            query: Search query string
+            target: Target string to compare against
+
+        Returns:
+            Similarity score between 0.0 and 1.0
+        """
+        if self.fuzzy_method == "difflib":
+            return self._calculate_difflib_similarity(query, target)
+        else:  # trigram method
+            return self._calculate_trigram_similarity(query, target)
+
+    def _calculate_trigram_similarity(self, query: str, target: str) -> float:
+        """Calculate similarity using Jaccard similarity based on trigrams.
 
         Args:
             query: Search query string
@@ -139,6 +168,18 @@ class SearchEngine:
 
         return intersection / union if union > 0 else 0.0
 
+    def _calculate_difflib_similarity(self, query: str, target: str) -> float:
+        """Calculate similarity using difflib SequenceMatcher.
+
+        Args:
+            query: Search query string
+            target: Target string to compare against
+
+        Returns:
+            Similarity score between 0.0 and 1.0
+        """
+        return difflib.SequenceMatcher(None, query.lower(), target.lower()).ratio()
+
     def search_tracks(self, query: str) -> List[Dict[str, Any]]:
         """Search for tracks matching the given query.
 
@@ -148,11 +189,12 @@ class SearchEngine:
         Returns:
             List of search results with track information
         """
-        if len(query) < self.min_query_length:
+        # Normalize query first
+        query_normalized = query.lower().strip()
+
+        if len(query_normalized) < self.min_query_length:
             return []
 
-        # Normalize query
-        query_normalized = query.lower().strip()
         results = []
         seen_tracks = set()
 
@@ -209,7 +251,10 @@ class SearchEngine:
         return matches
 
     def _find_fuzzy_matches(self, query: str, exclude_tracks: Set[str]) -> List[Tuple[str, float]]:
-        """Find fuzzy string matches using trigram similarity.
+        """Find fuzzy string matches with prefiltering optimization.
+
+        Uses trigram prefiltering to reduce complexity from O(n*m) to O(k*m)
+        where k is prefilter_top_n.
 
         Args:
             query: Normalized search query
@@ -219,19 +264,23 @@ class SearchEngine:
             List of (track_id, score) tuples
         """
         matches = []
-        query_trigrams = self._generate_trigrams(query)
 
-        # Find candidate tracks using trigram intersection
-        candidates = set()
-        for trigram in query_trigrams:
-            if trigram in self._trigram_index:
-                candidates.update(self._trigram_index[trigram])
+        if self.fuzzy_method == "trigram":
+            # Use trigram index for prefiltering
+            candidates = self._get_trigram_candidates(query, exclude_tracks)
+        else:
+            # For difflib, use all tracks (no prefiltering available)
+            candidates = [
+                track_id for track_id in self.recommender.genre_tree.tracks.keys()
+                if track_id not in exclude_tracks
+            ]
+
+        # Apply prefiltering limit for performance
+        if len(candidates) > self.prefilter_top_n:
+            candidates = candidates[:self.prefilter_top_n]
 
         # Calculate similarity scores for candidates
         for track_id in candidates:
-            if track_id in exclude_tracks:
-                continue
-
             node = self.recommender.genre_tree.tracks.get(track_id)
             if not node:
                 continue
@@ -243,7 +292,7 @@ class SearchEngine:
             max_score = 0.0
             for target in [track_name.lower(), artist_name.lower()]:
                 if target:
-                    score = self._calculate_similarity(query, target)
+                    score = self._calculate_similarity_cached(query, target)
                     max_score = max(max_score, score)
 
             if max_score >= self.fuzzy_threshold:
@@ -252,6 +301,35 @@ class SearchEngine:
         # Sort by score descending
         matches.sort(key=lambda x: x[1], reverse=True)
         return matches
+
+    def _get_trigram_candidates(self, query: str, exclude_tracks: Set[str]) -> List[str]:
+        """Get candidate tracks using trigram intersection for prefiltering.
+
+        Args:
+            query: Normalized search query
+            exclude_tracks: Track IDs to exclude from results
+
+        Returns:
+            List of candidate track IDs sorted by trigram overlap
+        """
+        query_trigrams = self._generate_trigrams(query)
+        candidate_scores = defaultdict(int)
+
+        # Count trigram overlaps for each track
+        for trigram in query_trigrams:
+            if trigram in self._trigram_index:
+                for track_id in self._trigram_index[trigram]:
+                    if track_id not in exclude_tracks:
+                        candidate_scores[track_id] += 1
+
+        # Sort candidates by trigram overlap count (descending)
+        sorted_candidates = sorted(
+            candidate_scores.items(),
+            key=lambda x: x[1],
+            reverse=True
+        )
+
+        return [track_id for track_id, _ in sorted_candidates]
 
     def _create_result(self, track_id: str, score: float, match_type: str) -> Optional[Dict[str, Any]]:
         """Create a search result dictionary for a track.
