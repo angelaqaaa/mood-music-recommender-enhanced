@@ -276,9 +276,13 @@ class MusicRecommender:
                 if genre_path:
                     recommendations = self.recommend_by_genre(genre_path[-1], limit)
                     # Filter out the original track
-                    recommendations = [r for r in recommendations if r["track_id"] != track_id]
+                    recommendations = [
+                        r for r in recommendations if r["track_id"] != track_id
+                    ]
                     if recommendations:
-                        print(f"No direct similarities found for {track_id}, using genre fallback")
+                        print(
+                            f"No direct similarities found for {track_id}, using genre fallback"
+                        )
                         return recommendations[:limit]
 
                 # Fallback 2: Recommend tracks with same mood
@@ -286,9 +290,13 @@ class MusicRecommender:
                 if mood_tags:
                     recommendations = self.recommend_by_mood(mood_tags[0], limit)
                     # Filter out the original track
-                    recommendations = [r for r in recommendations if r["track_id"] != track_id]
+                    recommendations = [
+                        r for r in recommendations if r["track_id"] != track_id
+                    ]
                     if recommendations:
-                        print(f"No similarities found for {track_id}, using mood fallback")
+                        print(
+                            f"No similarities found for {track_id}, using mood fallback"
+                        )
                         return recommendations[:limit]
 
         # Convert to dictionaries with relevant information

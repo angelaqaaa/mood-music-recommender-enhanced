@@ -261,10 +261,16 @@ class MusicRecommenderDashApp:
                                                                 "color": "#6c757d",
                                                             },
                                                             children=[
-                                                                html.P("📍 Direct Search: Finds tracks exactly matching your genre/mood selections"),
-                                                                html.P("🌐 BFS (Breadth-First): Explores related genres level by level, finding diverse recommendations"),
-                                                                html.P("🎯 DFS (Depth-First): Digs deep into specific genre paths, finding focused recommendations"),
-                                                            ]
+                                                                html.P(
+                                                                    "📍 Direct Search: Finds tracks exactly matching your genre/mood selections"
+                                                                ),
+                                                                html.P(
+                                                                    "🌐 BFS (Breadth-First): Explores related genres level by level, finding diverse recommendations"
+                                                                ),
+                                                                html.P(
+                                                                    "🎯 DFS (Depth-First): Digs deep into specific genre paths, finding focused recommendations"
+                                                                ),
+                                                            ],
                                                         ),
                                                         # Number of results to show - set default to 50
                                                         html.Label(
@@ -348,7 +354,7 @@ class MusicRecommenderDashApp:
                                                                         "marginBottom": "10px",
                                                                         "fontStyle": "italic",
                                                                     },
-                                                                )
+                                                                ),
                                                             ]
                                                         ),
                                                         dcc.Dropdown(
@@ -502,24 +508,26 @@ class MusicRecommenderDashApp:
                                                         "marginBottom": "5px",
                                                     },
                                                 ),
-                                                html.Div([
-                                                    html.P(
-                                                        "Bubble size represents popularity/similarity and color represents genre.",
-                                                        style={
-                                                            "textAlign": "center",
-                                                            "marginBottom": "5px",
-                                                        },
-                                                    ),
-                                                    html.P(
-                                                        "💡 This chart shows the relationship between Valence (happiness) and Energy. Hover over bubbles for track details.",
-                                                        style={
-                                                            "textAlign": "center",
-                                                            "fontSize": "12px",
-                                                            "color": "#6c757d",
-                                                            "marginBottom": "10px",
-                                                        },
-                                                    ),
-                                                ]),
+                                                html.Div(
+                                                    [
+                                                        html.P(
+                                                            "Bubble size represents popularity/similarity and color represents genre.",
+                                                            style={
+                                                                "textAlign": "center",
+                                                                "marginBottom": "5px",
+                                                            },
+                                                        ),
+                                                        html.P(
+                                                            "💡 This chart shows the relationship between Valence (happiness) and Energy. Hover over bubbles for track details.",
+                                                            style={
+                                                                "textAlign": "center",
+                                                                "fontSize": "12px",
+                                                                "color": "#6c757d",
+                                                                "marginBottom": "10px",
+                                                            },
+                                                        ),
+                                                    ]
+                                                ),
                                                 dcc.Graph(
                                                     id="track-features-bubble-chart",
                                                     style={"height": "600px"},
@@ -532,24 +540,26 @@ class MusicRecommenderDashApp:
                                 dcc.Tab(
                                     label="Similarity Network",
                                     children=[
-                                        html.Div([
-                                            html.P(
-                                                "This visualization shows connections between similar tracks.",
-                                                style={
-                                                    "textAlign": "center",
-                                                    "marginBottom": "5px",
-                                                },
-                                            ),
-                                            html.P(
-                                                "🔗 Each node is a track, connected lines show similarity. Larger nodes = more connections. Click nodes to explore.",
-                                                style={
-                                                    "textAlign": "center",
-                                                    "fontSize": "12px",
-                                                    "color": "#6c757d",
-                                                    "marginBottom": "10px",
-                                                },
-                                            ),
-                                        ]),
+                                        html.Div(
+                                            [
+                                                html.P(
+                                                    "This visualization shows connections between similar tracks.",
+                                                    style={
+                                                        "textAlign": "center",
+                                                        "marginBottom": "5px",
+                                                    },
+                                                ),
+                                                html.P(
+                                                    "🔗 Each node is a track, connected lines show similarity. Larger nodes = more connections. Click nodes to explore.",
+                                                    style={
+                                                        "textAlign": "center",
+                                                        "fontSize": "12px",
+                                                        "color": "#6c757d",
+                                                        "marginBottom": "10px",
+                                                    },
+                                                ),
+                                            ]
+                                        ),
                                         dcc.Graph(
                                             id="similarity-graph",
                                             style={"height": "700px"},
@@ -1557,16 +1567,22 @@ class MusicRecommenderDashApp:
                 "timestamp": str(datetime.now()),
                 "checks": {
                     "database": "ok",
-                    "search_engine": "ok" if hasattr(self, 'search_engine') else "not_initialized",
-                    "recommender": "ok" if hasattr(self, 'music_recommender') else "not_initialized"
-                }
+                    "search_engine": (
+                        "ok" if hasattr(self, "search_engine") else "not_initialized"
+                    ),
+                    "recommender": (
+                        "ok"
+                        if hasattr(self, "music_recommender")
+                        else "not_initialized"
+                    ),
+                },
             }
 
             return Response(
                 json.dumps(health_status, indent=2),
                 mimetype="application/json",
                 headers={"Access-Control-Allow-Origin": "*"},
-                status=200
+                status=200,
             )
 
     def run_server(self, debug=False, port=8040, host="127.0.0.1"):
