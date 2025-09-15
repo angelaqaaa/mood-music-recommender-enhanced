@@ -1,10 +1,10 @@
 # 🎵 Mood Music Recommender - Enhanced Edition
 
 [![CI/CD Pipeline](https://github.com/angelaqaaa/mood-music-recommender-enhanced/workflows/CI/badge.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced/actions)
-[![Code Coverage](https://codecov.io/gh/angelaqaaa/mood-music-recommender-enhanced/branch/main/graph/badge.svg)](https://codecov.io/gh/angelaqaaa/mood-music-recommender-enhanced)
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-22_files-brightgreen.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced)
+[![Features](https://img.shields.io/badge/features-user_interactive-purple.svg)](./FEATURES.md)
 
 > **An enterprise-grade music recommendation system that discovers songs based on mood, genre hierarchies, and audio feature similarity. Built with Python, featuring interactive visualizations, modern web interface, and production-ready deployment.**
 

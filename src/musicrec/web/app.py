@@ -21,6 +21,7 @@ from dash import Input, Output, State, callback_context, dcc, html
 from src.musicrec.web.components.explanations import generate_explanation
 from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
 from src.musicrec.web.components.styles import RESPONSIVE_STYLES
+from src.musicrec.web.components.user_features import UserFeaturesManager
 
 from ..metrics.collector import metrics_collector
 from .search.engine import SearchEngine
@@ -91,6 +92,9 @@ class MusicRecommenderDashApp:
 
         # Set the app layout
         self.app.layout = self._create_layout()
+
+        # Initialize user features manager
+        self.user_features = UserFeaturesManager(self.app, self.recommender)
 
         # Register callbacks
         self._register_callbacks()
@@ -534,6 +538,13 @@ class MusicRecommenderDashApp:
                     id="main-content",
                     role="main",
                 ),
+
+                # User Features Section
+                self.user_features.create_favorites_section(),
+
+                # Discovery Dashboard
+                self.user_features.create_discovery_dashboard(),
+
                 # Visualization section
                 html.Div(
                     [
@@ -623,6 +634,8 @@ class MusicRecommenderDashApp:
                 dcc.Store(id="current-recommendations-store"),
                 # Hidden div for page load trigger
                 html.Div(id="page-load-trigger", style={"display": "none"}),
+                # Theme state holder
+                html.Div(id="app-theme", children=[], style={"display": "none"}),
             ],
             className="main-container",
         )
@@ -977,9 +990,26 @@ class MusicRecommenderDashApp:
                                 "aria-label": f"Why this track was recommended: {explanation}"
                             },
                         ),
-                        # Action button
+                        # Action buttons
                         html.Div(
                             [
+                                html.Button(
+                                    "❤️",
+                                    id={
+                                        "type": "favorite-btn",
+                                        "index": i,
+                                    },
+                                    className="favorite-btn",
+                                    title="Add to favorites",
+                                    **{
+                                        "aria-label": f"Add {track_display} to favorites"
+                                    },
+                                ),
+                                html.Button(
+                                    "📋 Add to Playlist",
+                                    className="add-to-playlist-btn",
+                                    title="Add to playlist",
+                                ),
                                 html.Button(
                                     "Find Similar",
                                     id={
@@ -1002,7 +1032,7 @@ class MusicRecommenderDashApp:
                                     },
                                 )
                             ],
-                            style={"textAlign": "right", "marginTop": "10px"},
+                            className="track-card-actions",
                         ),
                     ],
                     className="recommendation-item",
@@ -1577,6 +1607,32 @@ class MusicRecommenderDashApp:
                 return 1  # Trigger one click
 
             return dash.no_update
+
+        # Dark mode toggle callback
+        @self.app.callback(
+            Output("app-theme", "children"),
+            [Input("theme-toggle", "n_clicks")],
+            [State("app-theme", "children")],
+            prevent_initial_call=True
+        )
+        def toggle_dark_mode(n_clicks, current_theme):
+            """Toggle between dark and light mode."""
+            if n_clicks is None:
+                return dash.no_update
+
+            # Toggle theme
+            if current_theme and "dark" in str(current_theme):
+                # Switch to light mode
+                return html.Script("""
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                """)
+            else:
+                # Switch to dark mode
+                return html.Script("""
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                """)
 
     def _add_metrics_endpoint(self):
         """Add metrics and health endpoints to the Flask server."""
