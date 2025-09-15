@@ -5,11 +5,11 @@ Tests performance characteristics and validates <200ms response time
 target on large datasets.
 """
 
+import os
+import sys
+import time
 import unittest
 from unittest.mock import Mock
-import time
-import sys
-import os
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))

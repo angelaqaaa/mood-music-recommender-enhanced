@@ -4,9 +4,10 @@ This module tests the MusicNode, GenreTree, and SimilaritySongGraph classes
 with both happy path scenarios and edge cases.
 """
 
-import pytest
 import pandas as pd
-from src.musicrec.models.structures import MusicNode, GenreTree, SimilaritySongGraph
+import pytest
+
+from src.musicrec.models.structures import GenreTree, MusicNode, SimilaritySongGraph
 
 
 class TestMusicNode:

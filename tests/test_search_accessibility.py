@@ -5,10 +5,10 @@ Tests ARIA attributes, keyboard navigation, and various edge cases
 to ensure robust and accessible search functionality.
 """
 
-import unittest
-from unittest.mock import Mock, patch, MagicMock
-import sys
 import os
+import sys
+import unittest
+from unittest.mock import MagicMock, Mock, patch
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -148,8 +148,8 @@ class TestSearchAccessibility(unittest.TestCase):
 
     def test_concurrent_search_safety(self):
         """Test thread safety for concurrent searches."""
-        import threading
         import queue
+        import threading
 
         search_engine = SearchEngine(self.mock_recommender, enable_fuzzy=True)
 

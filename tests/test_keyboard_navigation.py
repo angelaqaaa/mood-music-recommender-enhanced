@@ -1,11 +1,13 @@
 """Tests for keyboard navigation and focus management functionality."""
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+
 from src.musicrec.ui.keyboard_navigation import (
+    KEYBOARD_NAVIGATION_JS,
     get_keyboard_navigation_config,
     get_navigation_keys,
-    KEYBOARD_NAVIGATION_JS,
 )
 
 

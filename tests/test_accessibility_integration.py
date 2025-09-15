@@ -1,7 +1,9 @@
 """Integration tests for accessibility features and keyboard navigation."""
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
+
 from src.musicrec.ui.dash_app import MusicRecommenderDashApp
 
 

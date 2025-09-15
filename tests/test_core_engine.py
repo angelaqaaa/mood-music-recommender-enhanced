@@ -4,8 +4,9 @@ This module tests the MusicRecommender class with various recommendation
 algorithms and data retrieval methods.
 """
 
-import pytest
 import pandas as pd
+import pytest
+
 from src.musicrec.models.engine import MusicRecommender
 
 

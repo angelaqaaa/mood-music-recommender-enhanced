@@ -5,12 +5,12 @@ Tests the integration between Python search engine and JavaScript frontend,
 simulating debounced search behavior and frontend interactions.
 """
 
-import unittest
-from unittest.mock import Mock, patch, call
 import asyncio
-import time
-import sys
 import os
+import sys
+import time
+import unittest
+from unittest.mock import Mock, call, patch
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -190,8 +190,8 @@ class TestSearchIntegration(unittest.TestCase):
 
     def test_concurrent_search_simulation(self):
         """Test simulation of concurrent searches from multiple UI clients."""
-        import threading
         import queue
+        import threading
 
         results_queue = queue.Queue()
 

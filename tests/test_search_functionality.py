@@ -5,11 +5,11 @@ Tests core search features including exact matching, fuzzy matching,
 and basic performance characteristics.
 """
 
-import unittest
-from unittest.mock import Mock, MagicMock, patch
-import time
-import sys
 import os
+import sys
+import time
+import unittest
+from unittest.mock import MagicMock, Mock, patch
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))

@@ -1,7 +1,8 @@
 """Tests for create_sample_data function error handling and validation."""
 
-import pytest
 import pandas as pd
+import pytest
+
 from src.musicrec.main import create_sample_data
 
 

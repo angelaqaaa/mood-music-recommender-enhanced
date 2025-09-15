@@ -1,8 +1,9 @@
 """Integration tests for UI components and metrics integration."""
 
 from unittest.mock import Mock, patch
-from src.musicrec.ui.dash_app import MusicRecommenderDashApp
+
 from src.musicrec.metrics.collector import MetricsCollector
+from src.musicrec.ui.dash_app import MusicRecommenderDashApp
 
 
 class TestUIIntegration:

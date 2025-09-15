@@ -1,9 +1,10 @@
 """Tests for responsive UI features including accessibility and explanations."""
 
 from unittest.mock import Mock, patch
+
 from src.musicrec.ui.dash_app import MusicRecommenderDashApp
-from src.musicrec.ui.styles import RESPONSIVE_STYLES, CONTAINER_STYLES
 from src.musicrec.ui.explanations import generate_explanation, get_top_features
+from src.musicrec.ui.styles import CONTAINER_STYLES, RESPONSIVE_STYLES
 
 
 class TestResponsiveLayout:
