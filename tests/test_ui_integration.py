@@ -216,11 +216,15 @@ class TestErrorHandlingAndEdgeCases:
         """Test behavior during simulated network errors."""
         mock_recommender = Mock()
         mock_recommender.get_available_genres.side_effect = Exception("Network error")
+        # Mock the genre_tree.tracks attribute that SearchEngine needs
+        mock_recommender.genre_tree.tracks = {}
 
         try:
             MusicRecommenderDashApp(mock_recommender)
             assert False, "Should have raised an exception"
         except Exception as e:
+            # The exception should propagate from the constructor
+            # but might be wrapped, so check for the original error
             assert "Network error" in str(e)
 
     def test_accessibility_fallbacks(self):
