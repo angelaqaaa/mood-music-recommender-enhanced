@@ -29,7 +29,7 @@ jobs:
 
     - name: Run performance tests
       run: |
-        pytest tests/test_search_performance.py -v --tb=short
+        pytest tests/performance/test_search_performance.py -v --tb=short
 
     - name: Run basic performance timing
       run: |
