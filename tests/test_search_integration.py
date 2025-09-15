@@ -8,6 +8,7 @@ simulating debounced search behavior and frontend interactions.
 # Add src to path for imports
 import os
 import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import asyncio

@@ -30,8 +30,12 @@ except ImportError:
 
     # Add parent directory to path so we can import sibling modules
     sys.path.insert(0, str(Path(__file__).parent))
-    from config.settings import get_data_paths as _get_data_paths, get_retry_config as _get_retry_config, load_config as _load_config
-    from data.processor import build_dataset as _build_dataset, load_processed_data as _load_processed_data, save_processed_data as _save_processed_data
+    from config.settings import get_data_paths as _get_data_paths
+    from config.settings import get_retry_config as _get_retry_config
+    from config.settings import load_config as _load_config
+    from data.processor import build_dataset as _build_dataset
+    from data.processor import load_processed_data as _load_processed_data
+    from data.processor import save_processed_data as _save_processed_data
     from models.engine import MusicRecommender as _MusicRecommender
     from ui.dash_app import MusicRecommenderDashApp as _MusicRecommenderDashApp
     from utils.logging import setup_logging as _setup_logging
@@ -43,8 +47,8 @@ except ImportError:
     build_dataset = _build_dataset
     load_processed_data = _load_processed_data
     save_processed_data = _save_processed_data
-    MusicRecommender = _MusicRecommender
-    MusicRecommenderDashApp = _MusicRecommenderDashApp
+    MusicRecommender = _MusicRecommender  # type: ignore
+    MusicRecommenderDashApp = _MusicRecommenderDashApp  # type: ignore
     setup_logging = _setup_logging
 
 logger = logging.getLogger(__name__)

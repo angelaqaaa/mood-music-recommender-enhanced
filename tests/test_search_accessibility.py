@@ -8,6 +8,7 @@ to ensure robust and accessible search functionality.
 # Add src to path for imports
 import os
 import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import unittest

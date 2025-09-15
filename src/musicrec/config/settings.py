@@ -106,8 +106,12 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
 
             # Merge file config into defaults
             for section, values in file_config.items():
-                if section in config and isinstance(values, dict) and isinstance(config[section], dict):
-                    config[section].update(values)
+                if (
+                    section in config
+                    and isinstance(values, dict)
+                    and isinstance(config[section], dict)
+                ):
+                    config[section].update(values)  # type: ignore
                 else:
                     config[section] = values
 
