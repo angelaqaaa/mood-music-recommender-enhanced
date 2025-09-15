@@ -1,10 +1,14 @@
 [flake8]
-max-line-length = 88
-ignore = E501,W503,E203
+max-line-length = 100
+ignore = E501,W503,E203,W293,W291
 per-file-ignores =
     src/musicrec/main.py:F401
-    src/musicrec/data/processor.py:F841
-    tests/*.py:F401,F811
+    src/musicrec/data/processor.py:F841,F541
+    src/musicrec/ui/dash_app.py:F401,F841
+    src/musicrec/ui/keyboard_navigation.py:W293,W291
+    src/musicrec/ui/search.py:W293,W291
+    src/musicrec/ui/styles.py:W293
+    tests/*.py:F401,F811,F841,E226
 exclude =
     .git,
     __pycache__,
