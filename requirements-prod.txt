@@ -1,0 +1,18 @@
+# Core dependencies (production versions)
+pandas>=1.5.0,<3.0.0
+numpy>=1.21.0,<3.0.0
+plotly>=5.0.0,<6.0.0
+dash>=2.14.0,<3.0.0
+networkx>=2.8.8,<4.0.0
+scikit-learn>=1.1.0,<2.0.0
+
+# Production server
+gunicorn>=20.1.0,<22.0.0
+whitenoise>=6.0.0,<7.0.0
+
+# Performance & caching
+redis>=4.0.0,<5.0.0
+psutil>=5.8.0,<6.0.0
+
+# Security & monitoring
+cryptography>=3.4.8

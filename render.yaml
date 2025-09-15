@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: musicrec-enhanced
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: MUSICREC_ENV
+        value: production
+      - key: MUSICREC_DEBUG
+        value: false
+      - key: MUSICREC_LOG_LEVEL
+        value: WARNING
+      - key: PORT
+        value: 8040
+    healthCheckPath: /health
