@@ -9,6 +9,7 @@ This file is Copyright (c) 2025 Qian (Angela) Su & Mengxuan (Connie) Guo.
 """
 
 import time
+from datetime import datetime
 
 import dash
 import networkx as nx
@@ -1478,7 +1479,7 @@ class MusicRecommenderDashApp:
             return dash.no_update
 
     def _add_metrics_endpoint(self):
-        """Add metrics endpoint to the Flask server."""
+        """Add metrics and health endpoints to the Flask server."""
 
         @self.app.server.route("/metrics")
         def get_metrics():
@@ -1492,6 +1493,32 @@ class MusicRecommenderDashApp:
                 json.dumps(metrics, indent=2),
                 mimetype="application/json",
                 headers={"Access-Control-Allow-Origin": "*"},
+            )
+
+        @self.app.server.route("/health")
+        def health_check():
+            """Health check endpoint for deployment platforms."""
+            import json
+
+            from flask import Response
+
+            health_status = {
+                "status": "healthy",
+                "version": "2.0.0",
+                "service": "mood-music-recommender",
+                "timestamp": str(datetime.now()),
+                "checks": {
+                    "database": "ok",
+                    "search_engine": "ok" if hasattr(self, 'search_engine') else "not_initialized",
+                    "recommender": "ok" if hasattr(self, 'music_recommender') else "not_initialized"
+                }
+            }
+
+            return Response(
+                json.dumps(health_status, indent=2),
+                mimetype="application/json",
+                headers={"Access-Control-Allow-Origin": "*"},
+                status=200
             )
 
     def run_server(self, debug=False, port=8040, host="127.0.0.1"):

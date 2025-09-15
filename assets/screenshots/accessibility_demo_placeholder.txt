@@ -1,0 +1,14 @@
+
+    This is a placeholder for application screenshots.
+
+    To generate real screenshots:
+    1. Ensure the application is running (python src/musicrec/main.py --sample)
+    2. Use a screenshot tool or browser automation
+    3. Replace these placeholder files with actual screenshots
+
+    Recommended screenshots:
+    - Main interface with search results
+    - Mobile responsive view
+    - Accessibility features demonstration
+    - Search functionality in action
+    

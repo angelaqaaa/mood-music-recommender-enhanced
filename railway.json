@@ -1,0 +1,22 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "numReplicas": 1,
+    "sleepApplication": false,
+    "restartPolicyType": "ON_FAILURE"
+  },
+  "environments": {
+    "production": {
+      "variables": {
+        "MUSICREC_ENV": "production",
+        "MUSICREC_DEBUG": "false",
+        "MUSICREC_LOG_LEVEL": "WARNING",
+        "PORT": "8040"
+      }
+    }
+  }
+}
