@@ -2,48 +2,42 @@
 
 [![CI/CD Pipeline](https://github.com/angelaqaaa/mood-music-recommender-enhanced/workflows/CI/badge.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced/actions)
 [![Code Coverage](https://codecov.io/gh/angelaqaaa/mood-music-recommender-enhanced/branch/main/graph/badge.svg)](https://codecov.io/gh/angelaqaaa/mood-music-recommender-enhanced)
-[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)](https://python.org)
+[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Live Demo](https://img.shields.io/badge/demo-coming_soon-orange)](https://github.com/angelaqaaa/mood-music-recommender-enhanced)
-[![Tests](https://img.shields.io/badge/tests-196_passing-brightgreen.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced)
+[![Tests](https://img.shields.io/badge/tests-22_files-brightgreen.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced)
 
-> **An enterprise-grade music recommendation system that discovers songs based on mood, genre hierarchies, and audio feature similarity. Built with Python, featuring interactive visualizations, WCAG 2.1 AA accessibility compliance, and a modern web interface.**
-
-[**🚀 Live Demo**](https://mood-music-recommender-enhanced.onrender.com)) 
-
-![Main Interface](assets/screenshots/main_interface.png)
+> **An enterprise-grade music recommendation system that discovers songs based on mood, genre hierarchies, and audio feature similarity. Built with Python, featuring interactive visualizations, modern web interface, and production-ready deployment.**
 
 ## ✨ **Key Features**
 
-### 🔍 **Enterprise Search Engine**
-- **Advanced fuzzy matching** with trigram indexing for O(k*m) performance
-- **Real-time search suggestions** with debounced input handling
-- **Multi-algorithm support** (trigram + difflib) with configurable thresholds
-- **LRU caching** for sub-100ms response times
-
-### ♿ **Accessibility Excellence**
-- **WCAG 2.1 AA compliant** with full keyboard navigation
-- **Screen reader support** with proper ARIA attributes and announcements
-- **Reduced motion** and **high contrast** mode support
-- **Responsive design** optimized for mobile and desktop
-
 ### 🎯 **Intelligent Recommendations**
-- **Genre hierarchy traversal** using graph algorithms (BFS/DFS) with user-friendly explanations
-- **Enhanced similarity matching** with lowered thresholds and improved audio feature weighting
-- **Smart fallback system** ensuring every track gets recommendations via genre/mood matching
-- **Mood-based filtering** with explanation generation and neutral similarity handling
-- **Interactive visualizations** with helpful tooltips and guidance
+- **Genre hierarchy traversal** using graph algorithms (BFS/DFS/Direct search)
+- **Enhanced similarity matching** with audio feature analysis and mood-based filtering
+- **Smart fallback system** ensuring comprehensive recommendations
+- **Interactive visualizations** with network graphs and bubble charts
 
-### 🏗️ **Professional Architecture**
+### 🔍 **Advanced Search Engine**
+- **Fuzzy matching** with trigram indexing for fast performance
+- **Real-time search suggestions** with debounced input handling
+- **Multi-algorithm support** with configurable thresholds
+- **LRU caching** for optimized response times
+
+### 🎨 **Modern Web Interface**
+- **Dark/Light mode** with user preference persistence
+- **Responsive design** optimized for desktop and mobile
+- **Interactive visualizations** with Plotly and NetworkX
+- **Professional UI** with gradient styling and animations
+
+### 🏗️ **Production-Ready Architecture**
 - **Modular design** with clean separation of concerns
 - **Type-safe implementation** with comprehensive type hints
-- **196 comprehensive tests** (100% passing) across 18 test files
-- **5 CI/CD workflows** with automated quality gates
+- **Comprehensive testing** across 22 test files
+- **CI/CD automation** with 5 GitHub Actions workflows
 
 ## 🚀 **Quick Start**
 
 ### Prerequisites
-- Python 3.9+
+- Python 3.11+
 - Git
 
 ### Installation
@@ -61,26 +55,11 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 pip install -r requirements-dev.txt  # For development
 
-# Run the application
-python src/musicrec/main.py --sample
+# Run the application with sample data
+python -m src.musicrec.main --sample
 ```
 
 Visit `http://localhost:8040` to explore the application!
-
-## 🆕 **Recent Improvements (v2.1)**
-
-### **Enhanced User Experience**
-- **Intuitive explanations** for BFS, DFS, and Direct search methods
-- **Helpful tooltips** for visualization features (bubble chart, similarity network)
-- **Clear guidance** for search by track functionality
-- **Professional styling** with consistent visual hierarchy
-
-### **Improved Recommendation Algorithm**
-- **Lowered similarity threshold** from 0.15 to 0.1 for more inclusive matching
-- **Optimized feature weighting** (60% audio features, 40% mood) for better similarity
-- **Enhanced mood handling** with neutral similarity for tracks without mood tags
-- **Increased processing capacity** from 500 to 1000 tracks for better coverage
-- **Smart fallback system** ensuring zero "No recommendations found" cases
 
 ### Docker Deployment
 
@@ -92,31 +71,68 @@ docker build -t musicrec-enhanced .
 docker run -p 8040:8040 musicrec-enhanced
 ```
 
-## 📊 **Technical Highlights**
+## 🎬 **Usage Examples**
 
-| Feature | Implementation | Status |
-|---------|---------------|---------|
-| **Search Engine** | Trigram indexing + LRU caching | ✅ Enterprise-grade |
-| **Test Coverage** | 196 tests across 18 files | ✅ 100% passing |
-| **Code Quality** | Black, isort, flake8, mypy | ✅ All passing |
-| **Accessibility** | WCAG 2.1 AA compliance | ✅ Certified |
-| **CI/CD** | 5 comprehensive workflows | ✅ Automated |
-| **Performance** | Sub-100ms search responses | ✅ Optimized |
+### Basic Usage
+```bash
+# Run with sample data (recommended for first time)
+python -m src.musicrec.main --sample
 
-## 🎨 **Screenshots**
+# Run with real data files (if available)
+python -m src.musicrec.main
 
-### Main Interface
-![Main Interface](assets/screenshots/main_interface.png)
+# Run on custom port
+python -m src.musicrec.main --port 8050
 
-### Search & Recommendations
-![Search Results](assets/screenshots/search_results.png)
+# Save processed data
+python -m src.musicrec.main --save processed_data.pkl
+```
 
-### Mobile View
-![Mobile Interface](assets/screenshots/mobile_view.png)
+### Development Mode
+```bash
+# Run in demo mode (command line interface)
+python -m src.musicrec.main --demo --sample
+```
 
-## 🎬 **Demo**
+## 📊 **Technical Architecture**
 
-![Demo GIF](assets/demo/demo_interaction.gif)
+```
+src/musicrec/
+├── config/           # Configuration management
+├── core/            # Recommendation algorithms and data structures
+├── data/            # Data processing and loading utilities
+├── web/             # Web interface and components
+│   ├── components/  # UI components and styles
+│   ├── search/      # Advanced search engine
+│   └── app.py       # Main Dash application
+├── utils/           # Utilities and logging
+├── metrics/         # Performance monitoring
+└── main.py          # Application entry point
+```
+
+### Core Components
+
+- **`core/engine.py`**: Main recommendation engine with genre hierarchy and similarity algorithms
+- **`core/structures.py`**: Data structures for genre trees and similarity graphs
+- **`web/app.py`**: Interactive Dash web application with modern UI
+- **`web/search/engine.py`**: Advanced fuzzy search with trigram indexing
+- **`config/settings.py`**: Configuration management with environment overrides
+- **`data/processor.py`**: Data loading and processing pipeline
+
+## 📈 **Performance & Quality**
+
+### Technical Metrics
+- **Dataset Capacity**: 55,446+ tracks with full metadata and audio features
+- **Search Performance**: Sub-100ms response times with LRU caching
+- **Startup Time**: < 5 seconds (sample), optimized for production deployment
+- **Memory Usage**: ~200MB (sample), ~800MB (full dataset)
+
+### Code Quality
+- **Testing**: 22 test files covering core functionality, search, and integration
+- **Code Formatting**: Black, isort for consistent styling
+- **Type Checking**: MyPy for type safety
+- **Linting**: Flake8 for code quality
+- **CI/CD**: 5 automated workflows for quality gates
 
 ## 🧪 **Development & Testing**
 
@@ -125,15 +141,16 @@ docker run -p 8040:8040 musicrec-enhanced
 # Run all tests
 pytest
 
-# Run with coverage
+# Run with coverage report
 pytest --cov=src/musicrec --cov-report=html
 
 # Run specific test categories
-pytest tests/test_search_*  # Search functionality
-pytest tests/test_accessibility_*  # Accessibility tests
+pytest tests/test_*core*        # Core functionality
+pytest tests/performance/       # Performance tests
+pytest tests/test_*integration* # Integration tests
 ```
 
-### Code Quality
+### Code Quality Tools
 ```bash
 # Format code
 black src/ tests/
@@ -148,72 +165,56 @@ flake8 src/ tests/
 mypy src/
 ```
 
-### Development Server
-```bash
-# Run with hot reload (development mode)
-python src/musicrec/main.py --sample --debug
+## 🔧 **Configuration**
 
-# Run with real data files
-python src/musicrec/main.py
-```
+The application supports various configuration options via environment variables or the `config/settings.json` file:
 
-## 🏗️ **Architecture**
-
-```
-src/musicrec/
-├── config/           # Configuration management
-├── data/            # Data processing and loading
-├── models/          # Core recommendation algorithms
-├── ui/              # Web interface and interactions
-│   ├── dash_app.py  # Main Dash application
-│   ├── search.py    # Advanced search engine
-│   └── styles.py    # Responsive CSS styles
-├── utils/           # Utilities and logging
-└── metrics/         # Performance monitoring
-```
-
-## 📈 **Performance Benchmarks**
-
-- **Dataset Size**: 55,446 tracks with full metadata and audio features
-- **Search Response Time**: < 100ms (average)
-- **Similarity Connections**: Up to 1000 tracks processed for comprehensive matching
-- **Application Startup**: < 5 seconds (sample), ~60 seconds (full dataset)
-- **Memory Usage**: < 200MB (sample), ~800MB (full dataset)
-- **Test Execution**: 196 tests in ~6 seconds
+- **MUSICREC_ENV**: Set to "production" for optimized deployment
+- **PORT**: Custom port (default: 8040)
+- **LOG_LEVEL**: Logging verbosity (INFO, DEBUG, etc.)
 
 ## 🤝 **Contributing**
 
-This project follows enterprise development practices:
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
+### Quick Contribution Steps
 1. **Fork** the repository
 2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Run tests** (`pytest`) and ensure they pass
-4. **Check code quality** (`black`, `isort`, `flake8`, `mypy`)
-5. **Commit** with conventional commit format
-6. **Push** and create a Pull Request
+3. **Run tests** and ensure code quality (`pytest`, `black`, `flake8`, `mypy`)
+4. **Commit** with conventional commit format
+5. **Push** and create a Pull Request
 
 All contributions are automatically tested via GitHub Actions CI/CD.
 
-## 📜 **Attribution & License**
+## 📜 **Project History & Attribution**
 
-### **Development History**
-- **Original Course Project (v1.0)**: CSC111 Winter 2025 at University of Toronto, developed collaboratively with Mengxuan (Connie) Guo
-- **Enhanced Edition (v2.0+)**: All enhancements designed and implemented solely by Qian "Angela" Su after course completion
+### Development History
+- **Original Course Project (v1.0)**: CSC111 Winter 2025 at University of Toronto
+  - Collaborative development with Mengxuan (Connie) Guo
+  - Basic recommendation algorithms and data structures
 
-### **License**
+- **Enhanced Edition (v2.0+)**: Post-course enhancements by Qian "Angela" Su
+  - Modern web interface with dark mode and responsive design
+  - Advanced search engine with fuzzy matching and caching
+  - Production deployment optimizations and CI/CD automation
+  - Comprehensive testing suite and code quality tools
+
+### Key Enhancements Added
+All features beyond the original course scope are documented in [FEATURES.md](FEATURES.md), including:
+- 🎨 Modern web interface with dark/light mode toggle
+- 🔍 Enterprise-grade search engine with trigram indexing
+- ⚡ Production deployment optimizations
+- 🧪 Comprehensive testing infrastructure (22 test files)
+- 🔄 CI/CD automation with 5 GitHub Actions workflows
+- 📊 Performance monitoring and metrics collection
+- 🎯 Enhanced recommendation algorithms with smart fallbacks
+
+## 📄 **License**
+
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-### **Enhancements Added**
-All features beyond the original course project scope are documented in [ENHANCEMENTS.md](ENHANCEMENTS.md), including:
-- Enterprise search engine with trigram indexing and optimization
-- WCAG 2.1 AA accessibility implementation with keyboard navigation
-- Comprehensive test suite (196 tests) and CI/CD automation (5 workflows)
-- Enhanced similarity algorithm with smart fallback systems
-- Performance monitoring and metrics collection
-- Interactive UI explanations and user guidance
-- Client-side JavaScript integration and responsive design
 
 ## 🔗 **Links**
 
-- [**Live Demo**](https://mood-music-recommender-enhanced.onrender.com)
-- [**Changelog**](./CHANGELOG.md)
+- [**Features Documentation**](./FEATURES.md) - Detailed feature overview
+- [**Contributing Guide**](./CONTRIBUTING.md) - Development guidelines
+- [**Changelog**](CHANGELOG.md) - Version history and updates
