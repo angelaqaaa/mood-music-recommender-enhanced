@@ -16,6 +16,10 @@ COPY src/ ./src/
 COPY *.md ./
 COPY pyproject.toml ./
 
+# Create data directory and copy real data files for production use
+RUN mkdir -p data
+COPY *.csv *.tsv ./data/
+
 # Install Python dependencies globally
 RUN pip install --no-cache-dir -r requirements-prod.txt
 
@@ -30,5 +34,5 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 # Expose port (will be set by platform)
 EXPOSE 8040
 
-# Command to run the application as a module
-CMD ["python", "-m", "src.musicrec.main", "--port", "8040", "--sample"]
+# Command to run the application as a module (try real data first, fallback to sample)
+CMD ["python", "-m", "src.musicrec.main", "--port", "8040"]
