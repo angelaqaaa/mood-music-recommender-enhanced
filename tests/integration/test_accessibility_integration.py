@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.musicrec.web.dash_app import MusicRecommenderDashApp
+from src.musicrec.web.app import MusicRecommenderDashApp
 
 
 class TestAccessibilityIntegration:
@@ -83,7 +83,9 @@ class TestAccessibilityIntegration:
 
     def test_focus_management_after_render(self):
         """Test that focus moves to first recommendation after render."""
-        from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+        from src.musicrec.web.components.keyboard_navigation import (
+            KEYBOARD_NAVIGATION_JS,
+        )
 
         # JavaScript should contain logic to focus first recommendation
         focus_logic_present = (
@@ -127,7 +129,9 @@ class TestReducedMotionAndContrast:
 
     def test_reduced_motion_css_present(self):
         """Test that reduced motion CSS rules are present."""
-        from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+        from src.musicrec.web.components.keyboard_navigation import (
+            KEYBOARD_NAVIGATION_JS,
+        )
 
         # Should contain media query for reduced motion
         assert "@media (prefers-reduced-motion: reduce)" in KEYBOARD_NAVIGATION_JS
@@ -135,7 +139,9 @@ class TestReducedMotionAndContrast:
 
     def test_high_contrast_css_present(self):
         """Test that high contrast CSS rules are present."""
-        from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+        from src.musicrec.web.components.keyboard_navigation import (
+            KEYBOARD_NAVIGATION_JS,
+        )
 
         # Should contain media query for high contrast
         assert "@media (prefers-contrast: high)" in KEYBOARD_NAVIGATION_JS
@@ -144,7 +150,9 @@ class TestReducedMotionAndContrast:
 
     def test_focus_indicators_styling(self):
         """Test that focus indicators have proper styling."""
-        from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+        from src.musicrec.web.components.keyboard_navigation import (
+            KEYBOARD_NAVIGATION_JS,
+        )
 
         # Should have focus styling rules
         focus_styles = [
@@ -160,7 +168,9 @@ class TestReducedMotionAndContrast:
 
     def test_smooth_scrolling_with_reduced_motion(self):
         """Test that smooth scrolling respects reduced motion preference."""
-        from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+        from src.musicrec.web.components.keyboard_navigation import (
+            KEYBOARD_NAVIGATION_JS,
+        )
 
         # Should check for reduced motion before smooth scrolling
         assert "prefers-reduced-motion" in KEYBOARD_NAVIGATION_JS
@@ -173,7 +183,9 @@ class TestScreenReaderSupport:
 
     def test_aria_live_announcements(self):
         """Test that ARIA live announcements are implemented."""
-        from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+        from src.musicrec.web.components.keyboard_navigation import (
+            KEYBOARD_NAVIGATION_JS,
+        )
 
         # Should create live announcement elements
         assert "aria-live" in KEYBOARD_NAVIGATION_JS
@@ -182,7 +194,9 @@ class TestScreenReaderSupport:
 
     def test_aria_selected_management(self):
         """Test that aria-selected is properly managed."""
-        from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+        from src.musicrec.web.components.keyboard_navigation import (
+            KEYBOARD_NAVIGATION_JS,
+        )
 
         # Should update aria-selected when focus changes
         assert "setAttribute('aria-selected'" in KEYBOARD_NAVIGATION_JS
@@ -191,7 +205,9 @@ class TestScreenReaderSupport:
 
     def test_offscreen_announcement_positioning(self):
         """Test that announcements are positioned off-screen."""
-        from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+        from src.musicrec.web.components.keyboard_navigation import (
+            KEYBOARD_NAVIGATION_JS,
+        )
 
         # Should position announcements off-screen for screen readers only
         assert "absolute" in KEYBOARD_NAVIGATION_JS
@@ -199,7 +215,9 @@ class TestScreenReaderSupport:
 
     def test_proper_role_hierarchy(self):
         """Test that proper ARIA role hierarchy is maintained."""
-        from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+        from src.musicrec.web.components.keyboard_navigation import (
+            KEYBOARD_NAVIGATION_JS,
+        )
 
         # Should have role management for listbox and options
         assert "role" in KEYBOARD_NAVIGATION_JS
@@ -211,7 +229,9 @@ class TestKeyboardInteractionFlow:
 
     def test_navigation_flow_logic(self):
         """Test the complete navigation flow logic."""
-        from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+        from src.musicrec.web.components.keyboard_navigation import (
+            KEYBOARD_NAVIGATION_JS,
+        )
 
         # Should handle complete navigation cycle
         navigation_components = [
@@ -226,7 +246,9 @@ class TestKeyboardInteractionFlow:
 
     def test_wrap_around_logic(self):
         """Test wrap-around navigation logic."""
-        from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+        from src.musicrec.web.components.keyboard_navigation import (
+            KEYBOARD_NAVIGATION_JS,
+        )
 
         # Should use modulo for wrap-around
         assert "%" in KEYBOARD_NAVIGATION_JS
@@ -234,7 +256,9 @@ class TestKeyboardInteractionFlow:
 
     def test_button_activation_flow(self):
         """Test button activation flow."""
-        from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+        from src.musicrec.web.components.keyboard_navigation import (
+            KEYBOARD_NAVIGATION_JS,
+        )
 
         # Should find and click the track button
         assert "track-button" in KEYBOARD_NAVIGATION_JS
@@ -243,7 +267,9 @@ class TestKeyboardInteractionFlow:
 
     def test_escape_key_behavior(self):
         """Test escape key behavior."""
-        from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+        from src.musicrec.web.components.keyboard_navigation import (
+            KEYBOARD_NAVIGATION_JS,
+        )
 
         # Should move focus back to search controls
         assert "Escape" in KEYBOARD_NAVIGATION_JS
@@ -251,7 +277,9 @@ class TestKeyboardInteractionFlow:
 
     def test_mutation_observer_integration(self):
         """Test MutationObserver integration for dynamic content."""
-        from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+        from src.musicrec.web.components.keyboard_navigation import (
+            KEYBOARD_NAVIGATION_JS,
+        )
 
         # Should observe changes to recommendations container
         observer_components = [

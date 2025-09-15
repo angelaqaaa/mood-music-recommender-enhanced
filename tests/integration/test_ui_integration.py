@@ -3,7 +3,7 @@
 from unittest.mock import Mock, patch
 
 from src.musicrec.metrics.collector import MetricsCollector
-from src.musicrec.web.dash_app import MusicRecommenderDashApp
+from src.musicrec.web.app import MusicRecommenderDashApp
 
 
 class TestUIIntegration:
