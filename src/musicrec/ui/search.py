@@ -316,7 +316,7 @@ class SearchEngine:
             List of candidate track IDs sorted by trigram overlap
         """
         query_trigrams = self._generate_trigrams(query)
-        candidate_scores = defaultdict(int)
+        candidate_scores: Dict[str, int] = defaultdict(int)
 
         # Count trigram overlaps for each track
         for trigram in query_trigrams:

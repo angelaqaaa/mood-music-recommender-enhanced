@@ -106,7 +106,7 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
 
             # Merge file config into defaults
             for section, values in file_config.items():
-                if section in config and isinstance(values, dict):
+                if section in config and isinstance(values, dict) and isinstance(config[section], dict):
                     config[section].update(values)
                 else:
                     config[section] = values
@@ -134,11 +134,11 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
             "metadata_path",
             "processed_data_path",
         ]:
-            current_path = config["data"][key]
+            current_path = config["data"][key]  # type: ignore
             if not Path(current_path).is_absolute():
                 # Keep the original filename, just change the directory
                 filename = Path(current_path).name
-                config["data"][key] = str(base_dir / filename)
+                config["data"][key] = str(base_dir / filename)  # type: ignore
 
     return config
 

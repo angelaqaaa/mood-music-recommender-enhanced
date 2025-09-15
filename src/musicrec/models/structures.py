@@ -220,7 +220,7 @@ class GenreTree:
         Returns:
             List of track nodes
         """
-        results = []
+        results: List[MusicNode] = []
 
         def dfs(node: MusicNode) -> None:
             """Depth-first search helper to find genre nodes."""

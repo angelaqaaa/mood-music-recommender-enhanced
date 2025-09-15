@@ -30,11 +30,22 @@ except ImportError:
 
     # Add parent directory to path so we can import sibling modules
     sys.path.insert(0, str(Path(__file__).parent))
-    from config.settings import get_data_paths, get_retry_config, load_config
-    from data.processor import build_dataset, load_processed_data, save_processed_data
-    from models.engine import MusicRecommender
-    from ui.dash_app import MusicRecommenderDashApp
-    from utils.logging import setup_logging
+    from config.settings import get_data_paths as _get_data_paths, get_retry_config as _get_retry_config, load_config as _load_config
+    from data.processor import build_dataset as _build_dataset, load_processed_data as _load_processed_data, save_processed_data as _save_processed_data
+    from models.engine import MusicRecommender as _MusicRecommender
+    from ui.dash_app import MusicRecommenderDashApp as _MusicRecommenderDashApp
+    from utils.logging import setup_logging as _setup_logging
+
+    # Reassign to avoid redefinition
+    get_data_paths = _get_data_paths
+    get_retry_config = _get_retry_config
+    load_config = _load_config
+    build_dataset = _build_dataset
+    load_processed_data = _load_processed_data
+    save_processed_data = _save_processed_data
+    MusicRecommender = _MusicRecommender
+    MusicRecommenderDashApp = _MusicRecommenderDashApp
+    setup_logging = _setup_logging
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +76,7 @@ def _retry_operation(
     Raises:
         Exception: The last exception if all retries are exhausted
     """
-    last_exception = None
+    last_exception: Optional[Exception] = None
     current_backoff = backoff_seconds
 
     for attempt in range(1, max_attempts + 1):
@@ -95,7 +106,10 @@ def _retry_operation(
                 )
 
     # Re-raise the last exception if all retries failed
-    raise last_exception
+    if last_exception is not None:
+        raise last_exception
+    else:
+        raise RuntimeError("Operation failed with no exception recorded")
 
 
 def create_sample_data(num_genres: int = 4, tracks_per_genre: int = 10) -> pd.DataFrame:
@@ -602,9 +616,9 @@ def run_demo_cli(data: pd.DataFrame, limit: int = 5) -> None:
             for i, track in enumerate(genre_recs, 1):
                 track_name = track.get("track_name", "Unknown")
                 artist_name = track.get("artist_name", "Unknown")
-                moods = ", ".join(track.get("mood_tags", []))
+                track_moods = ", ".join(track.get("mood_tags", []))
                 print(f"{i}. {track_name} by {artist_name}")
-                print(f"   Moods: {moods}")
+                print(f"   Moods: {track_moods}")
 
         # Demo recommendations by mood
         if moods:
