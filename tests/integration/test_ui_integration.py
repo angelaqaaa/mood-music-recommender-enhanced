@@ -142,7 +142,7 @@ class TestSimulatedUserInteractions:
         app = MusicRecommenderDashApp(mock_recommender)
         assert app.app is not None
 
-    @patch("src.musicrec.ui.dash_app.generate_explanation")
+    @patch("src.musicrec.web.app.generate_explanation")
     def test_explanation_rendering_flow(self, mock_explanation):
         """Test that explanations are generated and rendered correctly."""
         mock_explanation.return_value = "Test explanation for recommendation"

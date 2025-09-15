@@ -71,8 +71,8 @@ class TestKeyboardNavigationConfig:
 class TestKeyboardNavigationIntegration:
     """Test suite for keyboard navigation integration with Dash app."""
 
-    @patch("src.musicrec.ui.dash_app.html")
-    @patch("src.musicrec.ui.dash_app.dash.Dash")
+    @patch("src.musicrec.web.app.html")
+    @patch("src.musicrec.web.app.dash.Dash")
     def test_dash_app_includes_keyboard_js(self, mock_dash, mock_html):
         """Test that Dash app includes keyboard navigation JavaScript."""
         from src.musicrec.web.app import MusicRecommenderDashApp

@@ -47,7 +47,7 @@ class TestResponsiveLayout:
         assert "flex-wrap: wrap" in RESPONSIVE_STYLES
         assert "display: flex" in RESPONSIVE_STYLES
 
-    @patch("src.musicrec.ui.dash_app.html")
+    @patch("src.musicrec.web.app.html")
     def test_main_container_has_responsive_class(self, mock_html):
         """Test that main layout container uses responsive class."""
         # Create mock recommender
@@ -85,7 +85,7 @@ class TestResponsiveLayout:
 class TestLoadingIndicator:
     """Test suite for loading indicator functionality."""
 
-    @patch("src.musicrec.ui.dash_app.html")
+    @patch("src.musicrec.web.app.html")
     def test_loading_indicator_structure(self, mock_html):
         """Test that loading indicator has proper structure."""
         mock_recommender = Mock()
@@ -190,7 +190,7 @@ class TestExplanationIntegration:
 class TestAccessibilityFeatures:
     """Test suite for accessibility features."""
 
-    @patch("src.musicrec.ui.dash_app.html")
+    @patch("src.musicrec.web.app.html")
     def test_skip_link_present(self, mock_html):
         """Test that skip link is present for keyboard navigation."""
         mock_recommender = Mock()
@@ -215,7 +215,7 @@ class TestAccessibilityFeatures:
         assert skip_link[1].get("href") == "#main-content"
         assert skip_link[1].get("tabIndex") == "1"
 
-    @patch("src.musicrec.ui.dash_app.html")
+    @patch("src.musicrec.web.app.html")
     def test_aria_attributes_present(self, mock_html):
         """Test that proper ARIA attributes are used."""
         mock_recommender = Mock()
@@ -249,7 +249,7 @@ class TestAccessibilityFeatures:
         assert "border-color: #000" in RESPONSIVE_STYLES
         assert "background-color: #fff" in RESPONSIVE_STYLES
 
-    @patch("src.musicrec.ui.dash_app.html")
+    @patch("src.musicrec.web.app.html")
     def test_semantic_html_elements(self, mock_html):
         """Test that semantic HTML elements are used."""
         mock_recommender = Mock()

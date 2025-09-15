@@ -106,7 +106,7 @@ class TestAccessibilityIntegration:
         mock_recommender.get_available_moods.return_value = ["happy"]
         mock_recommender.genre_tree.tracks = {}
 
-        with patch("src.musicrec.ui.dash_app.dash.Dash") as mock_dash:
+        with patch("src.musicrec.web.app.dash.Dash") as mock_dash:
             mock_app_instance = Mock()
             mock_dash.return_value = mock_app_instance
 
