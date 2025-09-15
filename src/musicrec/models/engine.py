@@ -123,9 +123,9 @@ class MusicRecommender:
         # Calculate similarities between tracks
         self.similarity_graph.calculate_similarities(
             feature_keys=self.audio_features,
-            mood_weight=0.6,
-            feature_weight=0.4,
-            similarity_threshold=0.3,
+            mood_weight=0.4,
+            feature_weight=0.6,
+            similarity_threshold=0.1,
         )
 
         print("✓ Data structures built successfully")
@@ -265,6 +265,31 @@ class MusicRecommender:
         """
         # Get similar tracks from the similarity graph
         similar_tracks = self.similarity_graph.recommend_similar_tracks(track_id, limit)
+
+        # If no similar tracks found, try fallback strategies
+        if not similar_tracks:
+            # Get the track's info for fallback recommendations
+            source_node = self.genre_tree.get_track_node(track_id)
+            if source_node:
+                # Fallback 1: Recommend tracks from same genre
+                genre_path = self.genre_tree.get_genre_path(source_node)
+                if genre_path:
+                    recommendations = self.recommend_by_genre(genre_path[-1], limit)
+                    # Filter out the original track
+                    recommendations = [r for r in recommendations if r["track_id"] != track_id]
+                    if recommendations:
+                        print(f"No direct similarities found for {track_id}, using genre fallback")
+                        return recommendations[:limit]
+
+                # Fallback 2: Recommend tracks with same mood
+                mood_tags = source_node.data.get("mood_tags", [])
+                if mood_tags:
+                    recommendations = self.recommend_by_mood(mood_tags[0], limit)
+                    # Filter out the original track
+                    recommendations = [r for r in recommendations if r["track_id"] != track_id]
+                    if recommendations:
+                        print(f"No similarities found for {track_id}, using mood fallback")
+                        return recommendations[:limit]
 
         # Convert to dictionaries with relevant information
         recommendations = []

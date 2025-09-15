@@ -249,6 +249,23 @@ class MusicRecommenderDashApp:
                                                                 "display": "block"
                                                             },
                                                         ),
+                                                        # Explanations for search methods
+                                                        html.Div(
+                                                            id="search-method-explanation",
+                                                            style={
+                                                                "margin-top": "10px",
+                                                                "padding": "8px",
+                                                                "background-color": "#f8f9fa",
+                                                                "border-left": "3px solid #007bff",
+                                                                "font-size": "12px",
+                                                                "color": "#6c757d",
+                                                            },
+                                                            children=[
+                                                                html.P("📍 Direct Search: Finds tracks exactly matching your genre/mood selections"),
+                                                                html.P("🌐 BFS (Breadth-First): Explores related genres level by level, finding diverse recommendations"),
+                                                                html.P("🎯 DFS (Depth-First): Digs deep into specific genre paths, finding focused recommendations"),
+                                                            ]
+                                                        ),
                                                         # Number of results to show - set default to 50
                                                         html.Label(
                                                             "Number of Results:"
@@ -321,6 +338,15 @@ class MusicRecommenderDashApp:
                                                                         "fontSize": "0.9em",
                                                                         "color": "#666",
                                                                         "marginBottom": "5px",
+                                                                    },
+                                                                ),
+                                                                html.P(
+                                                                    "🎵 This feature finds tracks with similar audio characteristics (tempo, energy, mood) to your selected song.",
+                                                                    style={
+                                                                        "fontSize": "0.85em",
+                                                                        "color": "#007bff",
+                                                                        "marginBottom": "10px",
+                                                                        "fontStyle": "italic",
                                                                     },
                                                                 )
                                                             ]
@@ -476,13 +502,24 @@ class MusicRecommenderDashApp:
                                                         "marginBottom": "5px",
                                                     },
                                                 ),
-                                                html.P(
-                                                    "Bubble size represents popularity/similarity and color represents genre.",
-                                                    style={
-                                                        "textAlign": "center",
-                                                        "marginBottom": "10px",
-                                                    },
-                                                ),
+                                                html.Div([
+                                                    html.P(
+                                                        "Bubble size represents popularity/similarity and color represents genre.",
+                                                        style={
+                                                            "textAlign": "center",
+                                                            "marginBottom": "5px",
+                                                        },
+                                                    ),
+                                                    html.P(
+                                                        "💡 This chart shows the relationship between Valence (happiness) and Energy. Hover over bubbles for track details.",
+                                                        style={
+                                                            "textAlign": "center",
+                                                            "fontSize": "12px",
+                                                            "color": "#6c757d",
+                                                            "marginBottom": "10px",
+                                                        },
+                                                    ),
+                                                ]),
                                                 dcc.Graph(
                                                     id="track-features-bubble-chart",
                                                     style={"height": "600px"},
@@ -495,13 +532,24 @@ class MusicRecommenderDashApp:
                                 dcc.Tab(
                                     label="Similarity Network",
                                     children=[
-                                        html.P(
-                                            "This visualization shows connections between similar tracks.",
-                                            style={
-                                                "textAlign": "center",
-                                                "marginBottom": "10px",
-                                            },
-                                        ),
+                                        html.Div([
+                                            html.P(
+                                                "This visualization shows connections between similar tracks.",
+                                                style={
+                                                    "textAlign": "center",
+                                                    "marginBottom": "5px",
+                                                },
+                                            ),
+                                            html.P(
+                                                "🔗 Each node is a track, connected lines show similarity. Larger nodes = more connections. Click nodes to explore.",
+                                                style={
+                                                    "textAlign": "center",
+                                                    "fontSize": "12px",
+                                                    "color": "#6c757d",
+                                                    "marginBottom": "10px",
+                                                },
+                                            ),
+                                        ]),
                                         dcc.Graph(
                                             id="similarity-graph",
                                             style={"height": "700px"},

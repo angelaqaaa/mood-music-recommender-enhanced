@@ -453,14 +453,14 @@ class SimilaritySongGraph:
         nodes = list(self.graph.nodes(data=True))
         total_nodes = len(nodes)
 
-        if total_nodes > 500:
+        if total_nodes > 1000:
             print(
                 f"Warning: Calculating similarities for {total_nodes} tracks. "
                 "This might take a while."
             )
-            print("Limiting to 500 tracks for faster processing.")
-            nodes = nodes[:500]
-            total_nodes = 500
+            print("Limiting to 1000 tracks for performance.")
+            nodes = nodes[:1000]
+            total_nodes = 1000
 
         print(f"Calculating similarities between {total_nodes} tracks...")
         edge_count = 0
@@ -476,14 +476,18 @@ class SimilaritySongGraph:
 
                 # Calculate mood similarity (Jaccard similarity of mood tags)
                 mood_sim = 0.0
-                if "mood_tags" in attrs1 and "mood_tags" in attrs2:
+                has_mood1 = "mood_tags" in attrs1 and attrs1["mood_tags"]
+                has_mood2 = "mood_tags" in attrs2 and attrs2["mood_tags"]
+
+                if has_mood1 and has_mood2:
                     mood_tags1 = set(attrs1["mood_tags"])
                     mood_tags2 = set(attrs2["mood_tags"])
-
-                    if mood_tags1 and mood_tags2:  # Ensure non-empty sets
-                        intersection = mood_tags1.intersection(mood_tags2)
-                        union = mood_tags1.union(mood_tags2)
-                        mood_sim = len(intersection) / len(union)
+                    intersection = mood_tags1.intersection(mood_tags2)
+                    union = mood_tags1.union(mood_tags2)
+                    mood_sim = len(intersection) / len(union)
+                elif not has_mood1 and not has_mood2:
+                    # If both tracks lack mood tags, give neutral similarity
+                    mood_sim = 0.2
 
                 # Calculate audio feature similarity (cosine similarity)
                 feature_sim = 0.0
