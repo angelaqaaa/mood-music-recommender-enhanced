@@ -17,8 +17,7 @@ COPY *.md ./
 COPY pyproject.toml ./
 
 # Create data directory and copy real data files for production use
-RUN mkdir -p data
-COPY *.csv *.tsv ./data/
+COPY data/ ./data/
 
 # Install Python dependencies globally
 RUN pip install --no-cache-dir -r requirements-prod.txt
