@@ -30,5 +30,5 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 # Expose port (will be set by platform)
 EXPOSE 8040
 
-# Command to run the application
-CMD ["python", "src/musicrec/main.py", "--port", "8040", "--sample"]
+# Command to run the application as a module
+CMD ["python", "-m", "src.musicrec.main", "--port", "8040", "--sample"]
