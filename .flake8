@@ -9,7 +9,7 @@ per-file-ignores =
     src/musicrec/ui/search.py:W293,W291
     src/musicrec/ui/styles.py:W293
     tests/*.py:F401,F811,F841,E226
-exclude =
+exclude = 
     .git,
     __pycache__,
     build,

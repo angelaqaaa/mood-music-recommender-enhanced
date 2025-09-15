@@ -1,20 +1,20 @@
 """CSC111 Winter 2025: A Mood-Driven Music Recommender with Genre Hierarchies
 
 Module for defining the core data structures of the music recommender system.
-This module contains the implementation of the Genre Tree and Song Similarity
-Graph.
+This module contains the implementation of the Genre Tree and Song Similarity Graph.
 
 Copyright and Usage Information
 ===============================
-This file is Copyright (c) 2025 Qian (Angela) Su & Mengxuan (Connie) Guo.
+This file is Copyright (c) 2025 Qian (Angela) Su.
 """
+
+from typing import Any, Dict, List, Optional, Tuple
 
 import networkx as nx
 import numpy as np
-from typing import Dict, List, Tuple, Optional, Any
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Optional import for code analysis
+# Optional import for CSC111 course linting
 try:
     import python_ta
 except ImportError:
@@ -46,10 +46,7 @@ class MusicNode:
     data: Dict[str, Any]
 
     def __init__(
-        self,
-        name: str,
-        node_type: str = "genre",
-        parent: Optional["MusicNode"] = None,
+        self, name: str, node_type: str = "genre", parent: Optional["MusicNode"] = None
     ) -> None:
         """Initialize a music node.
 
@@ -65,7 +62,7 @@ class MusicNode:
         self.node_type = node_type
         self.parent = parent
         self.children = []
-        self.data = {}  # For storing track attributes
+        self.data = {}  # For storing track attributes like mood, valence, etc.
 
     def add_child(self, child: "MusicNode") -> None:
         """Add a child node to this node.
@@ -101,8 +98,7 @@ class GenreTree:
         """Add a genre hierarchy path to the tree.
 
         Args:
-            genre_path: List of genres in hierarchical order
-                (e.g., ['rock', 'alternative'])
+            genre_path: List of genres in hierarchical order (e.g., ['rock', 'alternative'])
 
         Returns:
             The leaf genre node
@@ -150,9 +146,7 @@ class GenreTree:
             The track node
 
         >>> tree = GenreTree()
-        >>> track_node = tree.add_track(
-        ...     'track_001', ['rock', 'alternative'], {'mood_tags': ['energetic']}
-        ... )
+        >>> track_node = tree.add_track('track_001', ['rock', 'alternative'], {'mood_tags': ['energetic']})
         >>> track_node.name
         'track_001'
         >>> track_node.node_type
@@ -454,8 +448,7 @@ class SimilaritySongGraph:
 
         if total_nodes > 500:
             print(
-                f"Warning: Calculating similarities for {total_nodes} tracks. "
-                "This might take a while."
+                f"Warning: Calculating similarities for {total_nodes} tracks. This might take a while."
             )
             print("Limiting to 500 tracks for faster processing.")
             nodes = nodes[:500]
@@ -521,8 +514,7 @@ class SimilaritySongGraph:
                     and current_percentage != last_percentage
                 ):
                     print(
-                        f"  Similarity calculation: {current_percentage}% complete, "
-                        f"{edge_count} connections found"
+                        f"  Similarity calculation: {current_percentage}% complete, {edge_count} connections found"
                     )
                     last_percentage = current_percentage
 
@@ -543,11 +535,11 @@ class SimilaritySongGraph:
         if track_id not in self.graph:
             return []
 
-        # Store (neighbor_id_as_str, float_weight)
+        # We'll store (neighbor_id_as_str, float_weight)
         neighbors: List[Tuple[str, float]] = []
 
         for neighbor_id, edge_attrs in self.graph[track_id].items():
-            # Cast neighbor_id to string
+            # Cast neighbor_id to string if you are sure it is a string or can be converted
             neighbor_str = str(neighbor_id)
 
             # Extract the weight as a float
@@ -599,16 +591,17 @@ if __name__ == "__main__":
 
     doctest.testmod()
 
-    python_ta.check_all(
-        config={
-            "extra-imports": [
-                "networkx",
-                "numpy",
-                "sklearn.metrics.pairwise",
-                "typing",
-            ],
-            "allowed-io": [],
-            "max-line-length": 100,
-            "disable": ["E1136"],
-        }
-    )
+    if python_ta:
+        python_ta.check_all(
+            config={
+                "extra-imports": [
+                    "networkx",
+                    "numpy",
+                    "sklearn.metrics.pairwise",
+                    "typing",
+                ],
+                "allowed-io": [],
+                "max-line-length": 100,
+                "disable": ["E1136"],
+            }
+        )

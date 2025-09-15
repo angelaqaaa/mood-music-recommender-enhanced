@@ -1,13 +1,12 @@
 /**
- * Enhanced search functionality with debounced input and accessibility features.
- *
- * This module provides client-side search capabilities with:
- * - Debounced input handling (250-350ms configurable delay)
- * - Real-time search suggestions
- * - Keyboard navigation (Up/Down, Enter, Escape)
- * - ARIA accessibility attributes
- * - Loading states and empty state handling
- * - Reduced motion and high contrast support
+* CSC111 Winter 2025: A Mood-Driven Music Recommender with Genre Hierarchies
+ * 
+ * Real-time search functionality with debounced input, keyboard navigation,
+ * and accessible dropdown interface.
+ * 
+ * Copyright and Usage Information
+ * ===============================
+ * This file is Copyright (c) 2025 Qian (Angela) Su.
  */
 
 class DebouncedSearch {

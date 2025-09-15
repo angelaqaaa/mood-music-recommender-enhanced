@@ -1,8 +1,11 @@
-"""Enhanced search functionality with fuzzy matching capabilities.
+"""CSC111 Winter 2025: A Mood-Driven Music Recommender with Genre Hierarchies
 
-This module provides advanced search features for the music recommender system,
-including fuzzy string matching, trigram indexing, and performance optimizations.
-"""
+Search functionality module for real-time track/artist search with debounced input
+and accessible dropdown interface.
+
+Copyright and Usage Information
+===============================
+This file is Copyright (c) 2025 Qian (Angela) Su.
 
 import re
 import difflib
@@ -390,7 +393,7 @@ def generate_search_styles() -> str:
         border-color: #0066cc;
         box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
     }
-
+      
     .search-suggestions {
         position: absolute;
         top: 100%;

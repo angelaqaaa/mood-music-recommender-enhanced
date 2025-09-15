@@ -4,7 +4,7 @@ This module provides functions to generate user-friendly explanations for
 why specific tracks were recommended.
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 def generate_explanation(

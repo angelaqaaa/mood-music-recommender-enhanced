@@ -32,8 +32,7 @@ class MusicRecommender:
         - genre_tree: Tree structure organizing tracks by genre hierarchy
         - similarity_graph: Graph representing track similarities
         - data: The processed DataFrame containing all track data
-        - audio_features: List of audio feature column names used for
-                          similarity calculation
+        - audio_features: List of audio feature column names used for similarity calculation
     """
 
     genre_tree: GenreTree

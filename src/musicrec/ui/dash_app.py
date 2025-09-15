@@ -5,18 +5,20 @@ This module builds a Dash application for interactive music recommendations.
 
 Copyright and Usage Information
 ===============================
-This file is Copyright (c) 2025 Qian (Angela) Su & Mengxuan (Connie) Guo.
+This file is Copyright (c) 2025 Qian (Angela) Su.
 """
 
+import time
+
 import dash
-from dash import dcc, html, Input, Output, State, callback_context
-import plotly.graph_objects as go
-import plotly.express as px
-import pandas as pd
 import networkx as nx
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from dash import Input, Output, State, callback_context, dcc, html
+
 from ..metrics.collector import metrics_collector
 from .explanations import generate_explanation, get_top_features
-from .styles import RESPONSIVE_STYLES, BUTTON_STYLES, CONTAINER_STYLES
 from .keyboard_navigation import KEYBOARD_NAVIGATION_JS
 from .search import SearchEngine
 import time
@@ -64,6 +66,7 @@ class MusicRecommenderDashApp:
                 <style>
                 """
             + RESPONSIVE_STYLES
+            + generate_search_styles()
             + """
                 </style>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -90,6 +93,7 @@ class MusicRecommenderDashApp:
 
         # Register callbacks
         self._register_callbacks()
+        self._register_search_callbacks()
 
         # Add metrics endpoint
         self._add_metrics_endpoint()
@@ -308,8 +312,10 @@ class MusicRecommenderDashApp:
                                                     label="Search by Track",
                                                     value="track",
                                                     children=[
-                                                        # Track selection dropdown with help text
-                                                        html.Label("Select a Track:"),
+                                                        # Enhanced track search with debouncing
+                                                        html.Label(
+                                                            "Search for a Track:"
+                                                        ),
                                                         html.Div(
                                                             [
                                                                 html.P(
@@ -322,13 +328,30 @@ class MusicRecommenderDashApp:
                                                                 )
                                                             ]
                                                         ),
-                                                        dcc.Dropdown(
-                                                            id="track-selection-dropdown",
-                                                            options=all_tracks,  # Show all tracks initially
-                                                            value=None,
-                                                            placeholder="Type to search for a track...",
-                                                            clearable=True,
-                                                            searchable=True,
+                                                        html.Div(
+                                                            [
+                                                                dcc.Input(
+                                                                    id="track-search-input",
+                                                                    type="text",
+                                                                    placeholder="Search tracks by name or artist...",
+                                                                    className="search-input",
+                                                                    style={
+                                                                        "width": "100%"
+                                                                    },
+                                                                    debounce=True,
+                                                                ),
+                                                                html.Div(
+                                                                    id="track-search-suggestions",
+                                                                    # No inline style - let CSS handle positioning
+                                                                ),
+                                                            ],
+                                                            id="track-search-container",
+                                                            className="search-container",
+                                                            style={"position": "relative"},
+                                                        ),
+                                                        # Hidden store for selected track from search
+                                                        dcc.Store(
+                                                            id="search-selected-track"
                                                         ),
                                                         # Track info display
                                                         html.Div(
@@ -1475,6 +1498,155 @@ class MusicRecommenderDashApp:
 
             return dash.no_update
 
+    def _register_search_callbacks(self):
+        """Register callbacks for the enhanced search functionality."""
+
+        # Search suggestions callback
+        @self.app.callback(
+            Output("track-search-suggestions", "children"),
+            [Input("track-search-input", "value")],
+            prevent_initial_call=True,
+        )
+        def update_search_suggestions(search_query):
+            """Update search suggestions based on user input."""
+            if not search_query or len(search_query.strip()) < 3:
+                return html.Div()
+
+            # Get search results from the search engine
+            suggestions = self.search_engine.search_tracks(search_query)
+
+            if not suggestions:
+                return html.Div(
+                    "No tracks found",
+                    className="search-suggestions empty",
+                    style={"display": "block"},
+                )
+
+            # Check if fuzzy search is enabled for this query
+            has_fuzzy_results = (
+                self.search_engine.is_fuzzy_enabled() and len(search_query) >= 3
+            )
+
+            # Create suggestion items
+            suggestion_items = []
+            for i, suggestion in enumerate(suggestions):
+                suggestion_items.append(
+                    html.Div(
+                        [
+                            html.Div(
+                                [
+                                    html.Span(
+                                        suggestion["track_name"], className="track-name"
+                                    ),
+                                    html.Span(
+                                        f" by {suggestion['artist_name']}",
+                                        className="artist-name",
+                                    ),
+                                ],
+                                className="suggestion-main",
+                            ),
+                            html.Div(
+                                [
+                                    (
+                                        html.Span(
+                                            " › ".join(suggestion["genre_path"][:2]),
+                                            className="genre",
+                                        )
+                                        if suggestion["genre_path"]
+                                        else None
+                                    ),
+                                    (
+                                        html.Span(
+                                            ", ".join(suggestion["mood_tags"][:3]),
+                                            className="moods",
+                                        )
+                                        if suggestion["mood_tags"]
+                                        else None
+                                    ),
+                                ],
+                                className="suggestion-details",
+                            ),
+                        ],
+                        className="suggestion-item",
+                        **{
+                            "data-track-id": suggestion["track_id"],
+                            "data-index": str(i),
+                        },
+                    )
+                )
+
+            # Add fuzzy search indicator if enabled
+            if has_fuzzy_results:
+                suggestion_items.append(
+                    html.Div(
+                        "🔍 Fuzzy results included",
+                        className="fuzzy-indicator",
+                        style={
+                            "fontSize": "0.8em",
+                            "color": "#888",
+                            "textAlign": "center",
+                            "padding": "8px",
+                            "borderTop": "1px solid #eee",
+                            "fontStyle": "italic",
+                        },
+                    )
+                )
+
+            return html.Div(
+                suggestion_items,
+                className="search-suggestions",
+                style={"display": "block"},
+                role="listbox",
+                **{"aria-label": f"{len(suggestions)} search results"},
+            )
+
+        # Client-side callback disabled temporarily to debug search issue
+        # self.app.clientside_callback(
+        #     """
+        #     function(n_clicks) {
+        #         // Initialize debounced search when component loads
+        #         if (typeof window.DebouncedSearch !== 'undefined' && !window.trackSearch) {
+        #             window.trackSearch = new window.DebouncedSearch(
+        #                 'track-search-input',
+        #                 'track-search-container',
+        #                 {
+        #                     debounceDelay: 300,
+        #                     minQueryLength: 3,
+        #                     maxResults: 20,
+        #                     onSearch: async function(query) {
+        #                         // This will be handled by the Dash callback
+        #                         return [];
+        #                     },
+        #                     onSelect: function(suggestion) {
+        #                         // Store selected track for recommendations
+        #                         window.dash_clientside.set_props('search-selected-track', {data: suggestion.track_id});
+        #                         window.dash_clientside.set_props('search-type-tabs', {value: 'track'});
+        #                     }
+        #                 }
+        #             );
+        #         }
+        #         return window.dash_clientside.no_update;
+        #     }
+        #     """,
+        #     Output("track-search-container", "data-initialized"),
+        #     [Input("page-load-trigger", "children")],
+        # )
+
+        # Handle track selection from search
+        @self.app.callback(
+            [
+                Output("selected-track-store", "data", allow_duplicate=True),
+                Output("track-selection-dropdown", "value", allow_duplicate=True),
+            ],
+            [Input("search-selected-track", "data")],
+            prevent_initial_call=True,
+        )
+        def handle_search_selection(selected_track_id):
+            """Handle track selection from the search component."""
+            if selected_track_id:
+                return selected_track_id, selected_track_id
+            return dash.no_update, dash.no_update
+
     def _add_metrics_endpoint(self):
         """Add metrics endpoint to the Flask server."""
 
@@ -1482,6 +1654,7 @@ class MusicRecommenderDashApp:
         def get_metrics():
             """Return current metrics as JSON."""
             import json
+
             from flask import Response
 
             metrics = metrics_collector.get_metrics()
