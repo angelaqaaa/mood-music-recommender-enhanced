@@ -453,14 +453,35 @@ class SimilaritySongGraph:
         nodes = list(self.graph.nodes(data=True))
         total_nodes = len(nodes)
 
-        if total_nodes > 1000:
-            print(
-                f"Warning: Calculating similarities for {total_nodes} tracks. "
-                "This might take a while."
-            )
-            print("Limiting to 1000 tracks for performance.")
-            nodes = nodes[:1000]
-            total_nodes = 1000
+        # Check if we're in production deployment (Render/Docker)
+        import os
+        is_production = os.environ.get("MUSICREC_ENV") == "production" or os.environ.get("RENDER")
+
+        # Set appropriate limits based on environment
+        if is_production:
+            # Skip similarity calculation entirely in production for instant startup
+            if total_nodes > 100:  # Only skip for large datasets
+                print("Production deployment: Skipping similarity calculation for instant startup.")
+                print("Similarity-based recommendations will use fallback algorithms.")
+                return  # Skip similarity calculation entirely
+            else:
+                # For smaller datasets, use minimal calculation
+                max_tracks = 50
+                if total_nodes > max_tracks:
+                    print(f"Production deployment: Limiting similarity calculation to {max_tracks} tracks for fast startup.")
+                    nodes = nodes[:max_tracks]
+                    total_nodes = max_tracks
+        else:
+            # Local development can handle more tracks
+            max_tracks = 1000
+            if total_nodes > max_tracks:
+                print(
+                    f"Warning: Calculating similarities for {total_nodes} tracks. "
+                    "This might take a while."
+                )
+                print(f"Limiting to {max_tracks} tracks for performance.")
+                nodes = nodes[:max_tracks]
+                total_nodes = max_tracks
 
         print(f"Calculating similarities between {total_nodes} tracks...")
         edge_count = 0
