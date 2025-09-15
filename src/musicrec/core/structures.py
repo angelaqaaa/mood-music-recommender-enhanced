@@ -455,20 +455,27 @@ class SimilaritySongGraph:
 
         # Check if we're in production deployment (Render/Docker)
         import os
-        is_production = os.environ.get("MUSICREC_ENV") == "production" or os.environ.get("RENDER")
+
+        is_production = os.environ.get(
+            "MUSICREC_ENV"
+        ) == "production" or os.environ.get("RENDER")
 
         # Set appropriate limits based on environment
         if is_production:
             # Skip similarity calculation entirely in production for instant startup
             if total_nodes > 100:  # Only skip for large datasets
-                print("Production deployment: Skipping similarity calculation for instant startup.")
+                print(
+                    "Production deployment: Skipping similarity calculation for instant startup."
+                )
                 print("Similarity-based recommendations will use fallback algorithms.")
                 return  # Skip similarity calculation entirely
             else:
                 # For smaller datasets, use minimal calculation
                 max_tracks = 50
                 if total_nodes > max_tracks:
-                    print(f"Production deployment: Limiting similarity calculation to {max_tracks} tracks for fast startup.")
+                    print(
+                        f"Production deployment: Limiting similarity calculation to {max_tracks} tracks for fast startup."
+                    )
                     nodes = nodes[:max_tracks]
                     total_nodes = max_tracks
         else:
