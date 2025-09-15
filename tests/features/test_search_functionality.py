@@ -15,7 +15,7 @@ import time
 import unittest
 from unittest.mock import MagicMock, Mock, patch
 
-from musicrec.ui.search import SearchEngine
+from src.musicrec.web.search.engine import SearchEngine
 
 
 class TestSearchFunctionality(unittest.TestCase):

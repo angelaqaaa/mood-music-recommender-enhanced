@@ -23,7 +23,7 @@ from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_
 from src.musicrec.web.components.styles import RESPONSIVE_STYLES
 
 from ..metrics.collector import metrics_collector
-from .search import SearchEngine
+from .search.engine import SearchEngine
 
 # Optional import for code analysis
 try:
@@ -732,10 +732,6 @@ class MusicRecommenderDashApp:
             # Initialize variables
             recommendations = []
             status_message = ""
-            ctx = callback_context
-            trigger_id = (
-                ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
-            )
 
             # Only process if search button was clicked or tab changed after a search
             if n_clicks is None:

@@ -7,7 +7,7 @@ algorithms and data retrieval methods.
 import pandas as pd
 import pytest
 
-from src.musicrec.models.engine import MusicRecommender
+from src.musicrec.core.engine import MusicRecommender
 
 
 class TestMusicRecommender:

@@ -7,7 +7,7 @@ with both happy path scenarios and edge cases.
 import pandas as pd
 import pytest
 
-from src.musicrec.models.structures import GenreTree, MusicNode, SimilaritySongGraph
+from src.musicrec.core.structures import GenreTree, MusicNode, SimilaritySongGraph
 
 
 class TestMusicNode:

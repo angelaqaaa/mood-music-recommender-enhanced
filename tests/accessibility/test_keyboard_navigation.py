@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from src.musicrec.ui.keyboard_navigation import (
+from src.musicrec.web.components.keyboard_navigation import (
     KEYBOARD_NAVIGATION_JS,
     get_keyboard_navigation_config,
     get_navigation_keys,
@@ -75,7 +75,7 @@ class TestKeyboardNavigationIntegration:
     @patch("src.musicrec.ui.dash_app.dash.Dash")
     def test_dash_app_includes_keyboard_js(self, mock_dash, mock_html):
         """Test that Dash app includes keyboard navigation JavaScript."""
-        from src.musicrec.ui.dash_app import MusicRecommenderDashApp
+        from src.musicrec.web.dash_app import MusicRecommenderDashApp
 
         mock_recommender = Mock()
         mock_recommender.get_available_genres.return_value = ["rock"]
@@ -100,7 +100,7 @@ class TestKeyboardNavigationIntegration:
 
     def test_recommendation_cards_have_proper_attributes(self):
         """Test that recommendation cards have proper ARIA and keyboard attributes."""
-        from src.musicrec.ui.dash_app import MusicRecommenderDashApp
+        from src.musicrec.web.dash_app import MusicRecommenderDashApp
 
         mock_recommender = Mock()
         mock_recommender.get_available_genres.return_value = ["rock"]

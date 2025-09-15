@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 import unittest
 from unittest.mock import MagicMock, Mock, patch
 
-from musicrec.ui.search import SearchEngine
+from src.musicrec.web.search.engine import SearchEngine
 
 
 class TestSearchAccessibility(unittest.TestCase):

@@ -21,8 +21,8 @@ import pandas as pd
 try:
     from .config.settings import get_data_paths, get_retry_config, load_config
     from .data.processor import build_dataset, load_processed_data, save_processed_data
-    from .models.engine import MusicRecommender
-    from .ui.dash_app import MusicRecommenderDashApp
+    from .core.engine import MusicRecommender
+    from .web.app import MusicRecommenderDashApp
     from .utils.logging import setup_logging
 except ImportError:
     # Fallback to absolute imports when run directly
@@ -36,8 +36,8 @@ except ImportError:
     from data.processor import build_dataset as _build_dataset
     from data.processor import load_processed_data as _load_processed_data
     from data.processor import save_processed_data as _save_processed_data
-    from models.engine import MusicRecommender as _MusicRecommender
-    from ui.dash_app import MusicRecommenderDashApp as _MusicRecommenderDashApp
+    from core.engine import MusicRecommender as _MusicRecommender
+    from web.app import MusicRecommenderDashApp as _MusicRecommenderDashApp
     from utils.logging import setup_logging as _setup_logging
 
     # Reassign to avoid redefinition
