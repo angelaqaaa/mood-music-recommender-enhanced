@@ -3,3 +3,7 @@ flake8==7.3.0
 mypy==1.17.1
 pytest==8.3.4
 pytest-cov==6.2.1
+isort==5.13.2
+bandit==1.8.0
+safety==4.0.2
+pytest-timeout==2.3.1

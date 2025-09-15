@@ -53,7 +53,12 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "--cov=src/musicrec --cov-report=term-missing"
+addopts = "--cov=src/musicrec --cov-report=term-missing --timeout=300 --maxfail=5"
+markers = [
+    "integration: Integration tests",
+    "unit: Unit tests",
+    "performance: Performance tests"
+]
 
 [tool.flake8]
 max-line-length = 88
