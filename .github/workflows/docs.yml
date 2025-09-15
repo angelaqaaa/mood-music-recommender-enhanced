@@ -21,14 +21,17 @@ jobs:
       with:
         python-version: "3.11"
 
-    - name: Install documentation tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install markdown-link-check-cli
+    - name: Install Node.js for markdown tools
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install markdown-link-check
+      run: npm install -g markdown-link-check
 
     - name: Check documentation links
       run: |
-        find . -name "*.md" -not -path "./.pytest_cache/*" -not -path "./.mypy_cache/*" | xargs markdown-link-check || true
+        find . -name "*.md" -not -path "./.pytest_cache/*" -not -path "./.mypy_cache/*" -exec markdown-link-check {} \; || true
 
     - name: Validate README structure
       run: |
