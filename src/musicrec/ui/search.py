@@ -4,12 +4,10 @@ This module provides advanced search features for the music recommender system,
 including fuzzy string matching, trigram indexing, and performance optimizations.
 """
 
-import re
 import difflib
 from collections import defaultdict
 from functools import lru_cache
-from typing import Dict, List, Set, Tuple, Optional, Any, Union
-import time
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 
 class SearchEngine:

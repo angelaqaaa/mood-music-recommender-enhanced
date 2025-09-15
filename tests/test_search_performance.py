@@ -5,14 +5,14 @@ Tests performance characteristics and validates <200ms response time
 target on large datasets.
 """
 
+# Add src to path for imports
 import os
 import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+
 import time
 import unittest
 from unittest.mock import Mock
-
-# Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from musicrec.ui.search import SearchEngine
 

@@ -5,13 +5,13 @@ Tests ARIA attributes, keyboard navigation, and various edge cases
 to ensure robust and accessible search functionality.
 """
 
+# Add src to path for imports
 import os
 import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+
 import unittest
 from unittest.mock import MagicMock, Mock, patch
-
-# Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from musicrec.ui.search import SearchEngine
 

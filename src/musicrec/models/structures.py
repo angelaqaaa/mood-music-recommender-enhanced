@@ -9,9 +9,10 @@ Copyright and Usage Information
 This file is Copyright (c) 2025 Qian (Angela) Su & Mengxuan (Connie) Guo.
 """
 
+from typing import Any, Dict, List, Optional, Tuple
+
 import networkx as nx
 import numpy as np
-from typing import Dict, List, Tuple, Optional, Any
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Optional import for code analysis

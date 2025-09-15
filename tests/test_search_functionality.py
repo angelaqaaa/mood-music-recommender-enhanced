@@ -5,14 +5,14 @@ Tests core search features including exact matching, fuzzy matching,
 and basic performance characteristics.
 """
 
+# Add src to path for imports
 import os
 import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+
 import time
 import unittest
 from unittest.mock import MagicMock, Mock, patch
-
-# Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from musicrec.ui.search import SearchEngine
 

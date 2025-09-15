@@ -21,9 +21,9 @@ import pandas as pd
 try:
     from .config.settings import get_data_paths, get_retry_config, load_config
     from .data.processor import build_dataset, load_processed_data, save_processed_data
-    from .utils.logging import setup_logging
     from .models.engine import MusicRecommender
     from .ui.dash_app import MusicRecommenderDashApp
+    from .utils.logging import setup_logging
 except ImportError:
     # Fallback to absolute imports when run directly
     import sys
@@ -32,9 +32,9 @@ except ImportError:
     sys.path.insert(0, str(Path(__file__).parent))
     from config.settings import get_data_paths, get_retry_config, load_config
     from data.processor import build_dataset, load_processed_data, save_processed_data
-    from utils.logging import setup_logging
     from models.engine import MusicRecommender
     from ui.dash_app import MusicRecommenderDashApp
+    from utils.logging import setup_logging
 
 logger = logging.getLogger(__name__)
 

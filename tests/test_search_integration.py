@@ -5,15 +5,15 @@ Tests the integration between Python search engine and JavaScript frontend,
 simulating debounced search behavior and frontend interactions.
 """
 
-import asyncio
+# Add src to path for imports
 import os
 import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+
+import asyncio
 import time
 import unittest
 from unittest.mock import Mock, call, patch
-
-# Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from musicrec.ui.search import SearchEngine
 
