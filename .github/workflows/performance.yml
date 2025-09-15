@@ -1,0 +1,45 @@
+name: Performance Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run performance tests weekly
+    - cron: '0 6 * * 0'
+
+jobs:
+  performance:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt -r requirements-dev.txt
+        pip install pytest-benchmark memory-profiler
+
+    - name: Run performance tests
+      run: |
+        pytest tests/test_search_performance.py -v --benchmark-json=benchmark.json
+
+    - name: Run memory profiling on key functions
+      run: |
+        python -m memory_profiler src/musicrec/main.py --sample > memory_profile.txt || true
+
+    - name: Upload performance results
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-reports
+        path: |
+          benchmark.json
+          memory_profile.txt

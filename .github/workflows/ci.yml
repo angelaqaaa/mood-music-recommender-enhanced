@@ -36,6 +36,15 @@ jobs:
     - name: Type check with mypy
       run: mypy src/
 
+    - name: Check for TODO/FIXME comments
+      run: |
+        # Count TODOs and FIXMEs for awareness
+        TODO_COUNT=$(grep -r "TODO\|FIXME" src/ tests/ --include="*.py" | wc -l || echo "0")
+        echo "Found $TODO_COUNT TODO/FIXME comments"
+        if [ "$TODO_COUNT" -gt 10 ]; then
+          echo "WARNING: High number of TODO/FIXME comments ($TODO_COUNT)"
+        fi
+
   security:
     name: Security Checks
     runs-on: ubuntu-latest
@@ -82,6 +91,14 @@ jobs:
 
     - name: Test with pytest
       run: pytest --cov=src/musicrec --cov-report=xml --timeout=300 --maxfail=5
+
+    - name: Integration test - Start application
+      run: |
+        # Test that the application starts without errors
+        timeout 30s python -m src.musicrec.main --sample --port 8099 &
+        sleep 10
+        curl -f http://localhost:8099 || exit 1
+        echo "Application integration test passed"
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3

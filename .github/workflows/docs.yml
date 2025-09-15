@@ -1,0 +1,43 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**.md'
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+
+jobs:
+  docs-check:
+    name: Documentation Quality
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install documentation tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install markdown-link-check-cli
+
+    - name: Check documentation links
+      run: |
+        find . -name "*.md" -not -path "./.pytest_cache/*" -not -path "./.mypy_cache/*" | xargs markdown-link-check || true
+
+    - name: Validate README structure
+      run: |
+        # Check if README has required sections
+        grep -q "## Features" README.md || echo "WARNING: Missing Features section"
+        grep -q "## Installation" README.md || echo "WARNING: Missing Installation section"
+        grep -q "## Usage" README.md || echo "WARNING: Missing Usage section"
+
+    - name: Check CHANGELOG format
+      run: |
+        # Basic CHANGELOG format validation
+        head -10 CHANGELOG.md | grep -q "# Changelog" || echo "WARNING: CHANGELOG missing proper header"
