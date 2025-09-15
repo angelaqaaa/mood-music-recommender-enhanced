@@ -20,10 +20,10 @@ import pandas as pd
 # Handle both relative imports (when run as module) and absolute imports (when run directly)
 try:
     from .config.settings import get_data_paths, get_retry_config, load_config
-    from .data.processor import build_dataset, load_processed_data, save_processed_data
     from .core.engine import MusicRecommender
-    from .web.app import MusicRecommenderDashApp
+    from .data.processor import build_dataset, load_processed_data, save_processed_data
     from .utils.logging import setup_logging
+    from .web.app import MusicRecommenderDashApp
 except ImportError:
     # Fallback to absolute imports when run directly
     import sys
@@ -33,12 +33,12 @@ except ImportError:
     from config.settings import get_data_paths as _get_data_paths
     from config.settings import get_retry_config as _get_retry_config
     from config.settings import load_config as _load_config
+    from core.engine import MusicRecommender as _MusicRecommender
     from data.processor import build_dataset as _build_dataset
     from data.processor import load_processed_data as _load_processed_data
     from data.processor import save_processed_data as _save_processed_data
-    from core.engine import MusicRecommender as _MusicRecommender
-    from web.app import MusicRecommenderDashApp as _MusicRecommenderDashApp
     from utils.logging import setup_logging as _setup_logging
+    from web.app import MusicRecommenderDashApp as _MusicRecommenderDashApp
 
     # Reassign to avoid redefinition
     get_data_paths = _get_data_paths
