@@ -4,90 +4,476 @@ This module contains CSS styles for making the music recommender UI responsive
 across mobile, tablet, and desktop devices.
 """
 
-# Base responsive styles for the main layout
+# Enhanced responsive styles with modern design system
 RESPONSIVE_STYLES = """
-/* Base styles for all devices */
-.main-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+/* Modern CSS Variables for Design System */
+:root {
+    /* Primary Colors - Music Theme */
+    --primary-purple: #8B5CF6;
+    --primary-purple-light: #A78BFA;
+    --primary-purple-dark: #7C3AED;
+    --secondary-blue: #3B82F6;
+    --secondary-blue-light: #60A5FA;
+
+    /* Accent Colors */
+    --accent-pink: #EC4899;
+    --accent-orange: #F97316;
+    --accent-green: #10B981;
+
+    /* Neutral Colors */
+    --gray-50: #F9FAFB;
+    --gray-100: #F3F4F6;
+    --gray-200: #E5E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --gray-900: #111827;
+
+    /* Background Colors */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F8FAFC;
+    --bg-accent: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+    /* Text Colors */
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --text-inverse: #FFFFFF;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+    /* Border Radius */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+
+    /* Typography */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    --font-display: 'Inter', sans-serif;
 }
 
-.controls-container {
-    width: 100%;
-    padding: 15px;
+/* Dark Mode Variables */
+[data-theme="dark"] {
+    /* Dark Mode Colors */
+    --gray-50: #111827;
+    --gray-100: #1F2937;
+    --gray-200: #374151;
+    --gray-300: #4B5563;
+    --gray-400: #6B7280;
+    --gray-500: #9CA3AF;
+    --gray-600: #D1D5DB;
+    --gray-700: #E5E7EB;
+    --gray-800: #F3F4F6;
+    --gray-900: #F9FAFB;
+
+    /* Dark Background Colors */
+    --bg-primary: #111827;
+    --bg-secondary: #0F172A;
+    --bg-accent: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+    /* Dark Text Colors */
+    --text-primary: #F9FAFB;
+    --text-secondary: #D1D5DB;
+    --text-inverse: #111827;
+}
+
+/* Base styles for all devices */
+* {
     box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    margin: 0;
+    padding: 0;
+}
+
+.main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+/* Modern Header Styles */
+.app-header {
+    background: var(--bg-accent);
+    color: var(--text-inverse);
+    padding: 3rem 2rem;
+    text-align: center;
+    margin: -2rem -2rem 2rem -2rem;
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.app-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="music-pattern" patternUnits="userSpaceOnUse" width="20" height="20"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23music-pattern)"/></svg>');
+    opacity: 0.3;
+}
+
+.app-title {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.app-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0.5rem 0 0 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* Modern Card-based Layout */
+.controls-container {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    margin-bottom: 2rem;
+    transition: box-shadow 0.3s ease;
+}
+
+.controls-container:hover {
+    box-shadow: var(--shadow-lg);
 }
 
 .results-container {
-    width: 100%;
-    padding: 15px;
-    box-sizing: border-box;
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    min-height: 400px;
 }
 
+/* Enhanced Recommendation Cards */
 .recommendation-item {
-    padding: 15px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #f9f9f9;
+    background: var(--bg-primary);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendation-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(45deg, var(--primary-purple), var(--accent-pink));
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .recommendation-item:hover {
-    background-color: #f0f0f0;
-    border-color: #ccc;
+    border-color: var(--primary-purple-light);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.recommendation-item:hover::before {
+    opacity: 1;
 }
 
 .recommendation-item:focus-within {
-    outline: 2px solid #0078d4;
+    outline: 2px solid var(--primary-purple);
     outline-offset: 2px;
+    border-color: var(--primary-purple);
+}
+
+.recommendation-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.recommendation-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(45deg, var(--primary-purple), var(--secondary-blue));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-inverse);
+    font-weight: bold;
+    font-size: 1.2rem;
+    flex-shrink: 0;
 }
 
 .recommendation-title {
-    font-weight: bold;
-    font-size: 1.1em;
-    color: #333;
-    margin-bottom: 5px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.recommendation-artist {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0.25rem 0;
+    font-weight: 500;
 }
 
 .recommendation-details {
-    color: #666;
-    font-size: 0.95em;
-    margin-bottom: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.recommendation-tag {
+    background: var(--gray-100);
+    color: var(--text-secondary);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.recommendation-tag.genre {
+    background: linear-gradient(45deg, var(--primary-purple-light), var(--secondary-blue-light));
+    color: var(--text-inverse);
+}
+
+.recommendation-tag.mood {
+    background: linear-gradient(45deg, var(--accent-pink), var(--accent-orange));
+    color: var(--text-inverse);
 }
 
 .recommendation-explanation {
-    font-size: 0.9em;
-    color: #555;
+    background: linear-gradient(45deg, var(--gray-50), var(--gray-100));
+    border-left: 4px solid var(--primary-purple);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-top: 1rem;
     font-style: italic;
-    margin-top: 8px;
-    padding: 8px;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-    border-left: 3px solid #0078d4;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
 }
 
+.recommendation-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+.recommendation-button {
+    background: var(--primary-purple);
+    color: var(--text-inverse);
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.recommendation-button:hover {
+    background: var(--primary-purple-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.recommendation-button.secondary {
+    background: var(--gray-600);
+}
+
+.recommendation-button.secondary:hover {
+    background: var(--gray-700);
+}
+
+/* Enhanced Form Controls */
+.form-section {
+    margin-bottom: 2rem;
+}
+
+.form-section h3 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-section h3::before {
+    content: '';
+    width: 4px;
+    height: 1.25rem;
+    background: linear-gradient(45deg, var(--primary-purple), var(--accent-pink));
+    border-radius: 2px;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+/* Enhanced Dropdown Styles */
+.dash-dropdown .Select-control {
+    border: 2px solid var(--gray-300) !important;
+    border-radius: var(--radius-md) !important;
+    background: var(--bg-primary) !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all 0.2s ease !important;
+    min-height: 42px !important;
+}
+
+.dash-dropdown .Select-control:hover {
+    border-color: var(--primary-purple-light) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.dash-dropdown .Select-control.is-focused {
+    border-color: var(--primary-purple) !important;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
+}
+
+.dash-dropdown .Select-value-label {
+    color: var(--text-primary) !important;
+    font-weight: 500 !important;
+}
+
+.dash-dropdown .Select-placeholder {
+    color: var(--text-secondary) !important;
+}
+
+/* Enhanced Tab Styles */
+.dash-tabs {
+    border-bottom: 2px solid var(--gray-200) !important;
+    margin-bottom: 2rem !important;
+}
+
+.dash-tabs .tab {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    color: var(--text-secondary) !important;
+    font-weight: 500 !important;
+    padding: 1rem 1.5rem !important;
+    transition: all 0.2s ease !important;
+    border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
+}
+
+.dash-tabs .tab:hover {
+    color: var(--primary-purple) !important;
+    background: var(--gray-50) !important;
+}
+
+.dash-tabs .tab.tab--selected {
+    color: var(--primary-purple) !important;
+    border-bottom-color: var(--primary-purple) !important;
+    background: var(--bg-primary) !important;
+    font-weight: 600 !important;
+}
+
+/* Enhanced Radio Button Styles */
+.dash-radio-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    padding: 0.75rem 1rem !important;
+    border: 2px solid var(--gray-200) !important;
+    border-radius: var(--radius-md) !important;
+    margin-bottom: 0.5rem !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+}
+
+.dash-radio-item:hover {
+    border-color: var(--primary-purple-light) !important;
+    background: var(--gray-50) !important;
+}
+
+.dash-radio-item input:checked + label {
+    border-color: var(--primary-purple) !important;
+    background: linear-gradient(45deg, var(--primary-purple-light), var(--secondary-blue-light)) !important;
+    color: var(--text-inverse) !important;
+}
+
+/* Enhanced Loading Indicator */
 .loading-indicator {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    color: #666;
+    padding: 2rem;
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    margin: 1rem 0;
+    color: var(--text-secondary);
 }
 
 .loading-spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid #0078d4;
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--gray-200);
+    border-top: 3px solid var(--primary-purple);
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin-right: 10px;
+    margin-right: 12px;
 }
 
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-weight: 500;
+    font-size: 1rem;
 }
 
 .metrics-panel {
@@ -129,54 +515,145 @@ RESPONSIVE_STYLES = """
     margin-top: 5px;
 }
 
-/* Tablet styles */
-@media (min-width: 768px) {
-    .main-layout {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
+/* Enhanced Mobile Styles */
+@media (max-width: 767px) {
+    .main-container {
+        padding: 1rem;
     }
-    
-    .controls-container {
-        width: 35%;
-        min-width: 300px;
+
+    .app-header {
+        margin: -1rem -1rem 1rem -1rem;
+        padding: 2rem 1rem;
     }
-    
+
+    .app-title {
+        font-size: 2rem;
+    }
+
+    .controls-container,
     .results-container {
-        width: 60%;
-        flex: 1;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
     }
-    
+
     .recommendation-item {
-        padding: 20px;
+        padding: 1rem;
     }
-    
-    .metrics-panel {
-        position: sticky;
-        top: 20px;
+
+    .recommendation-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+
+    .recommendation-title {
+        font-size: 1.1rem;
+    }
+
+    .recommendation-actions {
+        flex-direction: column;
+    }
+
+    .recommendation-button {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .dash-tabs .tab {
+        padding: 0.75rem 1rem !important;
+        font-size: 0.9rem !important;
     }
 }
 
-/* Desktop styles */
-@media (min-width: 1024px) {
+/* Enhanced Tablet Styles */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .main-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
     .controls-container {
-        width: 30%;
+        margin-bottom: 0;
     }
-    
-    .results-container {
-        width: 65%;
-    }
-    
-    .main-container {
-        padding: 30px;
-    }
-    
+
     .recommendation-item {
-        padding: 25px;
+        padding: 1.25rem;
     }
-    
+
+    .app-title {
+        font-size: 2.25rem;
+    }
+
+    .metrics-panel {
+        position: sticky;
+        top: 2rem;
+    }
+}
+
+/* Enhanced Desktop Styles */
+@media (min-width: 1024px) {
+    .main-layout {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 3rem;
+        align-items: start;
+    }
+
+    .controls-container {
+        position: sticky;
+        top: 2rem;
+        margin-bottom: 0;
+    }
+
+    .main-container {
+        padding: 3rem;
+    }
+
+    .app-header {
+        margin: -3rem -3rem 3rem -3rem;
+    }
+
+    .recommendation-item {
+        padding: 2rem;
+    }
+
     .metrics-grid {
         grid-template-columns: repeat(4, 1fr);
+    }
+
+    .app-title {
+        font-size: 3rem;
+    }
+
+    .recommendation-actions {
+        flex-direction: row;
+    }
+
+    .recommendation-button {
+        width: auto;
+    }
+}
+
+/* Large Desktop Styles */
+@media (min-width: 1440px) {
+    .main-container {
+        padding: 4rem;
+    }
+
+    .app-header {
+        margin: -4rem -4rem 4rem -4rem;
+        padding: 4rem 2rem;
+    }
+
+    .main-layout {
+        gap: 4rem;
     }
 }
 
@@ -220,17 +697,95 @@ button:focus,
     }
 }
 
+/* Dark Mode Toggle */
+.theme-toggle {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    background: var(--bg-primary);
+    border: 2px solid var(--gray-300);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-lg);
+    font-size: 1.25rem;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--primary-purple);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+/* Smooth Theme Transitions */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* Auto Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Auto-apply dark mode colors if user prefers dark */
+        --gray-50: #111827;
+        --gray-100: #1F2937;
+        --gray-200: #374151;
+        --gray-300: #4B5563;
+        --gray-400: #6B7280;
+        --gray-500: #9CA3AF;
+        --gray-600: #D1D5DB;
+        --gray-700: #E5E7EB;
+        --gray-800: #F3F4F6;
+        --gray-900: #F9FAFB;
+
+        --bg-primary: #111827;
+        --bg-secondary: #0F172A;
+        --text-primary: #F9FAFB;
+        --text-secondary: #D1D5DB;
+        --text-inverse: #111827;
+    }
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
     .loading-spinner {
         animation: none;
     }
-    
+
     * {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
+}
+
+/* Enhanced Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--gray-100);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-purple);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-purple-dark);
 }
 """
 

@@ -129,11 +129,24 @@ class MusicRecommenderDashApp:
                 html.Header(
                     [
                         html.H1(
-                            "Mood-Driven Music Recommender with Genre Hierarchies",
-                            style={"textAlign": "center", "marginBottom": "30px"},
+                            "🎵 Mood-Driven Music Recommender",
+                            className="app-title",
                             id="main-title",
+                        ),
+                        html.P(
+                            "Discover your next favorite song with AI-powered recommendations",
+                            className="app-subtitle",
+                        ),
+                        # Dark mode toggle
+                        html.Button(
+                            "🌙",
+                            id="theme-toggle",
+                            className="theme-toggle",
+                            title="Toggle dark/light mode",
+                            **{"aria-label": "Toggle dark mode"}
                         )
                     ],
+                    className="app-header",
                     role="banner",
                 ),
                 # Skip link for accessibility
@@ -166,23 +179,29 @@ class MusicRecommenderDashApp:
                                 # Controls section
                                 html.Section(
                                     [
-                                        html.H3(
-                                            "Search Options",
-                                            id="search-options-heading",
-                                        ),
-                                        # Loading indicator
                                         html.Div(
                                             [
-                                                html.Div(className="loading-spinner"),
-                                                html.Span(
-                                                    "Finding recommendations...",
-                                                    **{"aria-live": "polite"},
+                                                html.H3(
+                                                    "🎛️ Search Options",
+                                                    id="search-options-heading",
+                                                ),
+                                                # Loading indicator
+                                                html.Div(
+                                                    [
+                                                        html.Div(className="loading-spinner"),
+                                                        html.Span(
+                                                            "Finding recommendations...",
+                                                            className="loading-text",
+                                                            **{"aria-live": "polite"},
+                                                        ),
+                                                    ],
+                                                    id="loading-indicator",
+                                                    className="loading-indicator",
+                                                    style={"display": "none"},
+                                                    role="status",
                                                 ),
                                             ],
-                                            id="loading-indicator",
-                                            className="loading-indicator",
-                                            style={"display": "none"},
-                                            role="status",
+                                            className="form-section",
                                         ),
                                         # Search Type tabs
                                         dcc.Tabs(
@@ -190,66 +209,74 @@ class MusicRecommenderDashApp:
                                             value="genre-mood",
                                             children=[
                                                 dcc.Tab(
-                                                    label="Search by Genre/Mood",
+                                                    label="🎵 Genre & Mood",
                                                     value="genre-mood",
                                                     children=[
                                                         # Genre selection
-                                                        html.Label("Select Genre:"),
-                                                        dcc.Dropdown(
-                                                            id="genre-dropdown",
-                                                            options=[
-                                                                {
-                                                                    "label": genre,
-                                                                    "value": genre,
-                                                                }
-                                                                for genre in genres
-                                                            ],
-                                                            value=(
-                                                                genres[0]
-                                                                if genres
-                                                                else None
+                                                        html.Div([
+                                                            html.Label("🎸 Select Genre:", className="form-label"),
+                                                            dcc.Dropdown(
+                                                                id="genre-dropdown",
+                                                                options=[
+                                                                    {
+                                                                        "label": f"🎵 {genre}",
+                                                                        "value": genre,
+                                                                    }
+                                                                    for genre in genres
+                                                                ],
+                                                                value=(
+                                                                    genres[0]
+                                                                    if genres
+                                                                    else None
+                                                                ),
+                                                                clearable=False,
+                                                                placeholder="Choose a music genre...",
                                                             ),
-                                                            clearable=False,
-                                                        ),
+                                                        ], className="form-group"),
                                                         # Mood selection
-                                                        html.Label(
-                                                            "Select Mood (Optional):"
-                                                        ),
-                                                        dcc.Dropdown(
-                                                            id="mood-dropdown",
-                                                            options=[
-                                                                {
-                                                                    "label": mood,
-                                                                    "value": mood,
-                                                                }
-                                                                for mood in moods
-                                                            ],
-                                                            value=None,
-                                                            clearable=True,
-                                                        ),
+                                                        html.Div([
+                                                            html.Label(
+                                                                "😊 Select Mood (Optional):",
+                                                                className="form-label"
+                                                            ),
+                                                            dcc.Dropdown(
+                                                                id="mood-dropdown",
+                                                                options=[
+                                                                    {
+                                                                        "label": f"🎭 {mood}",
+                                                                        "value": mood,
+                                                                    }
+                                                                    for mood in moods
+                                                                ],
+                                                                value=None,
+                                                                clearable=True,
+                                                                placeholder="Choose a mood (optional)...",
+                                                            ),
+                                                        ], className="form-group"),
                                                         # Search method
-                                                        html.Label("Search Method:"),
-                                                        dcc.RadioItems(
-                                                            id="search-method",
-                                                            options=[
-                                                                {
-                                                                    "label": "Breadth-First Search (BFS)",
-                                                                    "value": "bfs",
-                                                                },
-                                                                {
-                                                                    "label": "Depth-First Search (DFS)",
-                                                                    "value": "dfs",
-                                                                },
-                                                                {
-                                                                    "label": "Direct Search",
-                                                                    "value": "direct",
-                                                                },
-                                                            ],
-                                                            value="direct",
+                                                        html.Div([
+                                                            html.Label("🔍 Search Method:", className="form-label"),
+                                                            dcc.RadioItems(
+                                                                id="search-method",
+                                                                options=[
+                                                                    {
+                                                                        "label": "🌐 Breadth-First Search (Explore widely)",
+                                                                        "value": "bfs",
+                                                                    },
+                                                                    {
+                                                                        "label": "🔬 Depth-First Search (Dive deep)",
+                                                                        "value": "dfs",
+                                                                    },
+                                                                    {
+                                                                        "label": "🎯 Direct Search (Quick & focused)",
+                                                                        "value": "direct",
+                                                                    },
+                                                                ],
+                                                                value="direct",
                                                             labelStyle={
                                                                 "display": "block"
                                                             },
-                                                        ),
+                                                        )], className="form-group"),
                                                         # Explanations for search methods
                                                         html.Div(
                                                             id="search-method-explanation",
