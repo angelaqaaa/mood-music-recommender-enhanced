@@ -144,15 +144,18 @@ class GenreTree:
 
         Args:
             track_id: The unique identifier for the track
-            genre_path: The genre hierarchy path (e.g., ['rock', 'alternative'])
-            track_data: Dictionary of track attributes (mood, audio features, etc.)
+            genre_path: The genre hierarchy path (e.g., ['rock',
+                        'alternative'])
+            track_data: Dictionary of track attributes (mood, audio
+                        features, etc.)
 
         Returns:
             The track node
 
         >>> tree = GenreTree()
         >>> track_node = tree.add_track(
-        ...     'track_001', ['rock', 'alternative'], {'mood_tags': ['energetic']}
+        ...     'track_001', ['rock', 'alternative'],
+        ...     {'mood_tags': ['energetic']}
         ... )
         >>> track_node.name
         'track_001'
@@ -233,7 +236,8 @@ class GenreTree:
                     dfs(child)
 
         def collect_tracks(node: MusicNode, track_list: List[MusicNode]) -> None:
-            """Helper function to collect all track nodes beneath a given node."""
+            """Helper function to collect all track nodes beneath a
+            given node."""
             if node.node_type == "track":
                 track_list.append(node)
             else:
@@ -283,12 +287,14 @@ class GenreTree:
     def bfs_search(
         self, start_genre: str, mood: Optional[str] = None, max_depth: int = 2
     ) -> List[MusicNode]:
-        """Perform breadth-first search from a genre node, optionally filtering by mood.
+        """Perform breadth-first search from a genre node, optionally
+        filtering by mood.
 
         Args:
             start_genre: The genre to start search from
             mood: Optional mood to filter by
-            max_depth: Maximum depth to search (to limit exploration breadth)
+            max_depth: Maximum depth to search (to limit exploration
+                       breadth)
 
         Returns:
             List of track nodes in BFS order
@@ -340,7 +346,8 @@ class GenreTree:
     def dfs_search(
         self, start_genre: str, mood: Optional[str] = None, max_breadth: int = 5
     ) -> List[MusicNode]:
-        """Perform depth-first search from a genre node, optionally filtering by mood.
+        """Perform depth-first search from a genre node, optionally
+        filtering by mood.
 
         Args:
             start_genre: The genre to start search from
@@ -398,10 +405,12 @@ class GenreTree:
 
 
 class SimilaritySongGraph:
-    """A graph representation of song similarities based on mood and audio features.
+    """A graph representation of song similarities based on mood and audio
+    features.
 
     Instance Attributes:
-        - graph: NetworkX graph where nodes are tracks and edges represent similarities
+        - graph: NetworkX graph where nodes are tracks and edges represent
+                 similarities
     """
 
     graph: nx.Graph
@@ -415,7 +424,8 @@ class SimilaritySongGraph:
 
         Args:
             track_id: The unique identifier for the track
-            attributes: Dictionary of track attributes (mood, audio features, etc.)
+            attributes: Dictionary of track attributes (mood, audio features,
+                        etc.)
         """
         self.graph.add_node(track_id, **attributes)
 
@@ -462,19 +472,24 @@ class SimilaritySongGraph:
 
         # Set appropriate limits based on environment
         if is_production:
-            # Skip similarity calculation entirely in production for instant startup
+            # Skip similarity calculation entirely in production for instant
+            # startup
             if total_nodes > 100:  # Only skip for large datasets
                 print(
-                    "Production deployment: Skipping similarity calculation for instant startup."
+                    "Production deployment: Skipping similarity calculation "
+                    "for instant startup."
                 )
-                print("Similarity-based recommendations will use fallback algorithms.")
+                print(
+                    "Similarity-based recommendations will use fallback " "algorithms."
+                )
                 return  # Skip similarity calculation entirely
             else:
                 # For smaller datasets, use minimal calculation
                 max_tracks = 50
                 if total_nodes > max_tracks:
                     print(
-                        f"Production deployment: Limiting similarity calculation to {max_tracks} tracks for fast startup."
+                        f"Production deployment: Limiting similarity "
+                        f"calculation to {max_tracks} tracks for fast startup."
                     )
                     nodes = nodes[:max_tracks]
                     total_nodes = max_tracks
@@ -483,8 +498,8 @@ class SimilaritySongGraph:
             max_tracks = 1000
             if total_nodes > max_tracks:
                 print(
-                    f"Warning: Calculating similarities for {total_nodes} tracks. "
-                    "This might take a while."
+                    f"Warning: Calculating similarities for {total_nodes} "
+                    f"tracks. This might take a while."
                 )
                 print(f"Limiting to {max_tracks} tracks for performance.")
                 nodes = nodes[:max_tracks]
@@ -554,7 +569,8 @@ class SimilaritySongGraph:
                     and current_percentage != last_percentage
                 ):
                     print(
-                        f"  Similarity calculation: {current_percentage}% complete, "
+                        f"  Similarity calculation: {current_percentage}% "
+                        f"complete, "
                         f"{edge_count} connections found"
                     )
                     last_percentage = current_percentage
@@ -594,7 +610,8 @@ class SimilaritySongGraph:
         return neighbors[:n]
 
     def recommend_by_mood(self, mood: str, n: int = 5) -> List[str]:
-        """Recommend tracks with a specific mood, prioritizing well-connected nodes.
+        """Recommend tracks with a specific mood, prioritizing well-connected
+        nodes.
 
         Args:
             mood: The mood to filter by

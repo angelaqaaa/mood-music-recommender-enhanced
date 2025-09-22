@@ -1,6 +1,7 @@
 """CSC111 Winter 2025: A Mood-Driven Music Recommender with Genre Hierarchies
 
-Module for creating the visualization interface of the music recommender system.
+Module for creating the visualization interface of the music recommender
+system.
 This module builds a Dash application for interactive music recommendations.
 
 Copyright and Usage Information
@@ -19,7 +20,9 @@ import plotly.graph_objects as go
 from dash import Input, Output, State, callback_context, dcc, html
 
 from src.musicrec.web.components.explanations import generate_explanation
-from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
+from src.musicrec.web.components.keyboard_navigation import (
+    KEYBOARD_NAVIGATION_JS,
+)
 from src.musicrec.web.components.styles import RESPONSIVE_STYLES
 from src.musicrec.web.components.user_features import UserFeaturesManager
 
@@ -36,7 +39,8 @@ except ImportError:
 class MusicRecommenderDashApp:
     """A Dash application for the mood-driven music recommender system.
 
-    This class creates an interactive web interface for exploring and visualizing
+    This class creates an interactive web interface for exploring and
+    visualizing
     music recommendations based on genre, mood, and similarity.
 
     Instance Attributes:
@@ -90,11 +94,11 @@ class MusicRecommenderDashApp:
         """
         )
 
-        # Set the app layout
-        self.app.layout = self._create_layout()
-
-        # Initialize user features manager
+        # Initialize user features manager first
         self.user_features = UserFeaturesManager(self.app, self.recommender)
+
+        # Set the app layout (after user_features is initialized)
+        self.app.layout = self._create_layout()
 
         # Register callbacks
         self._register_callbacks()
@@ -523,7 +527,7 @@ class MusicRecommenderDashApp:
                                             style={
                                                 "overflowX": "auto",
                                                 "overflowY": "auto",
-                                                "maxHeight": "500px",
+                                                "maxHeight": "700px",
                                             },
                                         ),
                                     ],
@@ -538,13 +542,12 @@ class MusicRecommenderDashApp:
                     id="main-content",
                     role="main",
                 ),
-
                 # User Features Section
                 self.user_features.create_favorites_section(),
-
+                # Playlist confirmation messages
+                html.Div(id="playlist-confirmation", className="confirmation-messages"),
                 # Discovery Dashboard
                 self.user_features.create_discovery_dashboard(),
-
                 # Visualization section
                 html.Div(
                     [
@@ -634,8 +637,15 @@ class MusicRecommenderDashApp:
                 dcc.Store(id="current-recommendations-store"),
                 # Hidden div for page load trigger
                 html.Div(id="page-load-trigger", style={"display": "none"}),
+                # Minimal JavaScript - let CSS handle the dropdown positioning
+                html.Script(children="console.log('Dropdown CSS fix loaded');"),
                 # Theme state holder
-                html.Div(id="app-theme", children=[], style={"display": "none"}),
+                html.Div(
+                    id="app-theme",
+                    **{"data-theme": "light"},
+                    children=[],
+                    style={"display": "none"},
+                ),
             ],
             className="main-container",
         )
@@ -644,6 +654,33 @@ class MusicRecommenderDashApp:
 
     def _register_callbacks(self):
         """Register the Dash callbacks for interactive functionality."""
+
+        def get_theme_colors(theme):
+            """Get color scheme based on theme."""
+            if theme == "dark":
+                return {
+                    "plot_bgcolor": "rgba(31, 41, 55, 0.9)",
+                    "paper_bgcolor": "rgba(17, 24, 39, 0.9)",
+                    "font_color": "#F9FAFB",
+                    "grid_color": "rgba(156, 163, 175, 0.3)",
+                    "line_color": "rgba(156, 163, 175, 0.6)",
+                    "annotation_color": "#F9FAFB",
+                    "title_color": "#F9FAFB",
+                    "axis_color": "#F9FAFB",
+                    "tick_color": "#F9FAFB",
+                }
+            else:
+                return {
+                    "plot_bgcolor": "rgba(219, 234, 254, 0.8)",
+                    "paper_bgcolor": "#FFFFFF",
+                    "font_color": "#1F2937",
+                    "grid_color": "rgba(55, 65, 81, 0.3)",
+                    "line_color": "rgba(55, 65, 81, 0.5)",
+                    "annotation_color": "#1F2937",
+                    "title_color": "#1F2937",
+                    "axis_color": "#1F2937",
+                    "tick_color": "#1F2937",
+                }
 
         # Track selection dropdown callback
         @self.app.callback(
@@ -1006,11 +1043,6 @@ class MusicRecommenderDashApp:
                                     },
                                 ),
                                 html.Button(
-                                    "📋 Add to Playlist",
-                                    className="add-to-playlist-btn",
-                                    title="Add to playlist",
-                                ),
-                                html.Button(
                                     "Find Similar",
                                     id={
                                         "type": "track-button",
@@ -1030,7 +1062,7 @@ class MusicRecommenderDashApp:
                                         "cursor": "pointer",
                                         "fontSize": "14px",
                                     },
-                                )
+                                ),
                             ],
                             className="track-card-actions",
                         ),
@@ -1174,10 +1206,20 @@ class MusicRecommenderDashApp:
         # Update bubble chart visualization
         @self.app.callback(
             Output("track-features-bubble-chart", "figure"),
-            [Input("current-recommendations-store", "data")],
+            [
+                Input("current-recommendations-store", "data"),
+                Input("app-theme", "data-theme"),
+            ],
         )
-        def update_features_bubble_chart(recommendations):
+        def update_features_bubble_chart(recommendations, theme):
             """Create a bubble chart visualization of track audio features."""
+            # Debug logging
+            print(f"DEBUG: Bubble chart - Theme received: {theme}")
+
+            # Get theme colors
+            colors = get_theme_colors(theme)
+            print(f"DEBUG: Bubble chart - Colors for {theme}: {colors}")
+
             # If there are no recommendations, return an empty chart
             if not recommendations or len(recommendations) == 0:
                 fig = go.Figure()
@@ -1191,11 +1233,17 @@ class MusicRecommenderDashApp:
                             yref="paper",
                             x=0.5,
                             y=0.5,
+                            font=dict(color=colors["font_color"]),
                         )
                     ],
-                    xaxis=dict(title="Valence (Positivity)"),
-                    yaxis=dict(title="Energy"),
+                    xaxis=dict(
+                        title="Valence (Positivity)", gridcolor=colors["grid_color"]
+                    ),
+                    yaxis=dict(title="Energy", gridcolor=colors["grid_color"]),
                     height=600,
+                    plot_bgcolor=colors["plot_bgcolor"],
+                    paper_bgcolor=colors["paper_bgcolor"],
+                    font=dict(color=colors["font_color"]),
                 )
                 return fig
 
@@ -1208,8 +1256,21 @@ class MusicRecommenderDashApp:
                     if "energy" not in rec or "valence" not in rec:
                         continue
 
-                    # Extract the primary genre
+                    # Extract the primary genre and create a more diverse category for coloring
                     genre = rec["genre_path"][0] if rec["genre_path"] else "unknown"
+
+                    # Create diverse color categories based on energy/valence quadrants and genre
+                    energy_val = rec["energy"]
+                    valence_val = rec["valence"]
+
+                    if energy_val >= 0.5 and valence_val >= 0.5:
+                        color_category = f"High Energy Happy ({genre})"
+                    elif energy_val >= 0.5 and valence_val < 0.5:
+                        color_category = f"High Energy Intense ({genre})"
+                    elif energy_val < 0.5 and valence_val >= 0.5:
+                        color_category = f"Low Energy Happy ({genre})"
+                    else:
+                        color_category = f"Low Energy Sad ({genre})"
 
                     # Calculate popularity
                     popularity = (
@@ -1225,7 +1286,7 @@ class MusicRecommenderDashApp:
                         {
                             "track_name": track_name,
                             "artist_name": artist_name,
-                            "genre": genre,
+                            "genre": color_category,
                             "energy": rec["energy"],
                             "valence": rec["valence"],
                             "mood_tags": mood_tags,
@@ -1247,11 +1308,17 @@ class MusicRecommenderDashApp:
                             yref="paper",
                             x=0.5,
                             y=0.5,
+                            font=dict(color=colors["font_color"]),
                         )
                     ],
-                    xaxis=dict(title="Valence (Positivity)"),
-                    yaxis=dict(title="Energy"),
+                    xaxis=dict(
+                        title="Valence (Positivity)", gridcolor=colors["grid_color"]
+                    ),
+                    yaxis=dict(title="Energy", gridcolor=colors["grid_color"]),
                     height=600,
+                    plot_bgcolor=colors["plot_bgcolor"],
+                    paper_bgcolor=colors["paper_bgcolor"],
+                    font=dict(color=colors["font_color"]),
                 )
                 return fig
 
@@ -1271,15 +1338,46 @@ class MusicRecommenderDashApp:
                             yref="paper",
                             x=0.5,
                             y=0.5,
+                            font=dict(color=colors["font_color"]),
                         )
                     ],
-                    xaxis=dict(title="Valence (Positivity)"),
-                    yaxis=dict(title="Energy"),
+                    xaxis=dict(
+                        title="Valence (Positivity)", gridcolor=colors["grid_color"]
+                    ),
+                    yaxis=dict(title="Energy", gridcolor=colors["grid_color"]),
                     height=600,
+                    plot_bgcolor=colors["plot_bgcolor"],
+                    paper_bgcolor=colors["paper_bgcolor"],
+                    font=dict(color=colors["font_color"]),
                 )
                 return fig
 
-            # Create bubble chart
+            # Create bubble chart with theme-appropriate colors
+            if theme == "dark":
+                # Use bright colors for dark mode
+                color_sequence = [
+                    "#FF6B6B",
+                    "#4ECDC4",
+                    "#45B7D1",
+                    "#96CEB4",
+                    "#FFEAA7",
+                    "#DDA0DD",
+                    "#98D8C8",
+                    "#F7DC6F",
+                ]
+            else:
+                # Use darker colors for light mode
+                color_sequence = [
+                    "#E74C3C",
+                    "#16A085",
+                    "#2980B9",
+                    "#27AE60",
+                    "#F39C12",
+                    "#8E44AD",
+                    "#17A2B8",
+                    "#FFC107",
+                ]
+
             fig = px.scatter(
                 df,
                 x="valence",
@@ -1296,19 +1394,48 @@ class MusicRecommenderDashApp:
                     "popularity": False,
                 },
                 size_max=50,
-                opacity=0.7,
+                opacity=1.0,
+                color_discrete_sequence=color_sequence,
+            )
+
+            # Force visible markers with explicit styling and better contrast
+            outline_color = "white" if theme == "dark" else "#6B7280"
+            fig.update_traces(
+                marker=dict(
+                    line=dict(
+                        width=3, color=outline_color
+                    ),  # Thicker outline for visibility
+                    sizemin=12,  # Larger minimum size
+                    opacity=0.85,  # Ensure visibility
+                ),
+                textfont_size=12,
             )
 
             # Update layout
             fig.update_layout(
-                title="Audio Features: Energy vs. Valence",
-                xaxis=dict(
-                    title="Valence (Positivity)", range=[0, 1], gridcolor="lightgray"
+                title=dict(
+                    text="Audio Features: Energy vs. Valence",
+                    font=dict(color=colors["title_color"]),
                 ),
-                yaxis=dict(title="Energy", range=[0, 1], gridcolor="lightgray"),
+                xaxis=dict(
+                    title="Valence (Positivity)",
+                    range=[0, 1],
+                    gridcolor=colors["grid_color"],
+                    titlefont=dict(color=colors["axis_color"]),
+                    tickfont=dict(color=colors["tick_color"]),
+                ),
+                yaxis=dict(
+                    title="Energy",
+                    range=[0, 1],
+                    gridcolor=colors["grid_color"],
+                    titlefont=dict(color=colors["axis_color"]),
+                    tickfont=dict(color=colors["tick_color"]),
+                ),
                 height=600,
-                legend_title="Genre",
-                plot_bgcolor="rgba(240, 245, 250, 0.95)",
+                legend_title="Music Category",
+                plot_bgcolor=colors["plot_bgcolor"],
+                paper_bgcolor=colors["paper_bgcolor"],
+                font=dict(color=colors["font_color"]),
                 margin=dict(l=40, r=40, t=50, b=40),
             )
 
@@ -1319,7 +1446,7 @@ class MusicRecommenderDashApp:
                 y0=0,
                 x1=0.5,
                 y1=1,
-                line=dict(color="gray", width=1, dash="dash"),
+                line=dict(color=colors["line_color"], width=1, dash="dash"),
             )
 
             fig.add_shape(
@@ -1328,7 +1455,7 @@ class MusicRecommenderDashApp:
                 y0=0.5,
                 x1=1,
                 y1=0.5,
-                line=dict(color="gray", width=1, dash="dash"),
+                line=dict(color=colors["line_color"], width=1, dash="dash"),
             )
 
             fig.add_annotation(
@@ -1338,7 +1465,7 @@ class MusicRecommenderDashApp:
                 x=0.25,
                 y=0.25,
                 showarrow=False,
-                font=dict(size=10, color="gray"),
+                font=dict(size=10, color=colors["annotation_color"]),
             )
 
             fig.add_annotation(
@@ -1348,7 +1475,7 @@ class MusicRecommenderDashApp:
                 x=0.75,
                 y=0.75,
                 showarrow=False,
-                font=dict(size=10, color="gray"),
+                font=dict(size=10, color=colors["annotation_color"]),
             )
 
             fig.add_annotation(
@@ -1358,7 +1485,7 @@ class MusicRecommenderDashApp:
                 x=0.25,
                 y=0.75,
                 showarrow=False,
-                font=dict(size=10, color="gray"),
+                font=dict(size=10, color=colors["annotation_color"]),
             )
 
             fig.add_annotation(
@@ -1368,7 +1495,7 @@ class MusicRecommenderDashApp:
                 x=0.75,
                 y=0.25,
                 showarrow=False,
-                font=dict(size=10, color="gray"),
+                font=dict(size=10, color=colors["annotation_color"]),
             )
 
             return fig
@@ -1376,7 +1503,10 @@ class MusicRecommenderDashApp:
         # Update similarity graph visualization
         @self.app.callback(
             Output("similarity-graph", "figure"),
-            [Input("current-recommendations-store", "data")],
+            [
+                Input("current-recommendations-store", "data"),
+                Input("app-theme", "data-theme"),
+            ],
             [
                 State("search-type-tabs", "value"),
                 State("genre-dropdown", "value"),
@@ -1387,6 +1517,7 @@ class MusicRecommenderDashApp:
         )
         def update_similarity_graph(
             recommendations,
+            theme,
             active_tab,
             selected_genre,
             mood,
@@ -1394,6 +1525,13 @@ class MusicRecommenderDashApp:
             selected_track_store,
         ):
             """Create a network visualization of track similarities."""
+            # Debug logging
+            print(f"DEBUG: Similarity graph - Theme received: {theme}")
+
+            # Get theme colors
+            colors = get_theme_colors(theme)
+            print(f"DEBUG: Similarity graph - Colors for {theme}: {colors}")
+
             if not recommendations or len(recommendations) == 0:
                 # Create a basic figure with instructions
                 fig = go.Figure()
@@ -1407,8 +1545,12 @@ class MusicRecommenderDashApp:
                             yref="paper",
                             x=0.5,
                             y=0.5,
+                            font=dict(color=colors["font_color"]),
                         )
                     ],
+                    plot_bgcolor=colors["plot_bgcolor"],
+                    paper_bgcolor=colors["paper_bgcolor"],
+                    font=dict(color=colors["font_color"]),
                 )
                 return fig
 
@@ -1451,7 +1593,7 @@ class MusicRecommenderDashApp:
             edge_trace = go.Scatter(
                 x=edge_x,
                 y=edge_y,
-                line=dict(width=2.5, color="#888"),
+                line=dict(width=2.5, color=colors["line_color"]),
                 hoverinfo="none",
                 mode="lines",
             )
@@ -1520,6 +1662,14 @@ class MusicRecommenderDashApp:
                 # Save track name for display
                 node_text.append(track_name)
 
+            # Choose colorscale based on theme
+            if theme == "dark":
+                colorscale = "Plasma"  # Bright colors for dark mode
+                marker_outline_color = "#FFFFFF"
+            else:
+                colorscale = "Viridis"  # Standard colors for light mode
+                marker_outline_color = "#000000"
+
             # Create node trace
             node_trace = go.Scatter(
                 x=node_x,
@@ -1531,15 +1681,18 @@ class MusicRecommenderDashApp:
                 hovertext=hover_text,
                 marker=dict(
                     showscale=True,
-                    colorscale="Viridis",
+                    colorscale=colorscale,
                     size=node_size,
                     color=node_color,
-                    line=dict(width=2, color="#333"),
+                    line=dict(width=3, color=marker_outline_color),  # Thicker outline
+                    sizemin=10,  # Minimum size for visibility
                     colorbar=dict(
                         title="Genre",
                         thickness=15,
                         tickvals=list(genre_colors.values()),
                         ticktext=list(genre_colors.keys()),
+                        titlefont=dict(color=colors["font_color"]),
+                        tickfont=dict(color=colors["font_color"]),
                     ),
                 ),
             )
@@ -1569,14 +1722,16 @@ class MusicRecommenderDashApp:
 
             # Update layout settings
             fig.update_layout(
-                title=title_text,
+                title=dict(text=title_text, font=dict(color=colors["title_color"])),
                 showlegend=False,
                 hovermode="closest",
                 margin=dict(b=20, l=5, r=5, t=40),
                 height=700,
                 xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                 yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                plot_bgcolor="rgba(240, 245, 250, 0.95)",
+                plot_bgcolor=colors["plot_bgcolor"],
+                paper_bgcolor=colors["paper_bgcolor"],
+                font=dict(color=colors["font_color"]),
             )
 
             return fig
@@ -1608,31 +1763,25 @@ class MusicRecommenderDashApp:
 
             return dash.no_update
 
-        # Dark mode toggle callback
-        @self.app.callback(
-            Output("app-theme", "children"),
+        # Dark mode toggle clientside callback
+        self.app.clientside_callback(
+            """
+            function(n_clicks) {
+                if (n_clicks) {
+                    var currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                    var newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    console.log('Theme switched to:', newTheme);
+                    return newTheme;
+                }
+                return window.dash_clientside.no_update;
+            }
+            """,
+            Output("app-theme", "data-theme"),
             [Input("theme-toggle", "n_clicks")],
-            [State("app-theme", "children")],
-            prevent_initial_call=True
+            prevent_initial_call=True,
         )
-        def toggle_dark_mode(n_clicks, current_theme):
-            """Toggle between dark and light mode."""
-            if n_clicks is None:
-                return dash.no_update
-
-            # Toggle theme
-            if current_theme and "dark" in str(current_theme):
-                # Switch to light mode
-                return html.Script("""
-                    document.documentElement.setAttribute('data-theme', 'light');
-                    localStorage.setItem('theme', 'light');
-                """)
-            else:
-                # Switch to dark mode
-                return html.Script("""
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                    localStorage.setItem('theme', 'dark');
-                """)
 
     def _add_metrics_endpoint(self):
         """Add metrics and health endpoints to the Flask server."""

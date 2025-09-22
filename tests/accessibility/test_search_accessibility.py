@@ -12,7 +12,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import unittest
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock
 
 from src.musicrec.web.search.engine import SearchEngine
 
@@ -215,7 +215,7 @@ class TestSearchAccessibility(unittest.TestCase):
         # Test with recommender that has issues
         error_recommender.genre_tree.tracks = None
         try:
-            results = search_engine.search_tracks("test")
+            search_engine.search_tracks("test")
             # Should handle gracefully, not crash
         except Exception:
             pass  # Some exceptions are acceptable for malformed data

@@ -1,7 +1,8 @@
 """CSC111 Winter 2025: A Mood-Driven Music Recommender with Genre Hierarchies
 
 Module for managing the recommendation engine of the music recommender system.
-This module builds the data structures and implements recommendation algorithms.
+This module builds the data structures and implements recommendation
+algorithms.
 
 Copyright and Usage Information
 ===============================
@@ -23,9 +24,11 @@ from .structures import GenreTree, MusicNode, SimilaritySongGraph
 
 
 class MusicRecommender:
-    """The core recommendation engine for the mood-driven music recommender system.
+    """The core recommendation engine for the mood-driven music recommender
+    system.
 
-    This class builds and manages the genre tree and similarity graph, and provides
+    This class builds and manages the genre tree and similarity graph, and
+    provides
     various recommendation algorithms.
 
     Instance Attributes:
@@ -48,7 +51,8 @@ class MusicRecommender:
 
         Args:
             data: The processed DataFrame containing track data
-            audio_features: List of audio feature column names to use for similarity
+            audio_features: List of audio feature column names to use for
+                            similarity
         """
         print("Initializing music recommender...")
         self.data = data
@@ -116,7 +120,8 @@ class MusicRecommender:
             if track_count % print_interval == 0 or track_count == total_tracks:
                 print(
                     f"  Progress: {track_count}/{total_tracks} "
-                    f"tracks processed ({int(track_count / total_tracks * 100)}%)"
+                    f"tracks processed "
+                    f"({int(track_count / total_tracks * 100)}%)"
                 )
 
         print("Building similarity graph...")
@@ -134,7 +139,8 @@ class MusicRecommender:
         genre_count = len(self.get_available_genres())
         mood_count = len(self.get_available_moods())
         print(
-            f"Summary: {track_count} tracks, {genre_count} genres, {mood_count} moods"
+            f"Summary: {track_count} tracks, {genre_count} genres, "
+            f"{mood_count} moods"
         )
 
     def recommend_by_genre(self, genre: str, limit: int = 10) -> List[Dict[str, Any]]:
@@ -145,7 +151,8 @@ class MusicRecommender:
             limit: Maximum number of tracks to recommend
 
         Returns:
-            List of track dictionaries with track_id, genre_path, and other attributes
+            List of track dictionaries with track_id, genre_path, and other
+            attributes
         """
         # Search for tracks in the genre
         track_nodes = self.genre_tree.search_by_genre(genre)
@@ -182,7 +189,8 @@ class MusicRecommender:
             limit: Maximum number of tracks to recommend
 
         Returns:
-            List of track dictionaries with track_id, genre_path, and other attributes
+            List of track dictionaries with track_id, genre_path, and other
+            attributes
         """
         # Search for tracks with the mood
         track_nodes = self.genre_tree.search_by_mood(mood)
@@ -222,7 +230,8 @@ class MusicRecommender:
             limit: Maximum number of tracks to recommend
 
         Returns:
-            List of track dictionaries with track_id, genre_path, and other attributes
+            List of track dictionaries with track_id, genre_path, and other
+            attributes
         """
         # Search for tracks with both genre and mood
         track_nodes = self.genre_tree.search_by_genre_and_mood(genre, mood)
@@ -261,7 +270,8 @@ class MusicRecommender:
             limit: Maximum number of tracks to recommend
 
         Returns:
-            List of track dictionaries with track_id, similarity, and other attributes
+            List of track dictionaries with track_id, similarity, and other
+            attributes
         """
         # Get similar tracks from the similarity graph
         similar_tracks = self.similarity_graph.recommend_similar_tracks(track_id, limit)
@@ -281,7 +291,8 @@ class MusicRecommender:
                     ]
                     if recommendations:
                         print(
-                            f"No direct similarities found for {track_id}, using genre fallback"
+                            f"No direct similarities found for {track_id}, "
+                            f"using genre fallback"
                         )
                         return recommendations[:limit]
 
@@ -295,7 +306,8 @@ class MusicRecommender:
                     ]
                     if recommendations:
                         print(
-                            f"No similarities found for {track_id}, using mood fallback"
+                            f"No similarities found for {track_id}, "
+                            f"using mood fallback"
                         )
                         return recommendations[:limit]
 
@@ -342,7 +354,8 @@ class MusicRecommender:
             limit: Maximum number of tracks to recommend
 
         Returns:
-            List of track dictionaries with track_id, genre_path, and other attributes
+            List of track dictionaries with track_id, genre_path, and other
+            attributes
         """
         # Perform BFS search
         track_nodes = self.genre_tree.bfs_search(genre, mood, max_depth)
@@ -399,7 +412,8 @@ class MusicRecommender:
             limit: Maximum number of tracks to recommend
 
         Returns:
-            List of track dictionaries with track_id, genre_path, and other attributes
+            List of track dictionaries with track_id, genre_path, and other
+            attributes
         """
         # Perform DFS search
         track_nodes = self.genre_tree.dfs_search(genre, mood, max_breadth)

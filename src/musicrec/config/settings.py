@@ -1,6 +1,7 @@
 """Configuration settings for the music recommender system.
 
-This module provides centralized configuration management, including default settings
+This module provides centralized configuration management, including default
+settings
 for data file paths and other application settings.
 """
 
@@ -87,7 +88,8 @@ def _get_nested_value(config: Dict[str, Any], key_path: str) -> Any:
 
 
 def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
-    """Load configuration from defaults, config file, and environment variables.
+    """Load configuration from defaults, config file, and environment
+    variables.
 
     Args:
         config_path: Optional path to JSON config file

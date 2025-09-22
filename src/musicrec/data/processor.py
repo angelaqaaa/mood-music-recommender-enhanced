@@ -1,6 +1,7 @@
 """CSC111 Winter 2025: A Mood-Driven Music Recommender with Genre Hierarchies
 
-Module for processing music datasets and merging them into a unified representation.
+Module for processing music datasets and merging them into a unified
+representation.
 This module handles loading and parsing the Spotify and Jamendo datasets.
 
 Copyright and Usage Information
@@ -33,10 +34,13 @@ def load_spotify_data(filepath: str) -> pd.DataFrame:
     try:
         spotify_df = pd.read_csv(filepath)
 
-        # Check if this is the new spotify_songs.csv format or the old 1200_song_mapped.csv
+        # Check if this is the new spotify_songs.csv format or the old
+        # 1200_song_mapped.csv
         if "track_name" in spotify_df.columns and "danceability" in spotify_df.columns:
             # This is the new spotify_songs.csv format
-            print(f"Detected spotify_songs.csv format with {len(spotify_df)} tracks")
+            print(
+                f"Detected spotify_songs.csv format with {len(spotify_df)} " f"tracks"
+            )
 
             # Rename columns to match what our system expects
             column_mapping = {
@@ -115,7 +119,11 @@ def load_jamendo_genre_data(filepath: str) -> pd.DataFrame:
 
             # Add to data
             data.append(
-                {"TRACK_ID": track_id, "DURATION": duration, "genre_tags": genre_tags}
+                {
+                    "TRACK_ID": track_id,
+                    "DURATION": duration,
+                    "genre_tags": genre_tags,
+                }
             )
 
         # Create DataFrame
@@ -166,7 +174,11 @@ def load_jamendo_mood_data(filepath: str) -> pd.DataFrame:
 
             # Add to data
             data.append(
-                {"TRACK_ID": track_id, "DURATION": duration, "mood_tags": mood_tags}
+                {
+                    "TRACK_ID": track_id,
+                    "DURATION": duration,
+                    "mood_tags": mood_tags,
+                }
             )
 
         # Create DataFrame
@@ -229,8 +241,13 @@ def load_metadata(filepath: str) -> pd.DataFrame:
             row = {}
             for i, part in enumerate(parts):
                 if i < len(header):
-                    # Decode HTML entities if this is a text field like TRACK_NAME or ARTIST_NAME
-                    if header[i] in ["TRACK_NAME", "ARTIST_NAME", "ALBUM_NAME"]:
+                    # Decode HTML entities if this is a text field like
+                    # TRACK_NAME or ARTIST_NAME
+                    if header[i] in [
+                        "TRACK_NAME",
+                        "ARTIST_NAME",
+                        "ALBUM_NAME",
+                    ]:
                         row[header[i]] = html.unescape(part)
                     else:
                         row[header[i]] = part
@@ -252,7 +269,8 @@ def extract_genre_hierarchy(genre_tags: List[str]) -> List[str]:
     """Extract a genre hierarchy from a list of genre tags.
 
     Args:
-        genre_tags: A list of genre strings (e.g., ['metal', 'rock', 'punkrock'])
+        genre_tags: A list of genre strings (e.g., ['metal', 'rock',
+                    'punkrock'])
 
     Returns:
         A list representing the genre hierarchy path
@@ -265,7 +283,8 @@ def extract_genre_hierarchy(genre_tags: List[str]) -> List[str]:
     ['metal', 'deathmetal']
     """
     # Define genre parent relationships
-    # This is a simplified mapping; in a real project you might want more sophisticated rules
+    # This is a simplified mapping; in a real project you might want more
+    # sophisticated rules
     genre_parents = {
         "punkrock": "rock",
         "hardrock": "rock",
@@ -332,7 +351,8 @@ def extract_genre_hierarchy(genre_tags: List[str]) -> List[str]:
     hierarchy = list(hierarchy_set)
 
     # Sort hierarchy to ensure parent genres come before child genres
-    # This is a simplified sort; in a real project you might need a more complex algorithm
+    # This is a simplified sort; in a real project you might need a more
+    # complex algorithm
     sorted_hierarchy = []
 
     # First add high-level genres (those that are parents but not children)
@@ -384,7 +404,8 @@ def merge_datasets(
     """
     print("Merging datasets...")
 
-    # First, merge genre and mood data (same source, so we can join on TRACK_ID)
+    # First, merge genre and mood data (same source, so we can join on
+    # TRACK_ID)
     # We'll do an outer join to keep all tracks
     jamendo_merged = pd.merge(
         genre_df[["TRACK_ID", "DURATION", "genre_tags"]],
@@ -395,7 +416,8 @@ def merge_datasets(
 
     # Create a unified DataFrame
     # This is a placeholder for real matching between Spotify and Jamendo data
-    # In a real project, you might need more sophisticated matching based on track names, etc.
+    # In a real project, you might need more sophisticated matching based on
+    # track names, etc.
 
     # Create a unified ID field (we'll use TRACK_ID from Jamendo)
     merged_df = jamendo_merged.copy()
@@ -423,7 +445,10 @@ def merge_datasets(
         if avail_columns:
             print(f"Merging on metadata columns: {avail_columns}")
             merged_df = pd.merge(
-                merged_df, metadata_df_renamed[avail_columns], on="track_id", how="left"
+                merged_df,
+                metadata_df_renamed[avail_columns],
+                on="track_id",
+                how="left",
             )
 
     # For the new spotify_songs.csv format, we need to handle it differently
@@ -608,7 +633,10 @@ def preprocess_merged_data(merged_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_dataset(
-    spotify_path: str, genre_path: str, mood_path: str, metadata_path: str = None
+    spotify_path: str,
+    genre_path: str,
+    mood_path: str,
+    metadata_path: str = None,
 ) -> pd.DataFrame:
     """Build the complete dataset by loading and merging all data sources.
 

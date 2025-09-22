@@ -1,8 +1,6 @@
 """Tests for keyboard navigation and focus management functionality."""
 
-from unittest.mock import MagicMock, Mock, patch
-
-import pytest
+from unittest.mock import Mock, patch
 
 from src.musicrec.web.components.keyboard_navigation import (
     KEYBOARD_NAVIGATION_JS,
@@ -93,15 +91,13 @@ class TestKeyboardNavigationIntegration:
             assert "handleKeyboardNavigation" in app.app.index_string
             assert "focusFirstRecommendation" in app.app.index_string
 
-        except Exception as e:
+        except Exception:
             # If initialization fails due to callback issues, that's okay for this test
             # We mainly want to verify the JavaScript injection
             pass
 
     def test_recommendation_cards_have_proper_attributes(self):
         """Test that recommendation cards have proper ARIA and keyboard attributes."""
-        from src.musicrec.web.app import MusicRecommenderDashApp
-
         mock_recommender = Mock()
         mock_recommender.get_available_genres.return_value = ["rock"]
         mock_recommender.get_available_moods.return_value = ["happy"]
