@@ -7,6 +7,11 @@
 [![Features](https://img.shields.io/badge/features-user_interactive-purple.svg)](./FEATURES.md)
 
 > **An enterprise-grade music recommendation system that discovers songs based on mood, genre hierarchies, and audio feature similarity. Built with Python, featuring interactive visualizations, modern web interface, and production-ready deployment.**
+> 
+<img width="1470" height="956" alt="Screenshot 2025-09-22 at 8 15 55 AM" src="https://github.com/user-attachments/assets/c42c3fe9-694f-4a8a-8715-485f7913b1b2" />
+
+<img width="1470" height="473" alt="image" src="https://github.com/user-attachments/assets/24da46fe-70eb-42c5-adf0-039c698e6fd2" />
+
 
 ## ✨ **Key Features**
 
