@@ -37,4 +37,7 @@ Thumbs.db
 
 # Logs
 *.log
+*.pid
 musicrec.log
+.mood_server.log
+.mood_server.pid

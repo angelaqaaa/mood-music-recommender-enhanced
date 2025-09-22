@@ -20,9 +20,7 @@ import plotly.graph_objects as go
 from dash import Input, Output, State, callback_context, dcc, html
 
 from src.musicrec.web.components.explanations import generate_explanation
-from src.musicrec.web.components.keyboard_navigation import (
-    KEYBOARD_NAVIGATION_JS,
-)
+from src.musicrec.web.components.keyboard_navigation import KEYBOARD_NAVIGATION_JS
 from src.musicrec.web.components.styles import RESPONSIVE_STYLES
 from src.musicrec.web.components.user_features import UserFeaturesManager
 

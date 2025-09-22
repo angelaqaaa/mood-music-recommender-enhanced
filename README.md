@@ -1,9 +1,9 @@
 # 🎵 Mood Music Recommender - Enhanced Edition
 
 [![CI/CD Pipeline](https://github.com/angelaqaaa/mood-music-recommender-enhanced/workflows/CI/badge.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced/actions)
-[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://python.org)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-22_files-brightgreen.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced)
+[![Tests](https://img.shields.io/badge/tests-15_files-brightgreen.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced)
 [![Features](https://img.shields.io/badge/features-user_interactive-purple.svg)](./FEATURES.md)
 
 > **An enterprise-grade music recommendation system that discovers songs based on mood, genre hierarchies, and audio feature similarity. Built with Python, featuring interactive visualizations, modern web interface, and production-ready deployment.**
@@ -28,16 +28,16 @@
 - **Interactive visualizations** with Plotly and NetworkX
 - **Professional UI** with gradient styling and animations
 
-### 🏗️ **Production-Ready Architecture**
-- **Modular design** with clean separation of concerns
-- **Type-safe implementation** with comprehensive type hints
-- **Comprehensive testing** across 22 test files
-- **CI/CD automation** with 5 GitHub Actions workflows
+### 🏗️ **Enterprise Architecture**
+- **Clean modular architecture** with separation of concerns and dependency injection
+- **Type-safe Python implementation** with comprehensive type hints and validation
+- **Extensive test coverage** spanning unit, integration, performance, and accessibility tests
+- **Full CI/CD pipeline** with automated testing, code quality checks, and multi-platform deployment
 
 ## 🚀 **Quick Start**
 
 ### Prerequisites
-- Python 3.11+
+- Python 3.10+
 - Git
 
 ### Installation
@@ -70,6 +70,14 @@ docker build -t musicrec-enhanced .
 # Run the container
 docker run -p 8040:8040 musicrec-enhanced
 ```
+
+### Cloud Deployment
+
+The project includes configuration for multiple cloud platforms:
+
+- **Railway**: Deploy using `railway.json` configuration
+- **Render**: Deploy using `render.yaml` configuration
+- **Docker**: Universal containerized deployment
 
 ## 🎬 **Usage Examples**
 
@@ -104,6 +112,7 @@ src/musicrec/
 ├── web/             # Web interface and components
 │   ├── components/  # UI components and styles
 │   ├── search/      # Advanced search engine
+│   ├── static/js/   # JavaScript assets
 │   └── app.py       # Main Dash application
 ├── utils/           # Utilities and logging
 ├── metrics/         # Performance monitoring
@@ -128,11 +137,11 @@ src/musicrec/
 - **Memory Usage**: ~200MB (sample), ~800MB (full dataset)
 
 ### Code Quality
-- **Testing**: 22 test files covering core functionality, search, and integration
+- **Testing**: 15 test files covering core functionality, search, and integration
 - **Code Formatting**: Black, isort for consistent styling
 - **Type Checking**: MyPy for type safety
 - **Linting**: Flake8 for code quality
-- **CI/CD**: 5 automated workflows for quality gates
+- **CI/CD**: 6 automated workflows for quality gates
 
 ## 🧪 **Development & Testing**
 
@@ -204,8 +213,8 @@ All features beyond the original course scope are documented in [FEATURES.md](FE
 - 🎨 Modern web interface with dark/light mode toggle
 - 🔍 Enterprise-grade search engine with trigram indexing
 - ⚡ Production deployment optimizations
-- 🧪 Comprehensive testing infrastructure (22 test files)
-- 🔄 CI/CD automation with 5 GitHub Actions workflows
+- 🧪 Comprehensive testing infrastructure (15 test files)
+- 🔄 CI/CD automation with 6 GitHub Actions workflows
 - 📊 Performance monitoring and metrics collection
 - 🎯 Enhanced recommendation algorithms with smart fallbacks
 

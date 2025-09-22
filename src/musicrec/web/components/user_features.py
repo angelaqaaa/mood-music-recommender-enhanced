@@ -9,12 +9,12 @@ This module provides practical features that users can interact with:
 
 import json
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
 import dash
-from dash import dcc, html, Input, Output, State, callback_context, ALL
-from dash.exceptions import PreventUpdate
-import plotly.graph_objects as go
 import plotly.express as px
+import plotly.graph_objects as go
+from dash import ALL, Input, Output, State, callback_context, dcc, html
 from dash.exceptions import PreventUpdate
 
 
