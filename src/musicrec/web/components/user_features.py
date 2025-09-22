@@ -7,12 +7,7 @@ This module provides practical features that users can interact with:
 - User preferences management
 """
 
-import json
-from datetime import datetime
-from typing import Any, Dict, List
-
 import dash
-import plotly.express as px
 import plotly.graph_objects as go
 from dash import ALL, Input, Output, State, callback_context, dcc, html
 from dash.exceptions import PreventUpdate
@@ -242,7 +237,6 @@ class UserFeaturesManager:
         def update_user_stats(favorites, playlists):
             """Update user statistics display."""
             total_favorites = len(favorites)
-            total_playlists = len(playlists)
             total_playlist_tracks = sum(
                 len(p) if isinstance(p, list) else len(p.get("tracks", []))
                 for p in playlists.values()
