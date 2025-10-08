@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.0] - 2025-10-08
+
+### Changed
+- 📁 Reorganized documentation into `docs/` directory for cleaner structure
+- 📄 Updated README.md with accurate metrics (196 tests, 47% coverage, dataset sizes)
+- ⚙️ Consolidated mypy configuration from `mypy.ini` into `pyproject.toml`
+- 🔧 Streamlined dependencies by removing unnecessary production requirements
+- 📝 Clarified project as personal portfolio with accurate attribution
+
+### Fixed
+- Fixed dataset numbers in README (32,833 Spotify tracks + 55,215 Jamendo annotations)
+- Restored `.flake8` config file (flake8 doesn't support pyproject.toml natively)
+- Fixed test command examples in documentation
+
+---
+
 ## [2.2.0] - 2025-09-15
 
 ### Added
@@ -16,8 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 📊 Interactive visualizations with Plotly (network graphs, bubble charts)
 - 🎯 Enhanced recommendation algorithms with smart fallback systems
 - 📱 Responsive design optimized for mobile and desktop
-- 🧪 Comprehensive testing infrastructure (22 test files)
-- 🔄 CI/CD automation with 5 GitHub Actions workflows
+- 🧪 Comprehensive testing infrastructure (196 tests across 15 test files)
+- 🔄 CI/CD automation with 6 GitHub Actions workflows
 - 📚 Complete documentation overhaul (README, FEATURES, CONTRIBUTING)
 
 ### Changed
