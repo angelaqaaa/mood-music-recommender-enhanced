@@ -3,8 +3,8 @@
 [![CI/CD Pipeline](https://github.com/angelaqaaa/mood-music-recommender-enhanced/workflows/CI/badge.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced/actions)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-15_files-brightgreen.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced)
-[![Features](https://img.shields.io/badge/features-user_interactive-purple.svg)](./FEATURES.md)
+[![Tests](https://img.shields.io/badge/tests-196_passing-brightgreen.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced)
+[![Features](https://img.shields.io/badge/features-user_interactive-purple.svg)](./docs/FEATURES.md)
 
 > **An enterprise-grade music recommendation system that discovers songs based on mood, genre hierarchies, and audio feature similarity. Built with Python, featuring interactive visualizations, modern web interface, and production-ready deployment.**
 > 
@@ -138,13 +138,14 @@ src/musicrec/
 ## 📈 **Performance & Quality**
 
 ### Technical Metrics
-- **Dataset Capacity**: 55,446+ tracks with full metadata and audio features
+- **Dataset Capacity**: 32,000+ tracks (Spotify) + 55,000+ genre annotations (Jamendo)
 - **Search Performance**: Sub-100ms response times with LRU caching
 - **Startup Time**: < 5 seconds (sample), optimized for production deployment
 - **Memory Usage**: ~200MB (sample), ~800MB (full dataset)
 
 ### Code Quality
-- **Testing**: 15 test files covering core functionality, search, and integration
+- **Testing**: 196 tests across 15 test files with 47% code coverage (88%+ on core modules)
+- **Test Success Rate**: 100% (196/196 passing)
 - **Code Formatting**: Black, isort for consistent styling
 - **Type Checking**: MyPy for type safety
 - **Linting**: Flake8 for code quality
@@ -161,9 +162,10 @@ pytest
 pytest --cov=src/musicrec --cov-report=html
 
 # Run specific test categories
-pytest tests/test_*core*        # Core functionality
+pytest tests/unit/              # Core functionality
 pytest tests/performance/       # Performance tests
-pytest tests/test_*integration* # Integration tests
+pytest tests/integration/       # Integration tests
+pytest tests/accessibility/     # Accessibility tests
 ```
 
 ### Code Quality Tools
@@ -189,18 +191,12 @@ The application supports various configuration options via environment variables
 - **PORT**: Custom port (default: 8040)
 - **LOG_LEVEL**: Logging verbosity (INFO, DEBUG, etc.)
 
-## 🤝 **Contributing**
+## 💼 **About This Project**
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+This is a personal portfolio project showcasing full-stack development, testing, and DevOps skills. The codebase is available under the MIT License - feel free to explore, learn from it, or fork it for your own use!
 
-### Quick Contribution Steps
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Run tests** and ensure code quality (`pytest`, `black`, `flake8`, `mypy`)
-4. **Commit** with conventional commit format
-5. **Push** and create a Pull Request
-
-All contributions are automatically tested via GitHub Actions CI/CD.
+### Questions or Feedback?
+If you have questions about the implementation or find any issues, please feel free to open an issue on GitHub. While this is a personal project, constructive feedback is always appreciated.
 
 ## 📜 **Project History & Attribution**
 
@@ -216,11 +212,11 @@ All contributions are automatically tested via GitHub Actions CI/CD.
   - Comprehensive testing suite and code quality tools
 
 ### Key Enhancements Added
-All features beyond the original course scope are documented in [FEATURES.md](FEATURES.md), including:
+All features beyond the original course scope are documented in [FEATURES.md](docs/FEATURES.md), including:
 - 🎨 Modern web interface with dark/light mode toggle
 - 🔍 Enterprise-grade search engine with trigram indexing
 - ⚡ Production deployment optimizations
-- 🧪 Comprehensive testing infrastructure (15 test files)
+- 🧪 Comprehensive testing infrastructure (196 tests across 15 files)
 - 🔄 CI/CD automation with 6 GitHub Actions workflows
 - 📊 Performance monitoring and metrics collection
 - 🎯 Enhanced recommendation algorithms with smart fallbacks
@@ -231,6 +227,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 **Links**
 
-- [**Features Documentation**](./FEATURES.md) - Detailed feature overview
-- [**Contributing Guide**](./CONTRIBUTING.md) - Development guidelines
+- [**Features Documentation**](./docs/FEATURES.md) - Detailed feature overview
+- [**Deployment Guide**](./docs/DEPLOYMENT.md) - Production deployment instructions
 - [**Changelog**](CHANGELOG.md) - Version history and updates

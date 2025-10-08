@@ -7,7 +7,6 @@
 All deployment infrastructure has been implemented and committed:
 
 - ✅ **Dockerfile** - Multi-stage production build
-- ✅ **requirements-prod.txt** - Production dependencies
 - ✅ **render.yaml** - Render platform configuration
 - ✅ **railway.json** - Railway platform configuration
 - ✅ **Health Check Endpoint** - `/health` endpoint for monitoring
@@ -82,11 +81,12 @@ mv README_new.md README.md
 # - PyCharm's built-in screenshot
 # - Command+Shift+4 on Mac
 
-# Replace placeholders in assets/screenshots/ with real images:
-# - main_interface.png
-# - search_results.png
-# - mobile_view.png
-# - accessibility_demo.png
+# Add screenshots to your GitHub repository or documentation
+# Recommended screenshots:
+# - main_interface.png - Main application interface
+# - search_results.png - Search functionality demo
+# - mobile_view.png - Responsive mobile design
+# - accessibility_demo.png - Accessibility features
 ```
 
 ## 📊 **CURRENT PROJECT STATUS**
