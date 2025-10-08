@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and application code
-COPY requirements.txt requirements-prod.txt ./
+COPY requirements.txt ./
 COPY src/ ./src/
 COPY *.md ./
 COPY pyproject.toml ./
@@ -20,7 +20,7 @@ COPY pyproject.toml ./
 COPY data/ ./data/
 
 # Install Python dependencies globally
-RUN pip install --no-cache-dir -r requirements-prod.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Set environment variables
 ENV PYTHONPATH=/app/src

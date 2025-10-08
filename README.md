@@ -58,7 +58,9 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
-pip install -r requirements-dev.txt  # For development
+
+# For development (optional)
+pip install -r requirements-dev.txt
 
 # Run the application with sample data
 python -m src.musicrec.main --sample
