@@ -11,4 +11,5 @@ pytest-timeout>=2.0.0,<3.0.0
 
 # Security tools (used in CI)
 bandit>=1.7.0,<2.0.0
-safety>=2.0.0,<4.0.0
+safety>=3.6.2,<4.0.0
+authlib>=1.6.5,<2.0.0  # Security fix for CVE-2025-59420 and CVE-2025-61920
