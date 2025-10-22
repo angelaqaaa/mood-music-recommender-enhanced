@@ -228,5 +228,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔗 **Links**
 
 - [**Features Documentation**](./docs/FEATURES.md) - Detailed feature overview
-- [**Deployment Guide**](./docs/DEPLOYMENT.md) - Production deployment instructions
 - [**Changelog**](CHANGELOG.md) - Version history and updates
