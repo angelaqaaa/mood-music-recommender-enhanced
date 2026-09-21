@@ -208,7 +208,7 @@ streaming_url = f"https://music.youtube.com/search?q={encoded_query}"
 
 ### 🧪 **Comprehensive Testing Suite**
 
-#### **Test Coverage Across 15 Test Files**
+#### **Test Coverage Across 16 Test Files**
 ```bash
 tests/
 ├── unit/                            # Core engine, structures, input validation, logging, main
@@ -338,7 +338,7 @@ class DataProcessor:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Test Files** | 15 files | ✅ Comprehensive |
+| **Test Files** | 16 files | ✅ Comprehensive |
 | **Code Coverage** | Core modules | ✅ Well-tested |
 | **Type Safety** | Full mypy compliance | ✅ Type-safe |
 | **Code Style** | Black + isort compliant | ✅ Consistent |
