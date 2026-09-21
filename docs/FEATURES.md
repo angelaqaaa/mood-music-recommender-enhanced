@@ -19,10 +19,10 @@
 #### **Multi-Algorithm Search Methods**
 ```python
 # Three distinct recommendation approaches implemented
-class RecommendationEngine:
-    def recommend_by_genre_bfs(self, genre: str, mood: str = None) -> List[Track]
-    def recommend_by_genre_dfs(self, genre: str, mood: str = None) -> List[Track]
-    def recommend_direct(self, genre: str, mood: str = None) -> List[Track]
+class MusicRecommender:
+    def bfs_recommend(self, genre: str, mood: Optional[str] = None, max_depth: int = 2, limit: int = 10) -> List[Dict[str, Any]]
+    def dfs_recommend(self, genre: str, mood: Optional[str] = None, max_breadth: int = 5, limit: int = 10) -> List[Dict[str, Any]]
+    def recommend_by_genre(self, genre: str, limit: int = 10) -> List[Dict[str, Any]]
 ```
 
 **Features:**
@@ -33,8 +33,8 @@ class RecommendationEngine:
 #### **Smart Similarity Engine**
 ```python
 class SimilaritySongGraph:
-    def calculate_similarity(self, track1: MusicNode, track2: MusicNode) -> float:
-        """Advanced similarity calculation with audio features + mood matching"""
+    def calculate_similarities(self, feature_keys: List[str], mood_weight: float = 0.6, feature_weight: float = 0.4, similarity_threshold: float = 0.5) -> None:
+        """Calculate and add similarity edges between all pairs of tracks"""
 ```
 
 **Capabilities:**
@@ -48,18 +48,18 @@ class SimilaritySongGraph:
 #### **Hierarchical Genre Tree**
 ```python
 class GenreTree:
-    def build_hierarchy(self, tracks: List[MusicNode]) -> None:
-        """Creates parent-child genre relationships"""
+    def add_genre(self, genre_path: List[str]) -> MusicNode:
+        """Add a genre hierarchy path to the tree"""
 
-    def get_subgenres(self, genre: str) -> List[str]:
-        """Traverses genre hierarchy for recommendations"""
+    def search_by_genre(self, genre: str) -> List[MusicNode]:
+        """Find all tracks under a specified genre (at any level)"""
 ```
 
 #### **Network-Based Similarity Graph**
 ```python
 class SimilaritySongGraph:
-    def add_similarity_edge(self, track1_id: str, track2_id: str, similarity: float):
-        """Builds connection network between similar tracks"""
+    def add_edge(self, track_id1: str, track_id2: str, similarity: float) -> None:
+        """Add an edge between two tracks with a similarity weight"""
 ```
 
 ---
@@ -70,10 +70,11 @@ class SimilaritySongGraph:
 
 #### **Advanced Fuzzy Matching**
 ```python
-class AdvancedFuzzySearchEngine:
-    def __init__(self):
-        self.trigram_index = TrigramIndex()  # O(k*m) performance
-        self.lru_cache = LRUCache(maxsize=1000)  # Sub-100ms responses
+class SearchEngine:
+    def __init__(self, recommender, enable_fuzzy=False, fuzzy_threshold=0.6, prefilter_top_n=100, cache_size=128):
+        self._exact_index = self._build_exact_index()
+        self._trigram_index = self._build_trigram_index() if enable_fuzzy else {}
+        self._calculate_similarity_cached = lru_cache(maxsize=cache_size)(self._calculate_similarity_uncached)
 ```
 
 **Technical Features:**
@@ -86,13 +87,13 @@ class AdvancedFuzzySearchEngine:
 #### **Real-Time Search Interface**
 ```javascript
 // Client-side JavaScript integration
-class SearchInterface {
-    debounceSearch(query, delay = 300) {
-        // Prevents excessive API calls during typing
+class DebouncedSearch {
+    handleInput(value) {
+        // Debounces the search by this.debounceDelay (default 300 ms)
     }
 
-    updateAriaAnnouncements(resultCount) {
-        // Screen reader accessibility support
+    setupAccessibility() {
+        // Sets aria-autocomplete, aria-expanded and aria-activedescendant
     }
 }
 ```
@@ -102,30 +103,29 @@ class SearchInterface {
 #### **Comprehensive Analytics**
 ```python
 class MetricsCollector:
-    def track_search_performance(self, query: str, response_time: float):
-        """Monitor search engine performance"""
+    def record_request_success(self, start_time: float, request_type: str = "unknown"):
+        """Record a successful request with timing"""
 
-    def track_user_interactions(self, action: str, metadata: dict):
-        """Collect user behavior analytics"""
+    def record_request_failure(self, request_type: str = "unknown"):
+        """Record a failed request"""
 ```
 
 **Monitoring Capabilities:**
-- Search query performance tracking
-- User interaction analytics
-- Recommendation accuracy metrics
-- System resource utilization
-- Error rate monitoring
+- Request counts (total, successful, failed)
+- Average request latency
+- Success rate
+- Per-request-type counters
 
 ### 🔧 **Configuration Management**
 
 #### **Environment-Aware Settings**
 ```python
-class ConfigManager:
-    def load_config(self) -> Dict[str, Any]:
-        """Load configuration with environment overrides"""
+# src/musicrec/config/settings.py
+def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
+    """Load configuration from defaults, config file, and environment"""
 
-    def get_data_paths(self) -> Dict[str, str]:
-        """Dynamic data source configuration"""
+def get_data_paths(config: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
+    """Get data file paths from configuration"""
 ```
 
 **Features:**
@@ -176,16 +176,14 @@ RESPONSIVE_STYLES = """
 
 #### **Network Graph Visualization**
 ```python
-def create_similarity_network(self, tracks: List[MusicNode]) -> go.Figure:
-    """Interactive network graph showing track relationships"""
-    return plotly_figure_with_hover_data
+def update_similarity_graph(recommendations, theme, active_tab, selected_genre, mood, selected_track_dropdown, selected_track_store) -> go.Figure:
+    """Create a network visualization of track similarities"""
 ```
 
 #### **Audio Feature Bubble Charts**
 ```python
-def create_audio_features_chart(self, tracks: List[MusicNode]) -> go.Figure:
-    """Valence vs Energy scatter plot with size/color encoding"""
-    return plotly_bubble_chart
+def update_features_bubble_chart(recommendations, theme) -> go.Figure:
+    """Create a bubble chart visualization of track audio features"""
 ```
 
 **Visualization Features:**
@@ -198,9 +196,10 @@ def create_audio_features_chart(self, tracks: List[MusicNode]) -> go.Figure:
 
 #### **YouTube Music Links**
 ```python
-def generate_youtube_search_url(self, track_name: str, artist: str) -> str:
-    """Generate search URLs for external music streaming"""
-    return f"https://music.youtube.com/search?q={encoded_query}"
+# Built inline in the recommendations callback (web/app.py)
+search_query = f"{track_display} {artist_name}"
+encoded_query = search_query.replace(" ", "+")
+streaming_url = f"https://music.youtube.com/search?q={encoded_query}"
 ```
 
 ---
@@ -209,17 +208,14 @@ def generate_youtube_search_url(self, track_name: str, artist: str) -> str:
 
 ### 🧪 **Comprehensive Testing Suite**
 
-#### **Test Coverage Across 22 Files**
+#### **Test Coverage Across 15 Test Files**
 ```bash
 tests/
-├── test_core_engine.py              # Core recommendation logic
-├── test_data_processor.py           # Data loading and processing
-├── test_search_engine.py            # Fuzzy search functionality
-├── test_web_app.py                  # Web interface components
-├── test_integration_*.py            # End-to-end integration tests
-├── performance/
-│   └── test_search_performance.py   # Performance benchmarking
-└── test_*_accessibility.py         # Accessibility compliance
+├── unit/                            # Core engine, structures, input validation, logging, main
+├── features/                        # Sample data, search, UI features
+├── integration/                     # Search, UI and accessibility integration
+├── accessibility/                   # Keyboard navigation, responsive UI, search accessibility
+└── performance/                     # test_search_performance.py
 ```
 
 **Testing Categories:**
@@ -231,10 +227,11 @@ tests/
 
 ### 🔄 **CI/CD Automation Pipeline**
 
-#### **5 GitHub Actions Workflows**
+#### **6 GitHub Actions Workflows**
 ```yaml
 # .github/workflows/
 ci.yml              # Main CI pipeline (tests, linting, type checking)
+coverage.yml        # Test run with coverage upload to Codecov
 performance.yml     # Performance benchmarking and optimization
 dependency-check.yml # Security vulnerability scanning
 docs.yml           # Documentation generation and validation
@@ -274,17 +271,17 @@ mypy src/                  # Static type checking
 
 #### **Docker Optimization**
 ```dockerfile
-# Multi-stage build optimization
+# Single-stage build for simplicity and reliability
 FROM python:3.11-slim
 WORKDIR /app
 
-# Optimized dependency installation
-COPY requirements-prod.txt ./
-RUN pip install --no-cache-dir -r requirements-prod.txt
+# Copy requirements and application code
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Production environment configuration
-ENV MUSICREC_ENV=production
+# Set environment variables
 ENV PYTHONPATH=/app/src
+ENV PORT=8040
 ```
 
 **Container Features:**
@@ -341,12 +338,12 @@ class DataProcessor:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Test Files** | 22 files | ✅ Comprehensive |
+| **Test Files** | 15 files | ✅ Comprehensive |
 | **Code Coverage** | Core modules | ✅ Well-tested |
 | **Type Safety** | Full mypy compliance | ✅ Type-safe |
 | **Code Style** | Black + isort compliant | ✅ Consistent |
 | **Linting** | Zero flake8 violations | ✅ Clean |
-| **CI/CD Workflows** | 5 automated pipelines | ✅ Automated |
+| **CI/CD Workflows** | 6 automated pipelines | ✅ Automated |
 
 ### 🔍 **Testing Philosophy**
 
@@ -417,7 +414,7 @@ class TestRecommendationEngine:
 ### **Phase 3: Production Ready** ✅ **COMPLETED**
 - Docker containerization and deployment optimization
 - Security enhancements and error handling
-- Full CI/CD automation with 5 workflows
+- Full CI/CD automation with 6 workflows
 - Documentation and feature showcase
 
 ---

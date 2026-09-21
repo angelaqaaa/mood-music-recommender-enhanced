@@ -28,7 +28,7 @@
 - "Enterprise-grade search engine with sub-100ms responses"
 - "WCAG 2.1 AA accessibility compliance"
 - "196 comprehensive tests, all passing"
-- "5 automated CI/CD workflows"
+- "6 automated CI/CD workflows"
 - "Professional software engineering practices"
 
 ## Technical Highlights to Mention

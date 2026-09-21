@@ -125,7 +125,7 @@ mood-music-recommender-enhanced/
 │   ├── performance/              # Performance benchmarks
 │   └── integration/              # Integration tests
 ├── data/                         # Data files (sample and real)
-├── .github/workflows/            # CI/CD automation (5 workflows)
+├── .github/workflows/            # CI/CD automation (6 workflows)
 ├── requirements*.txt             # Dependency specifications
 ├── Dockerfile                    # Container configuration
 ├── pyproject.toml               # Project metadata

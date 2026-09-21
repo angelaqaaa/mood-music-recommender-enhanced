@@ -11,7 +11,7 @@
 - Startup time: ~5 seconds
 - Memory usage: ~200MB (sample data)
 - Test execution: 196 tests in ~6 seconds
-- Code coverage: 53% (with extensive new features)
+- Code coverage: 47% overall, 88% on both core modules
 
 ## Scalability Targets
 - Supports up to 10,000 tracks efficiently

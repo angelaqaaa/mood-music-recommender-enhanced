@@ -1,6 +1,6 @@
 # README Badges
 
-**CI/CD**: `[![CI/CD](https://github.com/yourusername/mood-music-recommender-enhanced/workflows/CI/badge.svg)](https://github.com/yourusername/mood-music-recommender-enhanced/workflows/CI/badge.svg)`
+**CI/CD**: `[![CI/CD](https://github.com/angelaqaaa/mood-music-recommender-enhanced/workflows/CI/badge.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced/workflows/CI/badge.svg)`
 
 **Tests**: `[![Tests](https://img.shields.io/badge/tests-196_passing-brightgreen.svg)](https://img.shields.io/badge/tests-196_passing-brightgreen.svg)`
 
