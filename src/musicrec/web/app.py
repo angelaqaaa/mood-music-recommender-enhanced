@@ -9,7 +9,6 @@ Copyright and Usage Information
 This file is Copyright (c) 2025 Qian (Angela) Su & Mengxuan (Connie) Guo.
 """
 
-import time
 from datetime import datetime
 
 import dash
@@ -776,7 +775,6 @@ class MusicRecommenderDashApp:
 
             # Get the track_id from the clicked button
             track_id = ids_values[button_idx]["index"]
-            print(f"Similar button clicked for track: {track_id}")
 
             # Set both track store and dropdown to the same track ID
             # This ensures consistent track selection
@@ -836,11 +834,6 @@ class MusicRecommenderDashApp:
                     False,
                 )
 
-            # Show loading during processing
-            # (In production, you might want to handle this differently)
-            # Add a small delay to demonstrate loading indicator
-            time.sleep(0.5)
-
             # Determine which tab is active and generate recommendations accordingly
             if active_tab == "track":  # Track selection tab
                 # Get the selected track ID (either from dropdown or store)
@@ -865,10 +858,6 @@ class MusicRecommenderDashApp:
 
                 # Get limit for number of recommendations
                 limit = num_recommendations or 50  # Default to 50
-
-                print(
-                    f"Getting recommendations similar to track: {selected_track}, limit: {limit}"
-                )
 
                 # Get recommendations similar to the selected track
                 recommendations = self.recommender.recommend_similar_to_track(
@@ -1211,12 +1200,8 @@ class MusicRecommenderDashApp:
         )
         def update_features_bubble_chart(recommendations, theme):
             """Create a bubble chart visualization of track audio features."""
-            # Debug logging
-            print(f"DEBUG: Bubble chart - Theme received: {theme}")
-
             # Get theme colors
             colors = get_theme_colors(theme)
-            print(f"DEBUG: Bubble chart - Colors for {theme}: {colors}")
 
             # If there are no recommendations, return an empty chart
             if not recommendations or len(recommendations) == 0:
@@ -1523,12 +1508,8 @@ class MusicRecommenderDashApp:
             selected_track_store,
         ):
             """Create a network visualization of track similarities."""
-            # Debug logging
-            print(f"DEBUG: Similarity graph - Theme received: {theme}")
-
             # Get theme colors
             colors = get_theme_colors(theme)
-            print(f"DEBUG: Similarity graph - Colors for {theme}: {colors}")
 
             if not recommendations or len(recommendations) == 0:
                 # Create a basic figure with instructions
@@ -1754,9 +1735,6 @@ class MusicRecommenderDashApp:
 
             # Only trigger search if selection changed via Similar button
             if trigger_id == "selected-track-store" and selected_track:
-                print(
-                    f"Auto-searching for track: {selected_track} (from Similar button)"
-                )
                 return 1  # Trigger one click
 
             return dash.no_update
@@ -1807,7 +1785,7 @@ class MusicRecommenderDashApp:
 
             health_status = {
                 "status": "healthy",
-                "version": "2.0.0",
+                "version": "2.3.0",
                 "service": "mood-music-recommender",
                 "timestamp": str(datetime.now()),
                 "checks": {
@@ -1816,9 +1794,7 @@ class MusicRecommenderDashApp:
                         "ok" if hasattr(self, "search_engine") else "not_initialized"
                     ),
                     "recommender": (
-                        "ok"
-                        if hasattr(self, "music_recommender")
-                        else "not_initialized"
+                        "ok" if hasattr(self, "recommender") else "not_initialized"
                     ),
                 },
             }
@@ -1859,12 +1835,7 @@ if __name__ == "__main__":
                 "html",
             ],
             "allowed-io": [
-                "update_similarity_graph",
-                "update_track_dropdown_and_info",
-                "update_recommendations",
                 "update_features_bubble_chart",
-                "track_selection_callback",
-                "auto_search_on_track_selection",
             ],
             "max-line-length": 120,
             "disable": ["E1136"],
