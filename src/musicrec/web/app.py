@@ -707,6 +707,7 @@ class MusicRecommenderDashApp:
                     return dash.no_update, "Type at least 3 characters to search"
 
                 # Use SearchEngine with fuzzy search for better results
+                search_start = metrics_collector.record_request_start()
                 search_results = self.search_engine.search_tracks(search_value)
 
                 # Convert search results to dropdown format
@@ -715,6 +716,8 @@ class MusicRecommenderDashApp:
                     display_name = result["display_name"]
                     track_id = result["track_id"]
                     matched_tracks.append({"label": display_name, "value": track_id})
+
+                metrics_collector.record_request_success(search_start, "search")
 
                 # Show default message if no track selected yet
                 return matched_tracks, "Select a track and click 'Search'"
@@ -834,12 +837,15 @@ class MusicRecommenderDashApp:
                     False,
                 )
 
+            request_start = metrics_collector.record_request_start()
+
             # Determine which tab is active and generate recommendations accordingly
             if active_tab == "track":  # Track selection tab
                 # Get the selected track ID (either from dropdown or store)
                 selected_track = track_dropdown or track_store
 
                 if not selected_track:
+                    metrics_collector.record_request_failure("recommendation")
                     return (
                         html.Div("Please select a track first."),
                         "No track selected",
@@ -868,6 +874,7 @@ class MusicRecommenderDashApp:
 
             else:  # Genre/Mood tab
                 if not genre:
+                    metrics_collector.record_request_failure("recommendation")
                     return (
                         html.Div("Please select a genre."),
                         "No genre selected",
@@ -925,6 +932,9 @@ class MusicRecommenderDashApp:
                 else:
                     no_results_message += " Try different search criteria."
 
+                metrics_collector.record_request_success(
+                    request_start, "recommendation_empty"
+                )
                 return (
                     html.Div(no_results_message),
                     status_message,
@@ -1083,6 +1093,7 @@ class MusicRecommenderDashApp:
                 },
             )
 
+            metrics_collector.record_request_success(request_start, "recommendation")
             return (
                 recommendations_container,
                 status_message,

@@ -120,7 +120,7 @@ mood-music-recommender-enhanced/
 │   │   └── collector.py          # Metrics collection
 │   ├── __init__.py
 │   └── main.py                   # Application entry point
-├── tests/                        # Test suite (22+ files)
+├── tests/                        # Test suite (22 files, 15 test modules)
 │   ├── test_*.py                 # Unit tests
 │   ├── performance/              # Performance benchmarks
 │   └── integration/              # Integration tests
