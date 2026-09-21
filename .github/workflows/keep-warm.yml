@@ -1,0 +1,20 @@
+name: Keep Warm
+
+on:
+  schedule:
+    # Every 14 minutes. Render's free plan sleeps a service after 15 minutes
+    # with no traffic, and a cold start takes around two minutes.
+    - cron: '*/14 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping the health endpoint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Request /health
+        run: |
+          curl --silent --show-error --fail --location \
+               --max-time 180 --retry 2 --retry-delay 30 \
+               https://mood-music-recommender-enhanced.onrender.com/health
