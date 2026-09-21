@@ -25,8 +25,8 @@
 - Demonstrate screen reader compatibility
 
 ## Key Talking Points
-- "Enterprise-grade search engine with sub-100ms responses"
-- "WCAG 2.1 AA accessibility compliance"
+- "Trigram search engine held to a 200 ms budget in the tests"
+- "Keyboard navigation, ARIA labels and screen reader support"
 - "204 comprehensive tests, all passing"
 - "6 automated CI/CD workflows"
 - "Professional software engineering practices"

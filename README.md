@@ -6,7 +6,7 @@
 [![Tests](https://img.shields.io/badge/tests-196_passing-brightgreen.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced)
 [![Features](https://img.shields.io/badge/features-user_interactive-purple.svg)](./docs/FEATURES.md)
 
-> **An enterprise-grade music recommendation system that discovers songs based on mood, genre hierarchies, and audio feature similarity. Built with Python, featuring interactive visualizations, modern web interface, and production-ready deployment.**
+> **A music recommendation system that discovers songs based on mood, genre hierarchies, and audio feature similarity. Built with Python, featuring interactive visualizations, modern web interface, and production-ready deployment.**
 > 
 <img width="1470" height="956" alt="Screenshot 2025-09-22 at 8 15 55 AM" src="https://github.com/user-attachments/assets/c42c3fe9-694f-4a8a-8715-485f7913b1b2" />
 
@@ -35,7 +35,7 @@
 
 ### 🏗️ **Enterprise Architecture**
 - **Clean modular architecture** with separation of concerns and dependency injection
-- **Type-safe Python implementation** with comprehensive type hints and validation
+- **Python implementation** with type hints and input validation
 - **Extensive test coverage** spanning unit, integration, performance, and accessibility tests
 - **Full CI/CD pipeline** with automated testing, code quality checks, and multi-platform deployment
 
@@ -139,7 +139,7 @@ src/musicrec/
 
 ### Technical Metrics
 - **Dataset Capacity**: 32,000+ tracks (Spotify) + 55,000+ genre annotations (Jamendo)
-- **Search Performance**: Sub-100ms response times with LRU caching
+- **Search Performance**: 200 ms budget asserted in the performance tests, with an LRU cache on the fuzzy path
 - **Startup Time**: < 5 seconds (sample), optimized for production deployment
 - **Memory Usage**: ~200MB (sample), ~800MB (full dataset)
 
@@ -214,7 +214,7 @@ If you have questions about the implementation or find any issues, please feel f
 ### Key Enhancements Added
 All features beyond the original course scope are documented in [FEATURES.md](docs/FEATURES.md), including:
 - 🎨 Modern web interface with dark/light mode toggle
-- 🔍 Enterprise-grade search engine with trigram indexing
+- 🔍 Search engine with trigram indexing
 - ⚡ Production deployment optimizations
 - 🧪 Comprehensive testing infrastructure (204 tests across 16 files)
 - 🔄 CI/CD automation with 6 GitHub Actions workflows

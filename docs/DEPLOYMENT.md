@@ -108,8 +108,8 @@ mv README_new.md README.md
 - **✅ 204/204 tests passing** (100% success rate)
 - **✅ All code quality tools passing** (Black, isort, flake8, mypy)
 - **✅ 6 comprehensive CI/CD workflows** operational
-- **✅ WCAG 2.1 AA accessibility compliance** implemented
-- **✅ Enterprise-grade search engine** with O(k*m) optimization
+- **✅ Accessibility work**: keyboard navigation, ARIA labels, screen reader support
+- **✅ Search engine** with a trigram index over a bounded candidate set
 - **✅ Production-ready deployment infrastructure** complete
 
 ## 🚀 **NEXT ACTIONS**
@@ -131,8 +131,8 @@ This project now demonstrates:
 - **Full-Stack Development** - Python backend + JavaScript frontend
 - **Test-Driven Development** - 204 comprehensive tests
 - **CI/CD Engineering** - Automated workflows and quality gates
-- **Accessibility Expertise** - WCAG 2.1 AA compliance
-- **Performance Optimization** - Sub-100ms search responses
+- **Accessibility** - keyboard navigation, ARIA labels, screen reader support
+- **Performance Optimization** - 200 ms search budget asserted in tests
 - **DevOps Skills** - Containerization and cloud deployment
 
 **This is a professional-caliber application that demonstrates readiness for software engineering roles.**

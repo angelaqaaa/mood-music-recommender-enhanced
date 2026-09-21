@@ -102,7 +102,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Phase 2 (v2.0.0+)**: Post-course enhancements developed solely by Qian "Angela" Su, including:
 - Modern web interface and user experience
-- Enterprise-grade search and recommendation systems
+- Search and recommendation systems
 - Production deployment and CI/CD automation
 - Comprehensive testing and code quality infrastructure
 - Professional documentation and project management

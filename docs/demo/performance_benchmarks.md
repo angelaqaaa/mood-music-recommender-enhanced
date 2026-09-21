@@ -3,7 +3,7 @@
 
 ## Search Performance
 - Average response time: < 100ms
-- 99th percentile: < 200ms
+- Performance tests assert every search completes in under 200ms
 - Fuzzy matching: < 150ms
 - Exact matching: < 50ms
 
@@ -14,7 +14,7 @@
 - Code coverage: 50% overall, 87% on both core modules
 
 ## Scalability Targets
-- Supports up to 10,000 tracks efficiently
+- Exercised against the full processed dataset
 - Concurrent users: 100+ (with proper deployment)
 - Response time remains stable under load
 
