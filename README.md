@@ -3,7 +3,7 @@
 [![CI/CD Pipeline](https://github.com/angelaqaaa/mood-music-recommender-enhanced/workflows/CI/badge.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced/actions)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-196_passing-brightgreen.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced)
+[![Tests](https://img.shields.io/badge/tests-204_passing-brightgreen.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced)
 [![Features](https://img.shields.io/badge/features-user_interactive-purple.svg)](./docs/FEATURES.md)
 
 > **A music recommendation system that discovers songs based on mood, genre hierarchies, and audio feature similarity. Built with Python, featuring interactive visualizations, modern web interface, and production-ready deployment.**
@@ -144,12 +144,12 @@ src/musicrec/
 - **Memory Usage**: ~200MB (sample), ~800MB (full dataset)
 
 ### Code Quality
-- **Testing**: 204 tests across 16 test files with 50% code coverage (87% on both core modules)
+- **Testing**: 204 tests across 16 test files with 50% code coverage (88% line coverage on both core modules)
 - **Test Success Rate**: 100% (204/204 passing)
 - **Code Formatting**: Black, isort for consistent styling
 - **Type Checking**: MyPy for type safety
 - **Linting**: Flake8 for code quality
-- **CI/CD**: 6 automated workflows for quality gates
+- **CI/CD**: Every push to main runs lint and format checks (black, isort, flake8), the full test suite on four Python versions with a 200 ms search-performance budget, an app-boot smoke test, and branch coverage reported to Codecov
 
 ## 🧪 **Development & Testing**
 
@@ -217,7 +217,7 @@ All features beyond the original course scope are documented in [FEATURES.md](do
 - 🔍 Search engine with trigram indexing
 - ⚡ Production deployment optimizations
 - 🧪 Comprehensive testing infrastructure (204 tests across 16 files)
-- 🔄 CI/CD automation with 6 GitHub Actions workflows
+- 🔄 CI/CD automation on every push to main: lint and format checks (black, isort, flake8), the full test suite on four Python versions with a 200 ms search-performance budget, an app-boot smoke test, and branch coverage reported to Codecov
 - 📊 Performance monitoring and metrics collection
 - 🎯 Enhanced recommendation algorithms with smart fallbacks
 
