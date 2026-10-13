@@ -120,12 +120,12 @@ mood-music-recommender-enhanced/
 │   │   └── collector.py          # Metrics collection
 │   ├── __init__.py
 │   └── main.py                   # Application entry point
-├── tests/                        # Test suite (23 files, 16 test modules)
+├── tests/                        # Test suite (24 files, 17 test modules)
 │   ├── test_*.py                 # Unit tests
 │   ├── performance/              # Performance benchmarks
 │   └── integration/              # Integration tests
 ├── data/                         # Data files (sample and real)
-├── .github/workflows/            # CI/CD automation (6 workflows)
+├── .github/workflows/            # CI/CD automation
 ├── requirements*.txt             # Dependency specifications
 ├── Dockerfile                    # Container configuration
 ├── pyproject.toml               # Project metadata
@@ -375,19 +375,30 @@ def test_genre_filtering(sample_tracks):
 ```python
 # tests/performance/test_search_performance.py
 import time
-import pytest
+import unittest
 
-def test_search_response_time():
-    """Ensure search responses are under 100ms."""
-    engine = AdvancedFuzzySearchEngine()
+from src.musicrec.web.search.engine import SearchEngine
 
-    start_time = time.time()
-    results = engine.search("test query", limit=10)
-    end_time = time.time()
 
-    response_time = (end_time - start_time) * 1000  # Convert to ms
-    assert response_time < 100, f"Search took {response_time:.2f}ms (should be < 100ms)"
+class TestSearchPerformance(unittest.TestCase):
+    # setUp builds self.mock_recommender with 1,000 Mock tracks
+
+    def test_large_dataset_search_performance(self):
+        """Test search performance on large dataset."""
+        search_engine = SearchEngine(
+            self.mock_recommender, enable_fuzzy=True, fuzzy_threshold=0.6
+        )
+
+        # Test exact search performance
+        start_time = time.time()
+        results = search_engine.search_tracks("Pop Song")
+        exact_time = time.time() - start_time
+
+        self.assertLess(exact_time, 0.2, "Exact search should complete in <200ms")
+        self.assertGreater(len(results), 0)
 ```
+
+To measure search time on the full catalog, run `PYTHONHASHSEED=0 MUSICREC_ENV=production python -m src.musicrec.benchmark`; [Performance Benchmarks](demo/performance_benchmarks.md) describes the method and the latest results.
 
 ---
 

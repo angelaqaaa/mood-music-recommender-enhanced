@@ -79,7 +79,7 @@ class SearchEngine:
 
 **Technical Features:**
 - **Trigram Indexing**: Character-level n-gram matching for typo tolerance
-- **LRU Caching**: Most recently used results cached for instant retrieval
+- **LRU Caching**: a 128-entry cache of the fuzzy phase's similarity scores
 - **Dual Algorithm Support**: Trigram + Python difflib fallback
 - **Configurable Thresholds**: Customizable matching sensitivity
 - **Performance Optimization**: Candidate pre-filtering and result limiting
@@ -208,10 +208,10 @@ streaming_url = f"https://music.youtube.com/search?q={encoded_query}"
 
 ### 🧪 **Comprehensive Testing Suite**
 
-#### **Test Coverage Across 16 Test Files**
+#### **Test Coverage Across 17 Test Files**
 ```bash
 tests/
-├── unit/                            # Core engine, structures, input validation, logging, main
+├── unit/                            # Core engine, structures, input validation, logging, main, benchmark
 ├── features/                        # Sample data, search, UI features
 ├── integration/                     # Search, UI and accessibility integration
 ├── accessibility/                   # Keyboard navigation, responsive UI, search accessibility
@@ -221,29 +221,30 @@ tests/
 **Testing Categories:**
 - **Unit Tests**: Individual component testing
 - **Integration Tests**: Cross-component interaction testing
-- **Performance Tests**: Search speed and memory usage benchmarks
+- **Performance Tests**: a 200 ms search budget on a 1,000-track fixture, plus the full-catalog benchmark module
 - **Accessibility Tests**: WCAG compliance verification
 - **Error Handling Tests**: Edge case and failure scenario coverage
 
 ### 🔄 **CI/CD Automation Pipeline**
 
-#### **6 GitHub Actions Workflows**
+#### **GitHub Actions Workflows**
 ```yaml
 # .github/workflows/
-ci.yml              # Main CI pipeline (tests, linting, type checking)
-coverage.yml        # Test run with coverage upload to Codecov
-performance.yml     # Performance benchmarking and optimization
-dependency-check.yml # Security vulnerability scanning
-docs.yml           # Documentation generation and validation
-release.yml        # Automated version releases and tagging
+ci.yml               # Lint and format checks, tests on Python 3.9 to 3.12, app-boot smoke test
+coverage.yml         # Test run with branch coverage uploaded to Codecov
+performance.yml      # Performance tests and the full-catalog search benchmark
+dependency-check.yml # Weekly pip-audit of the dependencies
+docs.yml             # Markdown link check and README and CHANGELOG format checks (warnings only)
+keep-warm.yml        # Scheduled ping of /health (cron */14)
+release.yml          # On a v* tag: build the package and create a GitHub Release
 ```
 
 **Automation Features:**
 - **Automated Testing**: All tests run on every commit
 - **Code Quality Gates**: Black, isort, flake8, mypy validation
 - **Security Scanning**: Dependency vulnerability detection
-- **Performance Monitoring**: Benchmark regression detection
-- **Documentation Updates**: Auto-generated docs from code changes
+- **Performance Monitoring**: runs the search benchmark and uploads its results
+- **Documentation Checks**: markdown link check and README and CHANGELOG format checks, reported as warnings
 
 ### 📝 **Code Quality Tools**
 
@@ -288,27 +289,16 @@ ENV PORT=8040
 - **Single-stage Build**: Simplified and reliable deployment
 - **Environment Detection**: Automatic production mode switching
 - **Health Checks**: Built-in application monitoring
-- **Resource Optimization**: Memory and CPU usage optimization
 - **Port Configuration**: Flexible port binding for cloud platforms
 
 ### ⚡ **Performance Optimizations**
 
 #### **Production Mode Enhancements**
-```python
-# Intelligent startup optimization
-def optimize_for_production(self, total_tracks: int):
-    if os.environ.get("MUSICREC_ENV") == "production":
-        if total_tracks > 100:
-            # Skip expensive similarity calculations
-            return self.enable_fast_startup_mode()
-```
+When `MUSICREC_ENV=production` or `RENDER` is set, `SimilaritySongGraph.calculate_similarities` in `core/structures.py` skips the pairwise similarity build for a catalog of more than 100 tracks.
 
 **Optimization Strategies:**
 - **Similarity Calculation Limits**: Reduced computation for large datasets
-- **Memory Usage Optimization**: Efficient data structure management
-- **Startup Time Reduction**: Quick initialization for cloud deployment
-- **Caching Strategies**: Intelligent result caching for repeated queries
-- **Resource Monitoring**: Memory and CPU usage tracking
+- **Search Similarity Cache**: a 128-entry LRU cache on the search engine's fuzzy-phase similarity scores, used in every mode
 
 ### 🔐 **Security & Error Handling**
 
@@ -338,12 +328,12 @@ class DataProcessor:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Test Files** | 16 files | ✅ Comprehensive |
+| **Test Files** | 17 files, 231 tests | ✅ All passing |
 | **Code Coverage** | Core modules | ✅ Well-tested |
 | **Type Safety** | Type hints throughout, mypy not run in strict mode | ⚠️ Partial |
 | **Code Style** | Black + isort compliant | ✅ Consistent |
 | **Linting** | Zero flake8 violations | ✅ Clean |
-| **CI/CD Workflows** | 6 automated pipelines | ✅ Automated |
+| **CI/CD Workflows** | GitHub Actions: lint, tests on four Python versions, app-boot smoke test | ✅ Automated |
 
 ### 🔍 **Testing Philosophy**
 
@@ -363,7 +353,6 @@ class TestRecommendationEngine:
 
 **Testing Approach:**
 - **Behavior-Driven Testing**: Focus on user-facing functionality
-- **Performance Benchmarking**: Continuous performance regression detection
 - **Edge Case Coverage**: Comprehensive error condition testing
 - **Integration Validation**: End-to-end workflow verification
 
@@ -406,17 +395,17 @@ class TestRecommendationEngine:
 - Basic CI/CD setup and code quality tools
 
 ### **Phase 2: Advanced Features** ✅ **COMPLETED**
-- Enterprise search engine with fuzzy matching
+- Two-phase search engine with fuzzy matching
 - Modern web interface with dark mode
 - Comprehensive testing infrastructure
 - Performance optimization and monitoring
 
-### **Phase 3: Production Ready** ✅ **COMPLETED**
+### **Phase 3: Deployment** ✅ **COMPLETED**
 - Docker containerization and deployment optimization
 - Security enhancements and error handling
-- Full CI/CD automation with 6 workflows
+- CI/CD automation with GitHub Actions
 - Documentation and feature showcase
 
 ---
 
-*This feature overview demonstrates the evolution from a course project to a professional-grade application, showcasing advanced software development skills, best practices, and production-ready implementation.*
+*This feature overview traces how the course project grew into the current application.*

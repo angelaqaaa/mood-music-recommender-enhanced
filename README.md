@@ -3,10 +3,10 @@
 [![CI/CD Pipeline](https://github.com/angelaqaaa/mood-music-recommender-enhanced/workflows/CI/badge.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced/actions)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-204_passing-brightgreen.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced)
+[![Tests](https://img.shields.io/badge/tests-231_passing-brightgreen.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced)
 [![Features](https://img.shields.io/badge/features-user_interactive-purple.svg)](./docs/FEATURES.md)
 
-> **A music recommendation system that discovers songs based on mood, genre hierarchies, and audio feature similarity. Built with Python, featuring interactive visualizations, modern web interface, and production-ready deployment.**
+> **A music recommendation system that discovers songs based on mood and genre hierarchies. Built with Python and Dash, with interactive visualizations and a Docker deployment on Render.**
 > 
 <img width="1470" height="956" alt="Screenshot 2025-09-22 at 8 15 55 AM" src="https://github.com/user-attachments/assets/c42c3fe9-694f-4a8a-8715-485f7913b1b2" />
 
@@ -15,29 +15,29 @@
 
 ## ✨ **Key Features**
 
-### 🎯 **Intelligent Recommendations**
+### 🎯 **Recommendations**
 - **Genre hierarchy traversal** using graph algorithms (BFS/DFS/Direct search)
-- **Enhanced similarity matching** with audio feature analysis and mood-based filtering
-- **Smart fallback system** ensuring comprehensive recommendations
+- **Similarity graph** that scores track pairs by mood-tag overlap and audio-feature cosine similarity; it covers at most 1,000 tracks, production mode skips it for catalogs over 100 tracks, and the audio features, with the mood tags inferred from them, are placeholders (see Catalog below)
+- **Fallback recommendations**: when a track has no similarity edges, Find Similar recommends tracks from its genre, then from its mood
 - **Interactive visualizations** with network graphs and bubble charts
 
-### 🔍 **Advanced Search Engine**
-- **Fuzzy matching** with trigram indexing for fast performance
-- **Real-time search suggestions** with debounced input handling
+### 🔍 **Search Engine**
+- **Fuzzy matching** in the search engine, over a trigram index
+- **Search-as-you-type** in the track dropdown; from three characters on, the options come from the search engine
 - **Multi-algorithm support** with configurable thresholds
-- **LRU caching** for optimized response times
+- **LRU cache** (128 entries) on the fuzzy phase's similarity scores
 
-### 🎨 **Modern Web Interface**
-- **Dark/Light mode** with user preference persistence
-- **Responsive design** optimized for desktop and mobile
+### 🎨 **Web Interface**
+- **Dark/Light mode** toggle
+- **Responsive design** for desktop and mobile
 - **Interactive visualizations** with Plotly and NetworkX
-- **Professional UI** with gradient styling and animations
+- **Styling** with gradients and animations
 
-### 🏗️ **Enterprise Architecture**
-- **Clean modular architecture** with separation of concerns and dependency injection
+### 🏗️ **Architecture**
+- **Modular architecture** with separation of concerns and dependency injection
 - **Python implementation** with type hints and input validation
-- **Extensive test coverage** spanning unit, integration, performance, and accessibility tests
-- **Full CI/CD pipeline** with automated testing, code quality checks, and multi-platform deployment
+- **Test suite** spanning unit, integration, feature, performance, and accessibility tests
+- **CI on GitHub Actions** for tests and code quality checks, plus deployment configuration for Docker, Render, and Railway
 
 ## 🚀 **Quick Start**
 
@@ -84,7 +84,9 @@ The project includes configuration for multiple cloud platforms:
 
 - **Railway**: Deploy using `railway.json` configuration
 - **Render**: Deploy using `render.yaml` configuration
-- **Docker**: Universal containerized deployment
+- **Docker**: Containerized deployment from the `Dockerfile`
+
+The app is live on Render at <https://mood-music-recommender-enhanced.onrender.com/>. The Render configuration (`render.yaml`, free plan) runs the full 55,446-track catalog: the `Dockerfile` copies `data/` and starts without `--sample`, and `MUSICREC_ENV=production` skips the similarity graph at startup, so Find Similar uses the genre and mood fallbacks.
 
 ## 🎬 **Usage Examples**
 
@@ -99,8 +101,8 @@ python -m src.musicrec.main
 # Run on custom port
 python -m src.musicrec.main --port 8050
 
-# Save processed data
-python -m src.musicrec.main --save processed_data.pkl
+# Save the processed catalog as CSV
+python -m src.musicrec.main --save processed_data.csv
 ```
 
 ### Development Mode
@@ -118,11 +120,12 @@ src/musicrec/
 ├── data/            # Data processing and loading utilities
 ├── web/             # Web interface and components
 │   ├── components/  # UI components and styles
-│   ├── search/      # Advanced search engine
-│   ├── static/js/   # JavaScript assets
+│   ├── search/      # Search engine
+│   ├── static/js/   # search.js (not loaded by the app)
 │   └── app.py       # Main Dash application
 ├── utils/           # Utilities and logging
 ├── metrics/         # Performance monitoring
+├── benchmark.py     # Full-catalog search benchmark
 └── main.py          # Application entry point
 ```
 
@@ -130,24 +133,23 @@ src/musicrec/
 
 - **`core/engine.py`**: Main recommendation engine with genre hierarchy and similarity algorithms
 - **`core/structures.py`**: Data structures for genre trees and similarity graphs
-- **`web/app.py`**: Interactive Dash web application with modern UI
-- **`web/search/engine.py`**: Advanced fuzzy search with trigram indexing
+- **`web/app.py`**: Interactive Dash web application
+- **`web/search/engine.py`**: Two-phase search: an exact index, then trigram fuzzy matching
 - **`config/settings.py`**: Configuration management with environment overrides
 - **`data/processor.py`**: Data loading and processing pipeline
 
 ## 📈 **Performance & Quality**
 
 ### Technical Metrics
-- **Dataset Capacity**: 32,000+ tracks (Spotify) + 55,000+ genre annotations (Jamendo)
+- **Catalog**: 55,446 Jamendo tracks in the search index, the union of `autotagging_genre.tsv` and `autotagging_moodtheme.tsv`, with track and artist names from `raw_meta_data.tsv`. The audio-feature columns, and the playlist-genre fallback for tracks without a genre tag, come from `spotify_songs.csv` (32,833 rows) but are not matched by track: `merge_datasets` (`src/musicrec/data/processor.py`) assigns Spotify rows to Jamendo tracks by unseeded random draws with replacement, so these values are not the tracks' own. `preprocess_merged_data` then infers mood tags (happy, sad, chill and the like) from the drawn valence and energy and adds them to each track's Jamendo mood tags, so the inferred tags are not the tracks' own either, and a track with no Jamendo mood tag has only inferred ones, if any
 - **Search Performance**: 200 ms budget asserted in the performance tests, with an LRU cache on the fuzzy path
-- **Startup Time**: < 5 seconds (sample), optimized for production deployment
-- **Memory Usage**: ~200MB (sample), ~800MB (full dataset)
+- **Measured Search Time**: on the full catalog on 2026-10-13 (8-core Apple M2, Python 3.13.1), first run of each query: exact-name queries p50 7.3 ms and p95 16.7 ms, misspelled queries p50 10.8 ms and p95 16.2 ms, from `benchmarks/results/2026-10-13-search-full-catalog.json` produced by `python -m src.musicrec.benchmark`; method and full table in [docs/demo/performance_benchmarks.md](docs/demo/performance_benchmarks.md)
 
 ### Code Quality
-- **Testing**: 204 tests across 16 test files with 50% code coverage (88% line coverage on both core modules)
-- **Test Success Rate**: 100% (204/204 passing)
+- **Testing**: 231 tests across 17 test files with 58% line coverage of `src/musicrec` (88% on `core/engine.py`, 89% on `core/structures.py`)
+- **Test Success Rate**: 100% (231/231 passing)
 - **Code Formatting**: Black, isort for consistent styling
-- **Type Checking**: MyPy for type safety
+- **Type Checking**: mypy runs in CI on `src/`, but the `pyproject.toml` override sets `ignore_errors` for those modules, so it does not fail a push
 - **Linting**: Flake8 for code quality
 - **CI/CD**: Every push to main runs lint and format checks (black, isort, flake8), the full test suite on four Python versions with a 200 ms search-performance budget, an app-boot smoke test, and branch coverage reported to Codecov
 
@@ -185,11 +187,13 @@ mypy src/
 
 ## 🔧 **Configuration**
 
-The application supports various configuration options via environment variables or the `config/settings.json` file:
+Settings come from environment variables, read in `config/settings.py` and `core/structures.py`, and from command-line flags:
 
-- **MUSICREC_ENV**: Set to "production" for optimized deployment
-- **PORT**: Custom port (default: 8040)
-- **LOG_LEVEL**: Logging verbosity (INFO, DEBUG, etc.)
+- **MUSICREC_ENV**: `production`, or a non-empty `RENDER` variable, skips the similarity graph for catalogs over 100 tracks
+- **MUSICREC_DATA_PATH** (a directory for the default file names), **MUSICREC_SPOTIFY_PATH**, **MUSICREC_GENRE_PATH**, **MUSICREC_MOOD_PATH**, **MUSICREC_METADATA_PATH**: data file locations; the `--spotify`, `--genre`, `--mood` and `--metadata` flags take precedence
+- **MUSICREC_MAX_ATTEMPTS**, **MUSICREC_BACKOFF_SECONDS**: attempts and first backoff for the startup check that each data file exists and is readable
+- **--port**: port for the web app (default: 8040)
+- **--log-level**: logging verbosity, one of DEBUG, INFO, WARNING, ERROR (default: INFO)
 
 ## 💼 **About This Project**
 
@@ -212,14 +216,14 @@ If you have questions about the implementation or find any issues, please feel f
   - Comprehensive testing suite and code quality tools
 
 ### Key Enhancements Added
-All features beyond the original course scope are documented in [FEATURES.md](docs/FEATURES.md), including:
-- 🎨 Modern web interface with dark/light mode toggle
+Features beyond the original course scope are described in [FEATURES.md](docs/FEATURES.md), including:
+- 🎨 Web interface with a dark/light mode toggle
 - 🔍 Search engine with trigram indexing
-- ⚡ Production deployment optimizations
-- 🧪 Comprehensive testing infrastructure (204 tests across 16 files)
+- ⚡ Production mode that skips the similarity graph at startup
+- 🧪 Testing infrastructure (231 tests across 17 files)
 - 🔄 CI/CD automation on every push to main: lint and format checks (black, isort, flake8), the full test suite on four Python versions with a 200 ms search-performance budget, an app-boot smoke test, and branch coverage reported to Codecov
 - 📊 Performance monitoring and metrics collection
-- 🎯 Enhanced recommendation algorithms with smart fallbacks
+- 🎯 Find Similar falls back to the track's genre, then its mood, when the track has no similarity edges
 
 ## 📄 **License**
 

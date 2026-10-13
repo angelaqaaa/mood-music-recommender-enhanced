@@ -31,16 +31,13 @@ jobs:
       run: |
         pytest tests/performance/test_search_performance.py -v --tb=short
 
-    - name: Run basic performance timing
+    - name: Run the full-catalog search benchmark
       run: |
-        echo "Running application startup timing test..."
-        time timeout 15s python -m src.musicrec.main --sample --port 8098 > startup_test.log 2>&1 &
-        sleep 5
-        curl -s http://localhost:8098 > /dev/null && echo "Startup performance test passed" || echo "Startup test failed"
+        PYTHONHASHSEED=0 MUSICREC_ENV=production python -m src.musicrec.benchmark --repeats 3 --output benchmark-ci.json
 
     - name: Upload performance results
       uses: actions/upload-artifact@v4
       with:
         name: performance-reports
-        path: |
-          startup_test.log
+        path: benchmark-ci.json
+        retention-days: 90

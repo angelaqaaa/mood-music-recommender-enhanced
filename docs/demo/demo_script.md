@@ -27,8 +27,8 @@
 ## Key Talking Points
 - "Trigram search engine held to a 200 ms budget in the tests"
 - "Keyboard navigation, ARIA labels and screen reader support"
-- "204 comprehensive tests, all passing"
-- "6 automated CI/CD workflows"
+- "231 tests, all passing"
+- "CI that lints every push to main and runs the tests on four Python versions"
 - "Professional software engineering practices"
 
 ## Technical Highlights to Mention
