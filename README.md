@@ -86,6 +86,8 @@ The project includes configuration for multiple cloud platforms:
 - **Render**: Deploy using `render.yaml` configuration
 - **Docker**: Universal containerized deployment
 
+The Render configuration (`render.yaml`, free plan) runs the full 55,446-track catalog: the `Dockerfile` copies `data/` and starts without `--sample`, and `MUSICREC_ENV=production` skips the similarity graph at startup, so Find Similar uses the genre and mood fallbacks.
+
 ## 🎬 **Usage Examples**
 
 ### Basic Usage
@@ -138,10 +140,9 @@ src/musicrec/
 ## 📈 **Performance & Quality**
 
 ### Technical Metrics
-- **Dataset Capacity**: 32,000+ tracks (Spotify) + 55,000+ genre annotations (Jamendo)
+- **Catalog**: 55,446 Jamendo tracks in the search index, the union of `autotagging_genre.tsv` and `autotagging_moodtheme.tsv` with track and artist names from `raw_meta_data.tsv`; `spotify_songs.csv` (32,833 rows) supplies the audio-feature columns and a playlist-genre fallback, attached per track in `merge_datasets` (`src/musicrec/data/processor.py`)
 - **Search Performance**: 200 ms budget asserted in the performance tests, with an LRU cache on the fuzzy path
-- **Startup Time**: < 5 seconds (sample), optimized for production deployment
-- **Memory Usage**: ~200MB (sample), ~800MB (full dataset)
+- **Measured Search Time**: on the full catalog on 2026-10-13 (8-core Apple M2, Python 3.13.1), first run of each query: exact-name queries p50 7.3 ms and p95 16.7 ms, misspelled queries p50 10.8 ms and p95 16.2 ms, from `benchmarks/results/2026-10-13-search-full-catalog.json` produced by `python -m src.musicrec.benchmark`; method and full table in [docs/demo/performance_benchmarks.md](docs/demo/performance_benchmarks.md)
 
 ### Code Quality
 - **Testing**: 204 tests across 16 test files with 50% code coverage (88% line coverage on both core modules)

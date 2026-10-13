@@ -221,28 +221,29 @@ tests/
 **Testing Categories:**
 - **Unit Tests**: Individual component testing
 - **Integration Tests**: Cross-component interaction testing
-- **Performance Tests**: Search speed and memory usage benchmarks
+- **Performance Tests**: a 200 ms search budget on a 1,000-track fixture, plus the full-catalog benchmark module
 - **Accessibility Tests**: WCAG compliance verification
 - **Error Handling Tests**: Edge case and failure scenario coverage
 
 ### 🔄 **CI/CD Automation Pipeline**
 
-#### **6 GitHub Actions Workflows**
+#### **GitHub Actions Workflows**
 ```yaml
 # .github/workflows/
-ci.yml              # Main CI pipeline (tests, linting, type checking)
-coverage.yml        # Test run with coverage upload to Codecov
-performance.yml     # Performance benchmarking and optimization
-dependency-check.yml # Security vulnerability scanning
-docs.yml           # Documentation generation and validation
-release.yml        # Automated version releases and tagging
+ci.yml               # Lint and format checks, tests on Python 3.9 to 3.12, app-boot smoke test
+coverage.yml         # Test run with branch coverage uploaded to Codecov
+performance.yml      # Performance tests and the full-catalog search benchmark
+dependency-check.yml # Weekly pip-audit of the dependencies
+docs.yml             # Markdown link check and README and CHANGELOG format checks (warnings only)
+keep-warm.yml        # Scheduled ping of /health (cron */14)
+release.yml          # On a v* tag: build the package and create a GitHub Release
 ```
 
 **Automation Features:**
 - **Automated Testing**: All tests run on every commit
 - **Code Quality Gates**: Black, isort, flake8, mypy validation
 - **Security Scanning**: Dependency vulnerability detection
-- **Performance Monitoring**: Benchmark regression detection
+- **Performance Monitoring**: runs the search benchmark and uploads its results
 - **Documentation Updates**: Auto-generated docs from code changes
 
 ### 📝 **Code Quality Tools**
@@ -288,27 +289,16 @@ ENV PORT=8040
 - **Single-stage Build**: Simplified and reliable deployment
 - **Environment Detection**: Automatic production mode switching
 - **Health Checks**: Built-in application monitoring
-- **Resource Optimization**: Memory and CPU usage optimization
 - **Port Configuration**: Flexible port binding for cloud platforms
 
 ### ⚡ **Performance Optimizations**
 
 #### **Production Mode Enhancements**
-```python
-# Intelligent startup optimization
-def optimize_for_production(self, total_tracks: int):
-    if os.environ.get("MUSICREC_ENV") == "production":
-        if total_tracks > 100:
-            # Skip expensive similarity calculations
-            return self.enable_fast_startup_mode()
-```
+When `MUSICREC_ENV=production` or `RENDER` is set, `SimilaritySongGraph.calculate_similarities` in `core/structures.py` skips the pairwise similarity build for a catalog of more than 100 tracks.
 
 **Optimization Strategies:**
 - **Similarity Calculation Limits**: Reduced computation for large datasets
-- **Memory Usage Optimization**: Efficient data structure management
-- **Startup Time Reduction**: Quick initialization for cloud deployment
 - **Caching Strategies**: Intelligent result caching for repeated queries
-- **Resource Monitoring**: Memory and CPU usage tracking
 
 ### 🔐 **Security & Error Handling**
 
@@ -363,7 +353,6 @@ class TestRecommendationEngine:
 
 **Testing Approach:**
 - **Behavior-Driven Testing**: Focus on user-facing functionality
-- **Performance Benchmarking**: Continuous performance regression detection
 - **Edge Case Coverage**: Comprehensive error condition testing
 - **Integration Validation**: End-to-end workflow verification
 
@@ -414,7 +403,7 @@ class TestRecommendationEngine:
 ### **Phase 3: Production Ready** ✅ **COMPLETED**
 - Docker containerization and deployment optimization
 - Security enhancements and error handling
-- Full CI/CD automation with 6 workflows
+- CI/CD automation with GitHub Actions
 - Documentation and feature showcase
 
 ---
