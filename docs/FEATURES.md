@@ -79,7 +79,7 @@ class SearchEngine:
 
 **Technical Features:**
 - **Trigram Indexing**: Character-level n-gram matching for typo tolerance
-- **LRU Caching**: Most recently used results cached for instant retrieval
+- **LRU Caching**: a 128-entry cache of the fuzzy phase's similarity scores
 - **Dual Algorithm Support**: Trigram + Python difflib fallback
 - **Configurable Thresholds**: Customizable matching sensitivity
 - **Performance Optimization**: Candidate pre-filtering and result limiting
@@ -208,10 +208,10 @@ streaming_url = f"https://music.youtube.com/search?q={encoded_query}"
 
 ### 🧪 **Comprehensive Testing Suite**
 
-#### **Test Coverage Across 16 Test Files**
+#### **Test Coverage Across 17 Test Files**
 ```bash
 tests/
-├── unit/                            # Core engine, structures, input validation, logging, main
+├── unit/                            # Core engine, structures, input validation, logging, main, benchmark
 ├── features/                        # Sample data, search, UI features
 ├── integration/                     # Search, UI and accessibility integration
 ├── accessibility/                   # Keyboard navigation, responsive UI, search accessibility
@@ -244,7 +244,7 @@ release.yml          # On a v* tag: build the package and create a GitHub Releas
 - **Code Quality Gates**: Black, isort, flake8, mypy validation
 - **Security Scanning**: Dependency vulnerability detection
 - **Performance Monitoring**: runs the search benchmark and uploads its results
-- **Documentation Updates**: Auto-generated docs from code changes
+- **Documentation Checks**: markdown link check and README and CHANGELOG format checks, reported as warnings
 
 ### 📝 **Code Quality Tools**
 
@@ -298,7 +298,7 @@ When `MUSICREC_ENV=production` or `RENDER` is set, `SimilaritySongGraph.calculat
 
 **Optimization Strategies:**
 - **Similarity Calculation Limits**: Reduced computation for large datasets
-- **Caching Strategies**: Intelligent result caching for repeated queries
+- **Search Similarity Cache**: a 128-entry LRU cache on the search engine's fuzzy-phase similarity scores, used in every mode
 
 ### 🔐 **Security & Error Handling**
 
@@ -328,12 +328,12 @@ class DataProcessor:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Test Files** | 16 files | ✅ Comprehensive |
+| **Test Files** | 17 files, 231 tests | ✅ All passing |
 | **Code Coverage** | Core modules | ✅ Well-tested |
 | **Type Safety** | Type hints throughout, mypy not run in strict mode | ⚠️ Partial |
 | **Code Style** | Black + isort compliant | ✅ Consistent |
 | **Linting** | Zero flake8 violations | ✅ Clean |
-| **CI/CD Workflows** | 6 automated pipelines | ✅ Automated |
+| **CI/CD Workflows** | GitHub Actions: lint, tests on four Python versions, app-boot smoke test | ✅ Automated |
 
 ### 🔍 **Testing Philosophy**
 
@@ -395,12 +395,12 @@ class TestRecommendationEngine:
 - Basic CI/CD setup and code quality tools
 
 ### **Phase 2: Advanced Features** ✅ **COMPLETED**
-- Enterprise search engine with fuzzy matching
+- Two-phase search engine with fuzzy matching
 - Modern web interface with dark mode
 - Comprehensive testing infrastructure
 - Performance optimization and monitoring
 
-### **Phase 3: Production Ready** ✅ **COMPLETED**
+### **Phase 3: Deployment** ✅ **COMPLETED**
 - Docker containerization and deployment optimization
 - Security enhancements and error handling
 - CI/CD automation with GitHub Actions
@@ -408,4 +408,4 @@ class TestRecommendationEngine:
 
 ---
 
-*This feature overview demonstrates the evolution from a course project to a professional-grade application, showcasing advanced software development skills, best practices, and production-ready implementation.*
+*This feature overview traces how the course project grew into the current application.*

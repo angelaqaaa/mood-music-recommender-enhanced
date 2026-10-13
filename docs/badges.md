@@ -2,7 +2,7 @@
 
 **CI/CD**: `[![CI/CD](https://github.com/angelaqaaa/mood-music-recommender-enhanced/workflows/CI/badge.svg)](https://github.com/angelaqaaa/mood-music-recommender-enhanced/workflows/CI/badge.svg)`
 
-**Tests**: `[![Tests](https://img.shields.io/badge/tests-196_passing-brightgreen.svg)](https://img.shields.io/badge/tests-196_passing-brightgreen.svg)`
+**Tests**: `[![Tests](https://img.shields.io/badge/tests-231_passing-brightgreen.svg)](https://img.shields.io/badge/tests-231_passing-brightgreen.svg)`
 
 **Python**: `[![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://img.shields.io/badge/python-3.9%2B-blue)`
 
